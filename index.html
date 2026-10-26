@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Музей безграничного роста</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2F5EC;
+    /* Цвета интерфейса (кнопки, панели, подписи UI) — не зависят от цвета линий */
+    --ui-ink:#1A1613; --ui-ink-rgb:26,22,19; --ui-ink-soft:#8A7E6E;
+    /* Цвета сцены (линии, подписи Diltz на чертеже) — управляются пользователем */
+    --ink:#1A1613; --ink-rgb:26,22,19; --ink-soft:#8A7E6E;
+    --paper-rgb:242,245,236;
+  }
+  *{box-sizing:border-box}
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--paper);
+    font-family: "Manrope", -apple-system, "Helvetica Neue", Arial, sans-serif; color: var(--ui-ink); }
+  canvas { display: block; }
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+    opacity: 0.07; mix-blend-mode: multiply; z-index: 998;
+  }
+  .modes { position: fixed; top: 64px; left: 30px; z-index: 1000; display: flex; gap: 6px; }
+  .views { position: fixed; top: 26px; left: 30px; z-index: 1000; display: flex; gap: 6px; }
+  .view-btn { background: rgba(var(--paper-rgb), 0.85); border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ui-ink); cursor: pointer; transition: background .25s, border-color .25s, opacity .25s; opacity: 0.65; backdrop-filter: blur(8px); }
+  .view-btn:hover { opacity: 1; background: var(--paper); }
+  .view-btn.active { opacity: 1; background: var(--ui-ink); color: var(--paper); border-color: var(--ui-ink); }
+  .controls { position: fixed; right: 30px; top: 50%; transform: translateY(-50%); z-index: 1000; width: 220px; display: flex; flex-direction: column; gap: 2px; }
+  .controls-label { font-size: 9px; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ui-ink-soft); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(var(--ui-ink-rgb),.18); }
+  .module-btn { background: transparent; border: none; padding: 8px 0; text-align: left; cursor: pointer; font: inherit; display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: baseline; color: var(--ui-ink); opacity: 0.38; transition: opacity .25s; }
+  .module-btn .n { font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ui-ink-soft); letter-spacing: 0.06em; }
+  .module-btn .t { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.4; }
+  .module-btn.active { opacity: 1; }
+  .module-btn.active .n { color: var(--ui-ink); }
+  .module-btn:hover { opacity: 0.75; }
+  .module-btn.active:hover { opacity: 1; }
+  .build { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 1000; width: 320px; max-width: calc(100vw - 60px); }
+  .build-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 9px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ui-ink-soft); margin-bottom: 8px; }
+  .build-label strong { font-weight: 700; color: var(--ui-ink); font-variant-numeric: tabular-nums; letter-spacing: 0.12em; }
+  #stageRange { display: block; width: 100%; height: 14px; appearance: none; background: transparent; cursor: pointer; }
+  #stageRange::-webkit-slider-runnable-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); border: 0; }
+  #stageRange::-moz-range-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); border: 0; }
+  #stageRange::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; margin-top: -5.5px; background: var(--paper); border: 1px solid var(--ui-ink); box-shadow: 0 0 0 1px var(--paper) inset; cursor: grab; }
+  #stageRange::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--paper); border: 1px solid var(--ui-ink); cursor: grab; }
+  .metrics { position: fixed; top: 26px; right: 30px; z-index: 1000; font-size: 9px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ui-ink-soft); text-align: right; line-height: 1.7; pointer-events: none; }
+  .metrics strong { color: var(--ui-ink); font-weight: 700; }
+  #hint { position: fixed; bottom: 14px; left: 30px; font-size: 9px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--ui-ink-soft); opacity: .65; pointer-events: none; z-index: 1000; }
+  /* Подписи на сцене (Дильтс) — следуют цвету линий сцены */
+  .diltz-wrap { width: 0; height: 0; position: relative; pointer-events: none; }
+  .diltz-lbl { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-family: "Manrope", sans-serif; font-weight: 600; color: var(--ink); background: rgba(var(--paper-rgb), 0.9); padding: 3px 10px 3px; white-space: nowrap; line-height: 1; letter-spacing: 0.05em; text-align: right; font-variant-numeric: tabular-nums; }
+  .text-toggle { position: fixed; right: 30px; bottom: 28px; z-index: 1001; width: 38px; height: 38px; border-radius: 50%; padding: 0; display: grid; place-items: center; background: rgba(var(--paper-rgb),.85); border: 1px solid rgba(var(--ui-ink-rgb),.22); color: var(--ui-ink); cursor: pointer; backdrop-filter: blur(8px); opacity: .7; transition: opacity .25s, background .25s; }
+  .text-toggle:hover { opacity: 1; background: var(--paper); }
+  .text-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+  .text-toggle .slash { display: none; }
+  body.notext .text-toggle .slash { display: block; }
+  #lightBtn { right: 76px; }
+  #shotBtn { right: 122px; }
+  #svgBtn { right: 168px; }
+  .light-panel { position: fixed; right: 30px; bottom: 76px; z-index: 1001; width: 240px; padding: 14px 16px 12px; background: rgba(var(--paper-rgb),.94); border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 14px; backdrop-filter: blur(10px); display: none; max-height: calc(100vh - 120px); overflow-y: auto; }
+  .light-panel.open { display: block; }
+  body.notext .light-panel { display: none; }
+  .lp-title { font-size: 9px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--ui-ink-soft); padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(var(--ui-ink-rgb),.18); }
+  .lp-row { margin-bottom: 8px; }
+  .lp-lab { display: flex; justify-content: space-between; font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ui-ink-soft); margin-bottom: 2px; }
+  .lp-lab b { color: var(--ui-ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .light-panel input[type=range] { display: block; width: 100%; height: 14px; appearance: none; background: transparent; cursor: pointer; margin: 0; }
+  .light-panel input[type=range]::-webkit-slider-runnable-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); }
+  .light-panel input[type=range]::-moz-range-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); }
+  .light-panel input[type=range]::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; margin-top: -5.5px; background: var(--paper); border: 1px solid var(--ui-ink); cursor: grab; }
+  .light-panel input[type=range]::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--paper); border: 1px solid var(--ui-ink); cursor: grab; }
+  .lp-colors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-bottom: 8px; }
+  .lp-color { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ui-ink-soft); cursor: pointer; }
+  .lp-color input { width: 34px; height: 20px; padding: 0; border: 1px solid rgba(var(--ui-ink-rgb),.35); border-radius: 6px; background: none; cursor: pointer; }
+  .lp-color input::-webkit-color-swatch-wrapper { padding: 0; }
+  .lp-color input::-webkit-color-swatch { border: 0; border-radius: 5px; }
+  .lp-color input::-moz-color-swatch { border: 0; border-radius: 5px; }
+  .lp-sep { height: 1px; background: rgba(var(--ui-ink-rgb),.18); margin: 2px 0 10px; }
+  .lp-check { display: flex; align-items: center; gap: 8px; font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ui-ink); margin: 6px 0; cursor: pointer; }
+  .lp-check input { accent-color: var(--ui-ink); margin: 0; }
+  .lp-reset { margin-top: 6px; width: 100%; background: transparent; border: 1px solid rgba(var(--ui-ink-rgb),.3); border-radius: 999px; padding: 7px 10px; font: inherit; font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ui-ink); cursor: pointer; }
+  .lp-reset:hover { background: var(--ui-ink); color: var(--paper); }
+  /* Переключатель стиля линий */
+  .lp-style-group { display: flex; gap: 4px; margin-top: 4px; }
+  .lp-style-btn { flex: 1; background: transparent; border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 999px; padding: 6px 8px; font: inherit; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ui-ink-soft); cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .lp-style-btn.active { background: var(--ui-ink); color: var(--paper); border-color: var(--ui-ink); }
+  .lp-style-btn:hover:not(.active) { background: rgba(var(--ui-ink-rgb),.06); color: var(--ui-ink); }
+  .shot-flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 1002; }
+  .shot-flash.go { animation: shotflash .35s ease-out; }
+  @keyframes shotflash { 0% { opacity: .75; } 100% { opacity: 0; } }
+  .views, .modes, .metrics, .controls, #hint, .build-label { transition: opacity .35s; }
+  body.notext .views, body.notext .modes, body.notext .metrics, body.notext .controls, body.notext #hint, body.notext .build-label { opacity: 0 !important; pointer-events: none; }
+  @media (max-width: 820px) {
+    .text-toggle { right: 20px; bottom: 20px; }
+    #lightBtn { right: 66px; }
+    #shotBtn { right: 112px; }
+    #svgBtn { right: 158px; }
+    .light-panel { right: 20px; bottom: 66px; width: min(260px, calc(100vw - 40px)); }
+    .views { top: 20px; left: 20px; gap: 4px; }
+    .modes { top: 58px; left: 20px; gap: 4px; }
+    .view-btn { padding: 7px 11px; font-size: 8px; letter-spacing: 0.14em; }
+    .controls { position: fixed; right: auto; left: 30px; top: auto; bottom: 200px; transform: none; width: calc(100vw - 60px); display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 16px; }
+    .controls-label { grid-column: 1 / -1; margin-bottom: 8px; }
+    .module-btn { padding: 5px 0; grid-template-columns: 22px 1fr; gap: 6px; }
+    .module-btn .t { font-size: 9px; }
+    .metrics { display: none; }
+    .build { bottom: 110px; }
+    #hint { display: none; }
+    .diltz-lbl { font-size: 10px !important; padding: 2px 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="views" role="group" aria-label="Вид">
+  <button class="view-btn active" data-view="axon">аксонометрия</button>
+  <button class="view-btn" data-view="facade">фасад</button>
+  <button class="view-btn" data-view="top">сверху</button>
+  <button class="view-btn" data-view="section">разрез</button>
+</div>
+<div class="modes" role="group" aria-label="Режим">
+  <button class="view-btn mode-btn active" data-mode="3d">3D</button>
+  <button class="view-btn mode-btn" data-mode="bp">чертёж</button>
+</div>
+<div class="metrics">
+  <div><strong>6</strong> модулей</div>
+  <div><strong>6</strong> этажей</div>
+  <div><strong>5</strong> опор</div>
+</div>
+<div class="controls" role="tablist" aria-label="Модули курса">
+  <div class="controls-label">Модуль</div>
+  <button class="module-btn" data-stage="1" role="tab"><span class="n">01</span><span class="t">Источник</span></button>
+  <button class="module-btn" data-stage="2" role="tab"><span class="n">02</span><span class="t">Анатомия действия</span></button>
+  <button class="module-btn" data-stage="3" role="tab"><span class="n">03</span><span class="t">Проявленность</span></button>
+  <button class="module-btn" data-stage="4" role="tab"><span class="n">04</span><span class="t">Диалог</span></button>
+  <button class="module-btn" data-stage="5" role="tab"><span class="n">05</span><span class="t">Среда</span></button>
+  <button class="module-btn" data-stage="6" role="tab"><span class="n">06</span><span class="t">Реализация</span></button>
+</div>
+<div class="build">
+  <div class="build-label"><span>Собрано</span><strong id="stageValue">06 / 06</strong></div>
+  <input id="stageRange" type="range" min="1" max="6" step="1" value="6" aria-label="Сколько витков показать">
+</div>
+<div id="hint">drag · scroll</div>
+<button class="text-toggle" id="textToggle" type="button" aria-label="Скрыть / показать весь текст" aria-pressed="false" title="Скрыть / показать текст">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7V5h16v2M12 5v14M9 19h6"/><path class="slash" d="M3 21L21 3"/></svg>
+</button>
+<div class="shot-flash" id="shotFlash"></div>
+<button class="text-toggle" id="svgBtn" type="button" aria-label="Скачать SVG" title="Скачать SVG">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></svg>
+</button>
+<button class="text-toggle" id="shotBtn" type="button" aria-label="Сохранить снимок сцены" title="Сохранить снимок (PNG)">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg>
+</button>
+<button class="text-toggle" id="lightBtn" type="button" aria-label="Настройки: цвета и освещение" aria-expanded="false" title="Цвета и освещение">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/></svg>
+</button>
+<div class="light-panel" id="lightPanel" role="group" aria-label="Настройки">
+  <div class="lp-title">Настройки</div>
+  <div class="lp-colors">
+    <label class="lp-color"><span>Фон</span><input id="cBg" type="color" value="#F2F5EC"></label>
+    <label class="lp-color"><span>Здание</span><input id="cBld" type="color" value="#EEF1E6"></label>
+    <label class="lp-color"><span>Линии</span><input id="cInk" type="color" value="#1A1613"></label>
+    <label class="lp-color"><span>Вспом.</span><input id="cSoft" type="color" value="#8A7E6E"></label>
+  </div>
+  <label class="lp-check"><input id="lpInkAuto" type="checkbox" checked> Цвет линий авто по фону</label>
+  <div class="lp-sep"></div>
+  <div class="lp-row">
+    <div class="lp-lab"><span>Толщина линии</span><b id="lpLineV">1.0</b></div>
+    <input id="lpLine" type="range" min="0.5" max="4" step="0.1" value="1">
+  </div>
+  <div class="lp-row">
+    <div class="lp-lab"><span>Стиль линий</span></div>
+    <div class="lp-style-group">
+      <button class="lp-style-btn active" data-style="sketch" type="button">От руки</button>
+      <button class="lp-style-btn" data-style="strict" type="button">Строгие</button>
+    </div>
+  </div>
+  <div class="lp-sep"></div>
+  <div id="lpLight">
+    <div class="lp-row"><div class="lp-lab"><span>Солнце</span><b id="lpSunV"></b></div><input id="lpSun" type="range" min="0" max="4" step="0.05"></div>
+    <div class="lp-row"><div class="lp-lab"><span>Рассеянный свет</span><b id="lpHemiV"></b></div><input id="lpHemi" type="range" min="0" max="4" step="0.05"></div>
+    <div class="lp-row"><div class="lp-lab"><span>Направление</span><b id="lpAzV"></b></div><input id="lpAz" type="range" min="0" max="360" step="1"></div>
+    <div class="lp-row"><div class="lp-lab"><span>Высота солнца</span><b id="lpElV"></b></div><input id="lpEl" type="range" min="8" max="88" step="1"></div>
+    <div class="lp-row"><div class="lp-lab"><span>Тень на земле</span><b id="lpGndV"></b></div><input id="lpGnd" type="range" min="0" max="0.6" step="0.01"></div>
+    <label class="lp-check"><input id="lpShadows" type="checkbox" checked> Тени</label>
+    <label class="lp-check"><input id="lpAuto" type="checkbox" checked> Авто по виду</label>
+    <label class="lp-check" title="По умолчанию SVG — векторные линии. Эта галочка вставит в SVG 3D-картинку целиком."><input id="lpSvgRaster" type="checkbox"> SVG с 3D-рендером</label>
+  </div>
+  <button class="lp-reset" id="lpReset" type="button">Сбросить</button>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+
+const $ = id => document.getElementById(id);
+
+/* ===== Тема / режим ===== */
+const BG_DEFAULT = '#F2F5EC';
+const BLD_DEFAULT = '#EEF1E6';
+const INK_DEFAULT = '#1A1613';
+const SOFT_DEFAULT = '#8A7E6E';
+const D = { bg: BG_DEFAULT, bld: BLD_DEFAULT };
+let mode = '3d';
+let inkHex = INK_DEFAULT, softHex = SOFT_DEFAULT;
+let autoInk = true;
+let lineThickness = 1.0;
+let lineStyle = 'sketch';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(D.bg);
+
+const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 0.1, 500);
+camera.position.set(13, 11.5, 18);
+camera.lookAt(0, 2.0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.localClippingEnabled = true;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(innerWidth, innerHeight);
+labelRenderer.domElement.style.position = 'fixed';
+labelRenderer.domElement.style.top = '0';
+labelRenderer.domElement.style.left = '0';
+labelRenderer.domElement.style.pointerEvents = 'none';
+labelRenderer.domElement.style.zIndex = '5';
+document.body.appendChild(labelRenderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 2.0, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.maxPolarAngle = Math.PI * 0.48;
+controls.minDistance = 6;
+controls.maxDistance = 45;
+
+const hemi = new THREE.HemisphereLight(0xFFFFFF, 0xF0EEE4, 2.0);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xFFF8EC, 1.8);
+sun.position.set(7, 15, 9);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -9; sun.shadow.camera.right = 9;
+sun.shadow.camera.top = 9;   sun.shadow.camera.bottom = -9;
+sun.shadow.camera.near = 1;  sun.shadow.camera.far = 40;
+sun.shadow.bias = -0.0008;
+sun.shadow.normalBias = 0.035;
+scene.add(sun);
+
+const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 100);
+const clipPlanes = [clipPlane];
+
+const stdRegs = [];
+const inkMats = [], softMats = [];
+const solids = [];
+const allLines = [];
+const OFFS = { wall: 0, slab: 0.04, col: -0.03, base: -0.01, cap: -0.1 };
+
+function tint(hex, off) {
+  const c = new THREE.Color(hex);
+  const hsl = {};
+  c.getHSL(hsl, THREE.SRGBColorSpace);
+  c.setHSL(hsl.h, hsl.s, Math.min(1, Math.max(0, hsl.l + off)), THREE.SRGBColorSpace);
+  return c;
+}
+function stdMat(kind, extra = {}) {
+  const m = new THREE.MeshStandardMaterial({
+    color: tint(D.bld, OFFS[kind]), roughness: 0.92, metalness: 0,
+    clippingPlanes: clipPlanes, clipShadows: true, ...extra,
+  });
+  stdRegs.push({ mat: m, kind });
+  return m;
+}
+function capMat(extra = {}) {
+  const m = new THREE.MeshBasicMaterial({
+    color: tint(D.bld, OFFS.cap), side: THREE.BackSide, clippingPlanes: clipPlanes,
+    polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2, ...extra,
+  });
+  stdRegs.push({ mat: m, kind: 'cap' });
+  return m;
+}
+const bpMat = new THREE.MeshBasicMaterial({
+  color: D.bld, side: THREE.DoubleSide, clippingPlanes: clipPlanes,
+  polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2,
+});
+
+function solid(geo, mat, cap, x, y, z, parent) {
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x, y, z);
+  m.castShadow = true; m.receiveShadow = true;
+  parent.add(m);
+  let c = null;
+  if (cap) {
+    c = new THREE.Mesh(geo, cap);
+    c.position.set(x, y, z);
+    parent.add(c);
+  }
+  solids.push({ mesh: m, std: mat, cap: c });
+  return m;
+}
+function box(w, h, d, x, y, z, parent, mat, cap) {
+  return solid(new THREE.BoxGeometry(w, h, d), mat, cap, x, y, z, parent);
+}
+
+/* ===== Линии (чертёж) ===== */
+function sketchLineTo(arr, p1, p2) {
+  if (!arr.cleanData) arr.cleanData = [];
+  const dist = p1.distanceTo(p2);
+  const segs = Math.max(3, Math.min(10, Math.floor(dist * 3)));
+  const jitter = 0.010;
+  const pts = [], ptsClean = [];
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs;
+    const pt = new THREE.Vector3().lerpVectors(p1, p2, t);
+    const ptClean = pt.clone();
+    if (i > 0 && i < segs) {
+      pt.x += (Math.random() - 0.5) * jitter;
+      pt.y += (Math.random() - 0.5) * jitter;
+      pt.z += (Math.random() - 0.5) * jitter;
+    }
+    pts.push(pt);
+    ptsClean.push(ptClean);
+  }
+  for (let i = 0; i < pts.length - 1; i++) {
+    arr.push(pts[i].x, pts[i].y, pts[i].z, pts[i+1].x, pts[i+1].y, pts[i+1].z);
+    arr.cleanData.push(ptsClean[i].x, ptsClean[i].y, ptsClean[i].z, ptsClean[i+1].x, ptsClean[i+1].y, ptsClean[i+1].z);
+  }
+}
+function boxEdges(w, h, d, x, y, z, arr) {
+  const hw = w/2, hh = h/2, hd = d/2;
+  const c = [
+    [x-hw, y-hh, z-hd], [x+hw, y-hh, z-hd], [x+hw, y-hh, z+hd], [x-hw, y-hh, z+hd],
+    [x-hw, y+hh, z-hd], [x+hw, y+hh, z-hd], [x+hw, y+hh, z+hd], [x-hw, y+hh, z+hd],
+  ];
+  [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(([a, b]) => {
+    sketchLineTo(arr, new THREE.Vector3(...c[a]), new THREE.Vector3(...c[b]));
+  });
+}
+function mkLines(arr, opacity, kind, clip, parent = scene) {
+  const geo = new LineSegmentsGeometry();
+  geo.setPositions(arr);
+  const mat = new LineMaterial({
+    color: kind === 'soft' ? softHex : inkHex,
+    transparent: true,
+    opacity,
+    depthWrite: false,
+    linewidth: lineThickness,
+    resolution: new THREE.Vector2(innerWidth, innerHeight),
+  });
+  if (clip) mat.clippingPlanes = clipPlanes;
+  (kind === 'soft' ? softMats : inkMats).push(mat);
+  const l = new LineSegments2(geo, mat);
+  l.userData.srcArr = arr;
+  l.userData.cleanArr = arr.cleanData || arr;
+  parent.add(l);
+  allLines.push(l);
+  return l;
+}
+
+function applyLineStyle(style) {
+  lineStyle = style;
+  allLines.forEach(l => {
+    const data = style === 'strict' ? l.userData.cleanArr : l.userData.srcArr;
+    if (!data) return;
+    const instBuf = l.geometry.attributes.instanceStart.data;
+    if (instBuf.array.length === data.length) {
+      instBuf.array.set(data);
+      instBuf.needsUpdate = true;
+    } else {
+      l.geometry.setPositions(data);
+    }
+  });
+  document.querySelectorAll('.lp-style-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.style === style);
+  });
+}
+document.querySelectorAll('.lp-style-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.style !== lineStyle) applyLineStyle(btn.dataset.style);
+  });
+});
+
+const SEC_Z = -0.01;
+function secLine(arr, x1, y1, x2, y2) {
+  sketchLineTo(arr, new THREE.Vector3(x1, y1, SEC_Z), new THREE.Vector3(x2, y2, SEC_Z));
+}
+function secRect(arr, xa, xb, ya, yb) {
+  secLine(arr, xa, ya, xb, ya); secLine(arr, xb, ya, xb, yb);
+  secLine(arr, xb, yb, xa, yb); secLine(arr, xa, yb, xa, ya);
+}
+
+const LABEL_X = -6.5;
+const STEP = 0.65;
+const WALL_T = 0.1;
+const SLAB_T = 0.05;
+const OV = 0.02;
+const floor_heights = [0, 0.7, 1.2, 1.7, 2.2, 2.7, 3.2];
+
+const gapSideByRing = { 6:'south', 5:'east', 4:'north', 3:'west', 2:'south', 1:'east' };
+function gapSizeFor(i) { return i === 6 ? 0.42 : i === 1 ? 0.32 : 0.24; }
+
+const diltzData = [
+  { ring: 6, label: 'СРЕДА' },
+  { ring: 5, label: 'ПОВЕДЕНИЕ' },
+  { ring: 4, label: 'СПОСОБНОСТИ' },
+  { ring: 3, label: 'УБЕЖДЕНИЯ И ЦЕННОСТИ' },
+  { ring: 2, label: 'ИДЕНТИЧНОСТЬ' },
+  { ring: 1, label: 'МИССИЯ' },
+];
+diltzData.forEach(d => { d.yPos = floor_heights[7 - d.ring] + 0.08; });
+const diltzByRing = {};
+diltzData.forEach(d => { diltzByRing[d.ring] = d; });
+
+function layoutWalls(i, ov, fn) {
+  const half = i * STEP;
+  const wallH = floor_heights[7 - i];
+  const wallYc = wallH / 2;
+  const sideLen = half * 2 + WALL_T;
+  const gapSize = gapSizeFor(i);
+  const segLen = (sideLen - gapSize) / 2;
+  const gapSide = gapSideByRing[i];
+  const sideS = sideLen - 2 * WALL_T;
+  const segS = (sideS - gapSize) / 2;
+
+  [['north', -half], ['south', half]].forEach(([name, z]) => {
+    if (gapSide === name) {
+      fn(segLen, wallH, WALL_T, -(half + WALL_T/2) + segLen/2, wallYc, z);
+      fn(segLen, wallH, WALL_T,  (half + WALL_T/2) - segLen/2, wallYc, z);
+    } else {
+      fn(sideLen, wallH, WALL_T, 0, wallYc, z);
+    }
+  });
+  [['west', -half], ['east', half]].forEach(([name, x]) => {
+    if (gapSide === name) {
+      fn(WALL_T, wallH, segS + ov, x, wallYc, -(sideS/2 + ov) + (segS + ov)/2);
+      fn(WALL_T, wallH, segS + ov, x, wallYc,  (sideS/2 + ov) - (segS + ov)/2);
+    } else {
+      fn(WALL_T, wallH, sideS + 2 * ov, x, wallYc, 0);
+    }
+  });
+}
+
+function addSlabMesh(parent, i, yCenter, mat, cap) {
+  const outerR = i * STEP - WALL_T / 2;
+  const innerR = (i - 1) * STEP + WALL_T / 2;
+  if (outerR - innerR <= 0.05) return;
+  const pc = (outerR + innerR) / 2;
+  const pw = outerR - innerR;
+  const spanX = outerR * 2;
+  const spanZ = innerR * 2 + 2 * OV;
+  box(spanX, SLAB_T, pw, 0, yCenter, -pc, parent, mat, cap);
+  box(spanX, SLAB_T, pw, 0, yCenter,  pc, parent, mat, cap);
+  box(pw, SLAB_T, spanZ, -pc, yCenter, 0, parent, mat, cap);
+  box(pw, SLAB_T, spanZ,  pc, yCenter, 0, parent, mat, cap);
+}
+function addSlabOutline(i, yCenter, arr) {
+  const outerR = i * STEP - WALL_T / 2;
+  const innerR = (i - 1) * STEP + WALL_T / 2;
+  if (outerR - innerR <= 0.05) return;
+  const y0 = yCenter - SLAB_T / 2, y1 = yCenter + SLAB_T / 2;
+  const sq = (r, y) => [[-r,-r],[r,-r],[r,r],[-r,r]].map(([x,z]) => new THREE.Vector3(x, y, z));
+  const rings = [outerR];
+  if (i > 1) rings.push(innerR);
+  rings.forEach(r => {
+    [y0, y1].forEach(y => {
+      const p = sq(r, y);
+      for (let k = 0; k < 4; k++) sketchLineTo(arr, p[k], p[(k+1)%4]);
+    });
+    const pa = sq(r, y0), pb = sq(r, y1);
+    for (let k = 0; k < 4; k++) sketchLineTo(arr, pa[k], pb[k]);
+  });
+}
+
+const levels = [];
+const state = [];
+const diltzLabels = [];
+
+for (let i = 1; i <= 6; i++) {
+  const wallG = new THREE.Group();
+  const slabG = new THREE.Group();
+  scene.add(wallG);
+  scene.add(slabG);
+
+  const wMat = stdMat('wall');
+  const wCap = capMat();
+  const sMat = stdMat('slab', { transparent: true });
+  const sCap = capMat({ transparent: true });
+
+  const half = i * STEP;
+  const wallTop = floor_heights[7 - i];
+  const outerR = i * STEP - WALL_T / 2, innerR = (i - 1) * STEP + WALL_T / 2;
+
+  layoutWalls(i, OV, (w, h, d, x, y, z) => box(w, h, d, x, y, z, wallG, wMat, wCap));
+  if (i !== 6) addSlabMesh(slabG, i, floor_heights[6 - i] + SLAB_T/2, sMat, sCap);
+  addSlabMesh(slabG, i, wallTop - SLAB_T/2, sMat, sCap);
+
+  const wallB = [], slabB = [];
+  layoutWalls(i, 0, (w, h, d, x, y, z) => boxEdges(w, h, d, x, y, z, wallB));
+  if (i !== 6) addSlabOutline(i, floor_heights[6 - i] + SLAB_T/2, slabB);
+  addSlabOutline(i, wallTop - SLAB_T/2, slabB);
+  const wl1 = mkLines(wallB, 0.85, 'ink', true, wallG);
+  const sl1 = mkLines(slabB, 0.85, 'ink', true, slabG);
+
+  const sW = [], sS = [], sL = [];
+  [-1, 1].forEach(sg => secRect(sW, sg * (half - WALL_T/2), sg * (half + WALL_T/2), 0, wallTop));
+  const slabYs = [wallTop - SLAB_T];
+  if (i !== 6) slabYs.push(floor_heights[6 - i]);
+  slabYs.forEach(y0 => {
+    if (i === 1) secRect(sS, -outerR, outerR, y0, y0 + SLAB_T);
+    else [-1, 1].forEach(sg => secRect(sS, sg * innerR, sg * outerR, y0, y0 + SLAB_T));
+  });
+  secLine(sL, LABEL_X, wallTop, -(half + WALL_T/2), wallTop);
+  const secWall = mkLines(sW, 0, 'ink', false);
+  const secSlab = mkLines(sS, 0, 'ink', false);
+  const secLvl = mkLines(sL, 0, 'soft', false);
+
+  const d0 = diltzByRing[i];
+  const gapSide = gapSideByRing[i];
+  const ex = -half - WALL_T/2, ey = wallTop - 0.1;
+  const ez = gapSide === 'west' ? 0.3 : 0;
+  const leader = mkLines([
+    ex, ey - 0.07, ez,  ex, ey + 0.07, ez,
+    ex, ey, ez,  LABEL_X + 0.15, d0.yPos, 0,
+  ], 0, 'soft', false);
+
+  levels.push({ wallG, slabG, sMat, sCap, wl1, sl1, secWall, secSlab, secLvl, leader, slabT: 1 });
+  state.push({ visible: true, t: 1 });
+
+  const wrap = document.createElement('div');
+  wrap.className = 'diltz-wrap';
+  const inner = document.createElement('span');
+  inner.className = 'diltz-lbl';
+  inner.textContent = d0.label;
+  inner.style.fontSize = '13px';
+  wrap.appendChild(inner);
+  const lblObj = new CSS2DObject(wrap);
+  lblObj.position.set(LABEL_X, d0.yPos, 0);
+  scene.add(lblObj);
+  diltzLabels.push({ ring: i, element: inner, pos: new THREE.Vector3(LABEL_X, d0.yPos, 0) });
+}
+
+const shadowCatcher = new THREE.Mesh(
+  new THREE.PlaneGeometry(80, 80),
+  new THREE.ShadowMaterial({ opacity: 0.2 })
+);
+shadowCatcher.rotation.x = -Math.PI / 2;
+shadowCatcher.position.y = -0.002;
+shadowCatcher.receiveShadow = true;
+scene.add(shadowCatcher);
+
+const gB = [];
+const baseHalf = 6 * STEP + WALL_T + 0.2;
+box(baseHalf * 2, 0.04, baseHalf * 2, 0, 0.02, 0, scene, stdMat('base'), capMat());
+boxEdges(baseHalf * 2, 0.04, baseHalf * 2, 0, 0.02, 0, gB);
+
+const colH = 3.5;
+const colR = 0.05;
+const colMat = stdMat('col');
+[[-0.35,-0.35],[0.35,-0.35],[0.35,0.35],[-0.35,0.35],[0,0]].forEach(([x, z]) => {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(colR, colR, colH, 20), colMat);
+  m.position.set(x, colH/2, z);
+  m.castShadow = true; m.receiveShadow = true;
+  scene.add(m);
+  solids.push({ mesh: m, std: colMat, cap: null });
+  for (let k = 0; k < 6; k++) {
+    const a = k / 6 * Math.PI * 2;
+    const px = x + colR * Math.cos(a), pz = z + colR * Math.sin(a);
+    sketchLineTo(gB, new THREE.Vector3(px, 0, pz), new THREE.Vector3(px, colH, pz));
+  }
+  for (let k = 0; k < 8; k++) {
+    const a1 = k / 8 * Math.PI * 2, a2 = (k+1) / 8 * Math.PI * 2;
+    sketchLineTo(gB,
+      new THREE.Vector3(x + colR*Math.cos(a1), colH, z + colR*Math.sin(a1)),
+      new THREE.Vector3(x + colR*Math.cos(a2), colH, z + colR*Math.sin(a2)));
+  }
+});
+
+const lanternBaseY = colH;
+const lanternH = 0.4;
+const lanternHalf = 0.35;
+const lanternMat = stdMat('wall');
+const lantern = new THREE.Mesh(new THREE.ConeGeometry(lanternHalf * Math.SQRT2, lanternH, 4), lanternMat);
+lantern.position.set(0, lanternBaseY + lanternH/2, 0);
+lantern.rotation.y = Math.PI/4;
+lantern.castShadow = true;
+scene.add(lantern);
+solids.push({ mesh: lantern, std: lanternMat, cap: null });
+{
+  const lApex = new THREE.Vector3(0, lanternBaseY + lanternH, 0);
+  const lc = [
+    new THREE.Vector3(-lanternHalf, lanternBaseY, -lanternHalf),
+    new THREE.Vector3( lanternHalf, lanternBaseY, -lanternHalf),
+    new THREE.Vector3( lanternHalf, lanternBaseY,  lanternHalf),
+    new THREE.Vector3(-lanternHalf, lanternBaseY,  lanternHalf),
+  ];
+  for (let k = 0; k < 4; k++) {
+    sketchLineTo(gB, lc[k], lc[(k+1)%4]);
+    sketchLineTo(gB, lc[k], lApex);
+  }
+}
+const gMain = mkLines(gB, 0.85, 'ink', true);
+
+const secStaticArr = [], secSoftArr = [];
+secRect(secStaticArr, -baseHalf, baseHalf, 0, 0.04);
+const colSegs = (x, arr) => {
+  [[0.04, 2.7], [2.75, 3.15], [3.2, colH]].forEach(([a, b]) => {
+    secLine(arr, x - colR, a, x - colR, b);
+    secLine(arr, x + colR, a, x + colR, b);
+  });
+  secLine(arr, x - colR, colH, x + colR, colH);
+};
+colSegs(0, secStaticArr);
+colSegs(-0.35, secSoftArr);
+colSegs(0.35, secSoftArr);
+secLine(secStaticArr, -lanternHalf, colH, lanternHalf, colH);
+secLine(secStaticArr, -lanternHalf, colH, 0, colH + lanternH);
+secLine(secStaticArr, lanternHalf, colH, 0, colH + lanternH);
+const secStatic = mkLines(secStaticArr, 0, 'ink', false);
+const secSoft = mkLines(secSoftArr, 0, 'ink', false);
+
+/* ===== Тема (цвета) ===== */
+function hexToRgb(h) {
+  const n = parseInt(h.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function applyTheme() {
+  const [r, g, b] = hexToRgb(D.bg);
+  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  const dark = lum < 0.45;
+
+  /* Цвета UI всегда автоподбираются по фону — кнопки всегда читаемы */
+  const uiInk  = dark ? '#F2EFE8' : '#1A1613';
+  const uiSoft = dark ? '#B7AE9F' : '#8A7E6E';
+
+  /* Цвета линий сцены: авто (совпадают с UI) или выбраны пользователем */
+  if (autoInk) {
+    inkHex = uiInk;
+    softHex = uiSoft;
+  }
+  $('cInk').value = inkHex;
+  $('cSoft').value = softHex;
+
+  const [ir, ig, ib] = hexToRgb(inkHex);
+  const [ur, ug, ub] = hexToRgb(uiInk);
+
+  scene.background.set(D.bg);
+  const root = document.documentElement.style;
+  root.setProperty('--paper', D.bg);
+  root.setProperty('--paper-rgb', r + ',' + g + ',' + b);
+
+  /* UI — фиксированный контраст к фону, не зависит от цвета линий */
+  root.setProperty('--ui-ink', uiInk);
+  root.setProperty('--ui-ink-rgb', ur + ',' + ug + ',' + ub);
+  root.setProperty('--ui-ink-soft', uiSoft);
+
+  /* Сцена — только линии и подписи Diltz */
+  root.setProperty('--ink', inkHex);
+  root.setProperty('--ink-rgb', ir + ',' + ig + ',' + ib);
+  root.setProperty('--ink-soft', softHex);
+
+  inkMats.forEach(m => m.color.set(inkHex));
+  softMats.forEach(m => m.color.set(softHex));
+  stdRegs.forEach(({ mat, kind }) => mat.color.copy(tint(D.bld, OFFS[kind])));
+  bpMat.color.set(D.bld);
+}
+
+let shadowsOn = true;
+function updateShadowVis() {
+  sun.castShadow = shadowsOn;
+  shadowCatcher.visible = shadowsOn && mode === '3d';
+}
+function setMode(m) {
+  mode = m;
+  const is3d = m === '3d';
+  solids.forEach(({ mesh, std, cap }) => {
+    mesh.material = is3d ? std : bpMat;
+    mesh.castShadow = is3d;
+    mesh.receiveShadow = is3d;
+    if (cap) cap.visible = is3d;
+  });
+  hemi.visible = is3d;
+  sun.visible = is3d;
+  updateShadowVis();
+  document.body.classList.toggle('bp-mode', !is3d);
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  $('lpLight').style.display = is3d ? '' : 'none';
+  setView(currentView, true);
+}
+
+let textHidden = false;
+const textToggle = $('textToggle');
+textToggle.addEventListener('click', () => {
+  textHidden = !textHidden;
+  document.body.classList.toggle('notext', textHidden);
+  textToggle.setAttribute('aria-pressed', String(textHidden));
+});
+let currentStage = 6;
+function applyStage(stage) {
+  currentStage = stage;
+  state.forEach((s, i) => { s.visible = i < stage; });
+  $('stageValue').textContent = String(stage).padStart(2, '0') + ' / 06';
+  document.querySelectorAll('.module-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === stage - 1);
+    b.setAttribute('aria-selected', i === stage - 1 ? 'true' : 'false');
+  });
+}
+const range = $('stageRange');
+range.addEventListener('input', () => applyStage(Number(range.value)));
+document.querySelectorAll('.module-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const s = Number(btn.dataset.stage);
+    range.value = s;
+    applyStage(s);
+  });
+});
+applyStage(6);
+
+const VIEW_BASE = {
+  axon:   { pos: new THREE.Vector3(13, 11.5, 18), target: new THREE.Vector3(0, 2.0, 0), fov: 34, enableRotate: true,  clip: false, flat: false },
+  facade: { pos: new THREE.Vector3(0, 1.95, 24),  target: new THREE.Vector3(0, 1.95, 0), fov: 24, enableRotate: false, clip: false, flat: true },
+  top:    { pos: new THREE.Vector3(0, 24, 0.01),  target: new THREE.Vector3(0, 0, 0),    fov: 32, enableRotate: false, clip: false, flat: false },
+};
+const SECTION_3D = { pos: new THREE.Vector3(4.5, 4.2, 17), target: new THREE.Vector3(0, 1.7, -0.6), fov: 28, enableRotate: true,  clip: true, flat: false };
+const SECTION_BP = { pos: new THREE.Vector3(0, 1.95, 24),  target: new THREE.Vector3(0, 1.95, 0),  fov: 24, enableRotate: false, clip: true, flat: true };
+function getView(name) {
+  if (name === 'section') return mode === '3d' ? SECTION_3D : SECTION_BP;
+  return VIEW_BASE[name];
+}
+
+const LIGHT_DEFAULT = { az: 38, el: 53, sunI: 1.8, hemiI: 2.0 };
+const LIGHT_TOP     = { az: 61, el: 32, sunI: 2.1, hemiI: 1.4 };
+const GROUND_SHADOW_DEFAULT = 0.2;
+const lightTarget = { ...LIGHT_DEFAULT };
+const lightCur = { ...LIGHT_DEFAULT };
+let autoLight = true;
+
+let currentView = 'axon';
+let transitioning = false;
+let targetPos = VIEW_BASE.axon.pos.clone();
+let targetTarget = VIEW_BASE.axon.target.clone();
+let targetFov = VIEW_BASE.axon.fov;
+let clipEnabled = false;
+
+function setView(name, force) {
+  if (name === currentView && !force) return;
+  currentView = name;
+  const v = getView(name);
+  targetPos.copy(v.pos);
+  targetTarget.copy(v.target);
+  targetFov = v.fov;
+  transitioning = true;
+  clipEnabled = v.clip;
+  if (autoLight && mode === '3d') { Object.assign(lightTarget, name === 'top' ? LIGHT_TOP : LIGHT_DEFAULT); syncLightUI(); }
+  document.querySelectorAll('.view-btn[data-view]').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === name);
+  });
+  controls.enableRotate = v.enableRotate;
+  controls.maxPolarAngle = v.flat ? Math.PI / 2 : Math.PI * 0.48;
+}
+document.querySelectorAll('.view-btn[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => setView(btn.dataset.view));
+});
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => { if (btn.dataset.mode !== mode) setMode(btn.dataset.mode); });
+});
+
+const lightBtn = $('lightBtn'), lightPanel = $('lightPanel');
+const ui = {
+  sun:  [$('lpSun'),  $('lpSunV'),  v => v.toFixed(2)],
+  hemi: [$('lpHemi'), $('lpHemiV'), v => v.toFixed(2)],
+  az:   [$('lpAz'),   $('lpAzV'),   v => Math.round(v) + '°'],
+  el:   [$('lpEl'),   $('lpElV'),   v => Math.round(v) + '°'],
+  gnd:  [$('lpGnd'),  $('lpGndV'),  v => v.toFixed(2)],
+};
+function syncLightUI() {
+  ui.sun[0].value = lightTarget.sunI;
+  ui.hemi[0].value = lightTarget.hemiI;
+  ui.az[0].value = lightTarget.az;
+  ui.el[0].value = lightTarget.el;
+  ui.gnd[0].value = shadowCatcher.material.opacity;
+  Object.values(ui).forEach(([inp, out, fmt]) => { out.textContent = fmt(Number(inp.value)); });
+}
+function manualLight(key, el, apply) {
+  el.addEventListener('input', () => {
+    apply(Number(el.value));
+    if (key !== 'gnd') { autoLight = false; $('lpAuto').checked = false; }
+    syncLightUI();
+  });
+}
+manualLight('sun',  ui.sun[0],  v => { lightTarget.sunI = v; });
+manualLight('hemi', ui.hemi[0], v => { lightTarget.hemiI = v; });
+manualLight('az',   ui.az[0],   v => { lightTarget.az = v; });
+manualLight('el',   ui.el[0],   v => { lightTarget.el = v; });
+manualLight('gnd',  ui.gnd[0],  v => { shadowCatcher.material.opacity = v; });
+$('lpShadows').addEventListener('change', e => { shadowsOn = e.target.checked; updateShadowVis(); });
+function applyViewLight() {
+  Object.assign(lightTarget, currentView === 'top' ? LIGHT_TOP : LIGHT_DEFAULT);
+  syncLightUI();
+}
+$('lpAuto').addEventListener('change', e => { autoLight = e.target.checked; if (autoLight) applyViewLight(); });
+
+const lpLineEl = $('lpLine'), lpLineV = $('lpLineV');
+function setLineThickness(v) {
+  lineThickness = v;
+  lpLineV.textContent = v.toFixed(1);
+  [...inkMats, ...softMats].forEach(m => {
+    m.linewidth = v;
+  });
+}
+lpLineEl.addEventListener('input', () => setLineThickness(Number(lpLineEl.value)));
+setLineThickness(1);
+
+$('cBg').addEventListener('input', e => { D.bg = e.target.value; applyTheme(); });
+$('cBld').addEventListener('input', e => { D.bld = e.target.value; applyTheme(); });
+
+/* Ручной выбор цвета линий — выключает авто-режим */
+$('cInk').addEventListener('input', e => {
+  inkHex = e.target.value;
+  autoInk = false;
+  $('lpInkAuto').checked = false;
+  applyTheme();
+});
+$('cSoft').addEventListener('input', e => {
+  softHex = e.target.value;
+  autoInk = false;
+  $('lpInkAuto').checked = false;
+  applyTheme();
+});
+$('lpInkAuto').addEventListener('change', e => {
+  autoInk = e.target.checked;
+  applyTheme();
+});
+
+$('lpReset').addEventListener('click', () => {
+  D.bg = BG_DEFAULT; D.bld = BLD_DEFAULT;
+  $('cBg').value = BG_DEFAULT; $('cBld').value = BLD_DEFAULT;
+  autoInk = true; $('lpInkAuto').checked = true;
+  inkHex = INK_DEFAULT; softHex = SOFT_DEFAULT;
+  applyTheme();
+  autoLight = true; $('lpAuto').checked = true;
+  $('lpShadows').checked = true; shadowsOn = true; updateShadowVis();
+  shadowCatcher.material.opacity = GROUND_SHADOW_DEFAULT;
+  applyViewLight();
+  $('lpLine').value = 1;
+  setLineThickness(1);
+  applyLineStyle('sketch');
+});
+lightBtn.addEventListener('click', () => {
+  const open = lightPanel.classList.toggle('open');
+  lightBtn.setAttribute('aria-expanded', String(open));
+});
+syncLightUI();
+
+function renderComposite(prMin = 2) {
+  const oldPR = renderer.getPixelRatio();
+  const pr = Math.max(prMin, oldPR);
+  renderer.setPixelRatio(pr);
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.render(scene, camera);
+
+  const w = renderer.domElement.width, h = renderer.domElement.height;
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  const ctx = out.getContext('2d');
+  ctx.drawImage(renderer.domElement, 0, 0);
+
+  if (!textHidden) {
+    const [pr_, pg_, pb_] = hexToRgb(D.bg);
+    const v = new THREE.Vector3();
+    diltzLabels.forEach(({ element, pos }) => {
+      const o = parseFloat(element.style.opacity) || 0;
+      if (o < 0.05) return;
+      v.copy(pos).project(camera);
+      if (v.z > 1) return;
+      const x = (v.x * 0.5 + 0.5) * w, y = (-v.y * 0.5 + 0.5) * h;
+      const fs = 13 * pr;
+      ctx.save();
+      ctx.globalAlpha = o;
+      ctx.font = '600 ' + fs + 'px Manrope, "Helvetica Neue", Arial, sans-serif';
+      if ('letterSpacing' in ctx) ctx.letterSpacing = (0.05 * fs) + 'px';
+      const txt = element.textContent;
+      const tw = ctx.measureText(txt).width;
+      const padX = 10 * pr, padY = 3 * pr;
+      ctx.fillStyle = 'rgba(' + pr_ + ',' + pg_ + ',' + pb_ + ',0.9)';
+      ctx.fillRect(x - tw - 2 * padX, y - fs / 2 - padY, tw + 2 * padX, fs + 2 * padY);
+      ctx.fillStyle = inkHex;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(txt, x - padX, y);
+      ctx.restore();
+    });
+  }
+
+  renderer.setPixelRatio(oldPR);
+  renderer.setSize(innerWidth, innerHeight);
+  return out;
+}
+function stamp() {
+  const t = new Date(), p = n => String(n).padStart(2, '0');
+  return t.getFullYear() + p(t.getMonth() + 1) + p(t.getDate()) + '-' + p(t.getHours()) + p(t.getMinutes()) + p(t.getSeconds());
+}
+function downloadBlob(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function flash() {
+  const fl = $('shotFlash');
+  fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+}
+function takeShot() {
+  const out = renderComposite();
+  out.toBlob(blob => { if (blob) downloadBlob(blob, 'museum-' + (mode === '3d' ? '3d-' : 'plan-') + stamp() + '.png'); }, 'image/png');
+  flash();
+}
+
+const depthMat = new THREE.ShaderMaterial({
+  side: THREE.DoubleSide, clipping: true, clippingPlanes: clipPlanes,
+  vertexShader: `
+    #include <clipping_planes_pars_vertex>
+    varying float vD;
+    void main() {
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      vD = -mvPosition.z;
+      gl_Position = projectionMatrix * mvPosition;
+      #include <clipping_planes_vertex>
+    }`,
+  fragmentShader: `
+    #include <clipping_planes_pars_fragment>
+    varying float vD;
+    void main() {
+      #include <clipping_planes_fragment>
+      float v = clamp(vD / 100.0, 0.0, 0.999999);
+      vec3 enc = fract(vec3(1.0, 255.0, 65025.0) * v);
+      enc -= enc.yzz * vec3(1.0 / 255.0, 1.0 / 255.0, 0.0);
+      gl_FragColor = vec4(enc, 1.0);
+    }`,
+});
+function depthPass(W, H) {
+  const rt = new THREE.WebGLRenderTarget(W, H);
+  const hidden = [];
+  scene.traverse(o => {
+    if ((o.isLine || o.isLineSegments2 || o.isLine2) && o.visible) {
+      hidden.push(o); o.visible = false;
+    }
+  });
+  const catcherWas = shadowCatcher.visible;
+  shadowCatcher.visible = false;
+  const oldBg = scene.background;
+  scene.background = null;
+  const oldClear = new THREE.Color();
+  renderer.getClearColor(oldClear);
+  const oldAlpha = renderer.getClearAlpha();
+  renderer.setClearColor(0xffffff, 1);
+  scene.overrideMaterial = depthMat;
+  renderer.setRenderTarget(rt);
+  renderer.clear();
+  renderer.render(scene, camera);
+  renderer.setRenderTarget(null);
+  scene.overrideMaterial = null;
+  renderer.setClearColor(oldClear, oldAlpha);
+  scene.background = oldBg;
+  shadowCatcher.visible = catcherWas;
+  hidden.forEach(o => { o.visible = true; });
+  const buf = new Uint8Array(W * H * 4);
+  renderer.readRenderTargetPixels(rt, 0, 0, W, H, buf);
+  rt.dispose();
+  return buf;
+}
+
+function vectorBody(W, H) {
+  const sec = currentView === 'section';
+  scene.updateMatrixWorld(true);
+  camera.updateMatrixWorld(true);
+  const occl = sec ? null : depthPass(W, H);
+
+  const src = [];
+  if (sec) {
+    levels.forEach((L, i) => {
+      if (state[i].t > 0.01) src.push({ o: L.secWall, g: 'main' });
+      if (L.slabT > 0.01) { src.push({ o: L.secSlab, g: 'main' }); src.push({ o: L.secLvl, g: 'soft' }); }
+    });
+    src.push({ o: secStatic, g: 'main' }, { o: secSoft, g: 'faint' });
+  } else {
+    levels.forEach((L, i) => {
+      if (state[i].t > 0.01) src.push({ o: L.wl1, g: 'main' });
+      if (L.slabT > 0.01) src.push({ o: L.sl1, g: 'main', yFix: mode === '3d' ? L.slabG.position.y : 0 });
+    });
+    src.push({ o: gMain, g: 'main' });
+  }
+
+  const groups = { main: { parts: [], last: null }, soft: { parts: [], last: null }, faint: { parts: [], last: null } };
+  const tmp = new THREE.Vector3(), A = new THREE.Vector3(), B = new THREE.Vector3(), S = new THREE.Vector3();
+  const pA = { x: 0, y: 0, d: 0 }, pB = { x: 0, y: 0, d: 0 }, pS = { x: 0, y: 0, d: 0 };
+  function proj(v, out) {
+    tmp.copy(v).applyMatrix4(camera.matrixWorldInverse);
+    out.d = -tmp.z;
+    tmp.applyMatrix4(camera.projectionMatrix);
+    out.x = (tmp.x * 0.5 + 0.5) * W;
+    out.y = (-tmp.y * 0.5 + 0.5) * H;
+  }
+  function visible(p) {
+    if (!occl) return true;
+    const ix = Math.round(p.x), iy = Math.round(p.y);
+    if (ix < 0 || iy < 0 || ix >= W || iy >= H) return true;
+    const idx = ((H - 1 - iy) * W + ix) * 4;
+    const v = occl[idx] / 255 + occl[idx + 1] / 65025 + occl[idx + 2] / 16581375;
+    return p.d <= v * 100 + 0.03;
+  }
+  const f = n => n.toFixed(1);
+  function emit(g, p, q) {
+    if (Math.hypot(q.x - p.x, q.y - p.y) < 0.3) return;
+    const G = groups[g];
+    if (G.last && Math.abs(G.last.x - p.x) < 0.05 && Math.abs(G.last.y - p.y) < 0.05) {
+      G.parts.push('L' + f(q.x) + ' ' + f(q.y));
+    } else {
+      G.parts.push('M' + f(p.x) + ' ' + f(p.y) + 'L' + f(q.x) + ' ' + f(q.y));
+    }
+    G.last = { x: q.x, y: q.y };
+  }
+
+  src.forEach(({ o, g, yFix = 0 }) => {
+    const arr = lineStyle === 'strict'
+      ? (o.userData.cleanArr || o.userData.srcArr)
+      : o.userData.srcArr;
+    if (!arr) return;
+    for (let k = 0; k + 5 < arr.length; k += 6) {
+      A.set(arr[k], arr[k+1], arr[k+2]).applyMatrix4(o.matrixWorld); A.y -= yFix;
+      B.set(arr[k+3], arr[k+4], arr[k+5]).applyMatrix4(o.matrixWorld); B.y -= yFix;
+      proj(A, pA); proj(B, pB);
+      if (pA.d < 0.1 || pB.d < 0.1) continue;
+      const n = Math.max(1, Math.ceil(Math.hypot(pB.x - pA.x, pB.y - pA.y) / 1.5));
+      let start = null, end = null;
+      for (let j = 0; j <= n; j++) {
+        S.lerpVectors(A, B, j / n);
+        proj(S, pS);
+        if (visible(pS)) {
+          if (!start) start = { x: pS.x, y: pS.y };
+          end = { x: pS.x, y: pS.y };
+        } else if (start) {
+          emit(g, start, end); start = null;
+        }
+      }
+      if (start) emit(g, start, end);
+    }
+  });
+
+  let svg = '';
+  const style = 'fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="' + lineThickness + '"';
+  if (groups.faint.parts.length) svg += '<path ' + style + ' stroke="' + inkHex + '" stroke-opacity="0.3" d="' + groups.faint.parts.join('') + '"/>\n';
+  if (groups.soft.parts.length)  svg += '<path ' + style + ' stroke="' + softHex + '" stroke-opacity="0.7" d="' + groups.soft.parts.join('') + '"/>\n';
+  if (groups.main.parts.length)  svg += '<path ' + style + ' stroke="' + inkHex + '" stroke-opacity="0.85" d="' + groups.main.parts.join('') + '"/>\n';
+
+  if (!textHidden) {
+    const [br, bgc, bb] = hexToRgb(D.bg);
+    diltzLabels.forEach(({ element }) => {
+      const o = parseFloat(element.style.opacity) || 0;
+      if (o < 0.05) return;
+      const r = element.getBoundingClientRect();
+      svg += '<g opacity="' + o.toFixed(2) + '">'
+        + '<rect x="' + f(r.left) + '" y="' + f(r.top) + '" width="' + f(r.width) + '" height="' + f(r.height) + '" fill="rgb(' + br + ',' + bgc + ',' + bb + ')" fill-opacity="0.9"/>'
+        + '<text x="' + f(r.right - 10) + '" y="' + f(r.top + r.height / 2) + '" text-anchor="end" dominant-baseline="central"'
+        + ' font-family="Manrope, \'Helvetica Neue\', Arial, sans-serif" font-size="13" font-weight="600" letter-spacing="0.65" fill="' + inkHex + '">'
+        + element.textContent + '</text></g>\n';
+    });
+  }
+  return svg;
+}
+
+function exportSVG() {
+  const W = Math.round(innerWidth), H = Math.round(innerHeight);
+  const raster = mode === '3d' && $('lpSvgRaster').checked;
+  let inner;
+  if (raster) {
+    const url = renderComposite(2).toDataURL('image/png');
+    inner = '<image x="0" y="0" width="' + W + '" height="' + H + '" href="' + url + '" xlink:href="' + url + '"/>\n';
+  } else {
+    inner = '<rect width="' + W + '" height="' + H + '" fill="' + D.bg + '"/>\n' + vectorBody(W, H);
+  }
+  const svg = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">\n'
+    + '<title>Музей безграничного роста</title>\n' + inner + '</svg>\n';
+  downloadBlob(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), 'museum-' + (raster ? 'render-' : 'vector-') + stamp() + '.svg');
+  flash();
+}
+$('svgBtn').addEventListener('click', exportSVG);
+$('shotBtn').addEventListener('click', takeShot);
+
+let secT = 0;
+let labT = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  const is3d = mode === '3d';
+
+  if (transitioning) {
+    camera.position.lerp(targetPos, 0.08);
+    controls.target.lerp(targetTarget, 0.08);
+    camera.fov += (targetFov - camera.fov) * 0.08;
+    camera.updateProjectionMatrix();
+    if (camera.position.distanceTo(targetPos) < 0.02 && controls.target.distanceTo(targetTarget) < 0.02) {
+      camera.position.copy(targetPos);
+      controls.target.copy(targetTarget);
+      camera.fov = targetFov;
+      camera.updateProjectionMatrix();
+      transitioning = false;
+    }
+  }
+
+  for (const k of ['az', 'el', 'sunI', 'hemiI']) lightCur[k] += (lightTarget[k] - lightCur[k]) * 0.12;
+  const ar = lightCur.az * Math.PI / 180, er = lightCur.el * Math.PI / 180;
+  sun.position.set(18 * Math.cos(er) * Math.sin(ar), 18 * Math.sin(er), 18 * Math.cos(er) * Math.cos(ar));
+  sun.intensity = lightCur.sunI;
+  hemi.intensity = lightCur.hemiI;
+
+  const curClip = clipPlane.constant;
+  const tgtClip = clipEnabled ? 0 : 100;
+  clipPlane.constant = curClip + (tgtClip - curClip) * 0.12;
+
+  const secGoal = (!is3d && currentView === 'section') ? 1 : 0;
+  secT += (secGoal - secT) * 0.12;
+  if (Math.abs(secT - secGoal) < 0.005) secT = secGoal;
+  const k3 = 1 - secT;
+
+  state.forEach((s, i) => {
+    const target = s.visible ? 1 : 0;
+    s.t += (target - s.t) * 0.12;
+    if (Math.abs(s.t - target) < 0.005) s.t = target;
+
+    const L = levels[i];
+    const slabT = Math.max(0, Math.min(1, (s.t - 0.5) / 0.5));
+    L.slabT = slabT;
+
+    L.wallG.visible = s.t > 0.01 && (is3d || k3 > 0.01);
+    L.wallG.scale.y = Math.max(0.001, s.t);
+    L.wl1.visible = !is3d;
+    L.wl1.material.opacity = 0.85 * s.t * k3;
+
+    L.slabG.visible = slabT > 0.01 && (is3d || k3 > 0.01);
+    L.slabG.position.y = is3d ? (1 - slabT) * 0.5 : 0;
+    L.sl1.visible = !is3d;
+    L.sl1.material.opacity = 0.85 * slabT * k3;
+    L.sMat.opacity = slabT;
+    L.sCap.opacity = slabT;
+
+    L.secWall.visible = !is3d && secT > 0.01 && s.t > 0.01;
+    L.secWall.scale.y = Math.max(0.001, s.t);
+    L.secWall.material.opacity = 0.85 * secT * s.t;
+    L.secSlab.visible = !is3d && secT > 0.01 && slabT > 0.01;
+    L.secSlab.material.opacity = 0.85 * secT * slabT;
+    L.secLvl.visible = !is3d && secT > 0.01 && slabT > 0.01;
+    L.secLvl.material.opacity = 0.7 * secT * slabT;
+  });
+
+  gMain.visible = !is3d && k3 > 0.01;
+  gMain.material.opacity = 0.85 * k3;
+  secStatic.visible = secSoft.visible = !is3d && secT > 0.01;
+  secStatic.material.opacity = 0.85 * secT;
+  secSoft.material.opacity = 0.3 * secT;
+
+  labT += ((currentView === 'section' ? 1 : 0) - labT) * 0.12;
+  if (Math.abs(labT - (currentView === 'section' ? 1 : 0)) < 0.005) labT = currentView === 'section' ? 1 : 0;
+
+  let showFromCam = (camera.position.x < 0 || camera.position.z > 0) ? 1 : 0;
+  if (currentView === 'top') showFromCam = 0;
+
+  diltzLabels.forEach(({ ring, element }) => {
+    const L = levels[ring - 1];
+    const o = textHidden ? 0 : L.slabT * showFromCam * labT;
+    element.style.opacity = String(o);
+    L.leader.visible = is3d;
+    L.leader.material.opacity = is3d ? 0.6 * o : 0;
+  });
+
+  controls.update();
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+}
+
+applyTheme();
+setMode('3d');
+applyLineStyle('sketch');
+animate();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  labelRenderer.setSize(innerWidth, innerHeight);
+  [...inkMats, ...softMats].forEach(m => {
+    if (m.resolution && typeof m.resolution.set === 'function') {
+      m.resolution.set(innerWidth, innerHeight);
+    }
+  });
+});
+</script>
+</body>
+</html>
