@@ -10,9 +10,7 @@
 <style>
   :root{
     --paper:#F2F5EC;
-    /* Цвета интерфейса (кнопки, панели, подписи UI) — не зависят от цвета линий */
     --ui-ink:#1A1613; --ui-ink-rgb:26,22,19; --ui-ink-soft:#8A7E6E;
-    /* Цвета сцены (линии, подписи Diltz на чертеже) — управляются пользователем */
     --ink:#1A1613; --ink-rgb:26,22,19; --ink-soft:#8A7E6E;
     --paper-rgb:242,245,236;
   }
@@ -50,7 +48,6 @@
   .metrics { position: fixed; top: 26px; right: 30px; z-index: 1000; font-size: 9px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ui-ink-soft); text-align: right; line-height: 1.7; pointer-events: none; }
   .metrics strong { color: var(--ui-ink); font-weight: 700; }
   #hint { position: fixed; bottom: 14px; left: 30px; font-size: 9px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--ui-ink-soft); opacity: .65; pointer-events: none; z-index: 1000; }
-  /* Подписи на сцене (Дильтс) — следуют цвету линий сцены */
   .diltz-wrap { width: 0; height: 0; position: relative; pointer-events: none; }
   .diltz-lbl { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-family: "Manrope", sans-serif; font-weight: 600; color: var(--ink); background: rgba(var(--paper-rgb), 0.9); padding: 3px 10px 3px; white-space: nowrap; line-height: 1; letter-spacing: 0.05em; text-align: right; font-variant-numeric: tabular-nums; }
   .text-toggle { position: fixed; right: 30px; bottom: 28px; z-index: 1001; width: 38px; height: 38px; border-radius: 50%; padding: 0; display: grid; place-items: center; background: rgba(var(--paper-rgb),.85); border: 1px solid rgba(var(--ui-ink-rgb),.22); color: var(--ui-ink); cursor: pointer; backdrop-filter: blur(8px); opacity: .7; transition: opacity .25s, background .25s; }
@@ -84,11 +81,12 @@
   .lp-check input { accent-color: var(--ui-ink); margin: 0; }
   .lp-reset { margin-top: 6px; width: 100%; background: transparent; border: 1px solid rgba(var(--ui-ink-rgb),.3); border-radius: 999px; padding: 7px 10px; font: inherit; font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ui-ink); cursor: pointer; }
   .lp-reset:hover { background: var(--ui-ink); color: var(--paper); }
-  /* Переключатель стиля линий */
   .lp-style-group { display: flex; gap: 4px; margin-top: 4px; }
   .lp-style-btn { flex: 1; background: transparent; border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 999px; padding: 6px 8px; font: inherit; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ui-ink-soft); cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
   .lp-style-btn.active { background: var(--ui-ink); color: var(--paper); border-color: var(--ui-ink); }
   .lp-style-btn:hover:not(.active) { background: rgba(var(--ui-ink-rgb),.06); color: var(--ui-ink); }
+  /* В режиме Flat скрываем контролы, относящиеся к солнцу/теням */
+  body.flat-mode .flat-hide { display: none; }
   .shot-flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 1002; }
   .shot-flash.go { animation: shotflash .35s ease-out; }
   @keyframes shotflash { 0% { opacity: .75; } 100% { opacity: 0; } }
@@ -123,21 +121,8 @@
 </div>
 <div class="modes" role="group" aria-label="Режим">
   <button class="view-btn mode-btn active" data-mode="3d">3D</button>
+  <button class="view-btn mode-btn" data-mode="flat">Flat</button>
   <button class="view-btn mode-btn" data-mode="bp">чертёж</button>
-</div>
-<div class="metrics">
-  <div><strong>6</strong> модулей</div>
-  <div><strong>6</strong> этажей</div>
-  <div><strong>5</strong> опор</div>
-</div>
-<div class="controls" role="tablist" aria-label="Модули курса">
-  <div class="controls-label">Модуль</div>
-  <button class="module-btn" data-stage="1" role="tab"><span class="n">01</span><span class="t">Источник</span></button>
-  <button class="module-btn" data-stage="2" role="tab"><span class="n">02</span><span class="t">Анатомия действия</span></button>
-  <button class="module-btn" data-stage="3" role="tab"><span class="n">03</span><span class="t">Проявленность</span></button>
-  <button class="module-btn" data-stage="4" role="tab"><span class="n">04</span><span class="t">Диалог</span></button>
-  <button class="module-btn" data-stage="5" role="tab"><span class="n">05</span><span class="t">Среда</span></button>
-  <button class="module-btn" data-stage="6" role="tab"><span class="n">06</span><span class="t">Реализация</span></button>
 </div>
 <div class="build">
   <div class="build-label"><span>Собрано</span><strong id="stageValue">06 / 06</strong></div>
@@ -180,13 +165,14 @@
   </div>
   <div class="lp-sep"></div>
   <div id="lpLight">
-    <div class="lp-row"><div class="lp-lab"><span>Солнце</span><b id="lpSunV"></b></div><input id="lpSun" type="range" min="0" max="4" step="0.05"></div>
+    <div class="lp-row flat-hide"><div class="lp-lab"><span>Солнце</span><b id="lpSunV"></b></div><input id="lpSun" type="range" min="0" max="4" step="0.05"></div>
     <div class="lp-row"><div class="lp-lab"><span>Рассеянный свет</span><b id="lpHemiV"></b></div><input id="lpHemi" type="range" min="0" max="4" step="0.05"></div>
-    <div class="lp-row"><div class="lp-lab"><span>Направление</span><b id="lpAzV"></b></div><input id="lpAz" type="range" min="0" max="360" step="1"></div>
-    <div class="lp-row"><div class="lp-lab"><span>Высота солнца</span><b id="lpElV"></b></div><input id="lpEl" type="range" min="8" max="88" step="1"></div>
-    <div class="lp-row"><div class="lp-lab"><span>Тень на земле</span><b id="lpGndV"></b></div><input id="lpGnd" type="range" min="0" max="0.6" step="0.01"></div>
-    <label class="lp-check"><input id="lpShadows" type="checkbox" checked> Тени</label>
+    <div class="lp-row flat-hide"><div class="lp-lab"><span>Направление</span><b id="lpAzV"></b></div><input id="lpAz" type="range" min="0" max="360" step="1"></div>
+    <div class="lp-row flat-hide"><div class="lp-lab"><span>Высота солнца</span><b id="lpElV"></b></div><input id="lpEl" type="range" min="8" max="88" step="1"></div>
+    <div class="lp-row flat-hide"><div class="lp-lab"><span>Тень на земле</span><b id="lpGndV"></b></div><input id="lpGnd" type="range" min="0" max="0.6" step="0.01"></div>
+    <label class="lp-check flat-hide"><input id="lpShadows" type="checkbox" checked> Тени</label>
     <label class="lp-check"><input id="lpAuto" type="checkbox" checked> Авто по виду</label>
+    <label class="lp-check"><input id="lpRoofs" type="checkbox" checked> Крыши и перекрытия</label>
     <label class="lp-check" title="По умолчанию SVG — векторные линии. Эта галочка вставит в SVG 3D-картинку целиком."><input id="lpSvgRaster" type="checkbox"> SVG с 3D-рендером</label>
   </div>
   <button class="lp-reset" id="lpReset" type="button">Сбросить</button>
@@ -214,11 +200,13 @@ const BLD_DEFAULT = '#EEF1E6';
 const INK_DEFAULT = '#1A1613';
 const SOFT_DEFAULT = '#8A7E6E';
 const D = { bg: BG_DEFAULT, bld: BLD_DEFAULT };
-let mode = '3d';
+let mode = '3d';            // '3d' | 'flat' | 'bp'
+let flatBlend = 0;          // плавный переход 3D ↔ Flat
 let inkHex = INK_DEFAULT, softHex = SOFT_DEFAULT;
 let autoInk = true;
 let lineThickness = 1.0;
 let lineStyle = 'sketch';
+const LEVEL_TINT_STEP = 0.022;  // шаг тона между ярусами в Flat
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(D.bg);
@@ -302,8 +290,12 @@ const bpMat = new THREE.MeshBasicMaterial({
   color: D.bld, side: THREE.DoubleSide, clippingPlanes: clipPlanes,
   polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2,
 });
+// Flat — графичный режим: равномерный цвет без направленного света и теней.
+const flatMat = new THREE.MeshBasicMaterial({
+  color: D.bld, side: THREE.DoubleSide, clippingPlanes: clipPlanes,
+});
 
-function solid(geo, mat, cap, x, y, z, parent) {
+function solid(geo, mat, cap, x, y, z, parent, level = null) {
   const m = new THREE.Mesh(geo, mat);
   m.position.set(x, y, z);
   m.castShadow = true; m.receiveShadow = true;
@@ -314,14 +306,13 @@ function solid(geo, mat, cap, x, y, z, parent) {
     c.position.set(x, y, z);
     parent.add(c);
   }
-  solids.push({ mesh: m, std: mat, cap: c });
+  solids.push({ mesh: m, std: mat, cap: c, level });
   return m;
 }
-function box(w, h, d, x, y, z, parent, mat, cap) {
-  return solid(new THREE.BoxGeometry(w, h, d), mat, cap, x, y, z, parent);
+function box(w, h, d, x, y, z, parent, mat, cap, level = null) {
+  return solid(new THREE.BoxGeometry(w, h, d), mat, cap, x, y, z, parent, level);
 }
 
-/* ===== Линии (чертёж) ===== */
 function sketchLineTo(arr, p1, p2) {
   if (!arr.cleanData) arr.cleanData = [];
   const dist = p1.distanceTo(p2);
@@ -459,7 +450,7 @@ function layoutWalls(i, ov, fn) {
   });
 }
 
-function addSlabMesh(parent, i, yCenter, mat, cap) {
+function addSlabMesh(parent, i, yCenter, mat, cap, level = null) {
   const outerR = i * STEP - WALL_T / 2;
   const innerR = (i - 1) * STEP + WALL_T / 2;
   if (outerR - innerR <= 0.05) return;
@@ -467,10 +458,10 @@ function addSlabMesh(parent, i, yCenter, mat, cap) {
   const pw = outerR - innerR;
   const spanX = outerR * 2;
   const spanZ = innerR * 2 + 2 * OV;
-  box(spanX, SLAB_T, pw, 0, yCenter, -pc, parent, mat, cap);
-  box(spanX, SLAB_T, pw, 0, yCenter,  pc, parent, mat, cap);
-  box(pw, SLAB_T, spanZ, -pc, yCenter, 0, parent, mat, cap);
-  box(pw, SLAB_T, spanZ,  pc, yCenter, 0, parent, mat, cap);
+  box(spanX, SLAB_T, pw, 0, yCenter, -pc, parent, mat, cap, level);
+  box(spanX, SLAB_T, pw, 0, yCenter,  pc, parent, mat, cap, level);
+  box(pw, SLAB_T, spanZ, -pc, yCenter, 0, parent, mat, cap, level);
+  box(pw, SLAB_T, spanZ,  pc, yCenter, 0, parent, mat, cap, level);
 }
 function addSlabOutline(i, yCenter, arr) {
   const outerR = i * STEP - WALL_T / 2;
@@ -505,13 +496,20 @@ for (let i = 1; i <= 6; i++) {
   const sMat = stdMat('slab', { transparent: true });
   const sCap = capMat({ transparent: true });
 
+  // Отдельный плоский материал для каждого яруса в режиме Flat:
+  // лёгкий градиент тона даёт видимые «слои» при взгляде сверху.
+  const lvlFlatMat = new THREE.MeshBasicMaterial({
+    color: tint(D.bld, -(i - 1) * LEVEL_TINT_STEP),
+    side: THREE.DoubleSide, clippingPlanes: clipPlanes,
+  });
+
   const half = i * STEP;
   const wallTop = floor_heights[7 - i];
   const outerR = i * STEP - WALL_T / 2, innerR = (i - 1) * STEP + WALL_T / 2;
 
-  layoutWalls(i, OV, (w, h, d, x, y, z) => box(w, h, d, x, y, z, wallG, wMat, wCap));
-  if (i !== 6) addSlabMesh(slabG, i, floor_heights[6 - i] + SLAB_T/2, sMat, sCap);
-  addSlabMesh(slabG, i, wallTop - SLAB_T/2, sMat, sCap);
+  layoutWalls(i, OV, (w, h, d, x, y, z) => box(w, h, d, x, y, z, wallG, wMat, wCap, i));
+  if (i !== 6) addSlabMesh(slabG, i, floor_heights[6 - i] + SLAB_T/2, sMat, sCap, i);
+  addSlabMesh(slabG, i, wallTop - SLAB_T/2, sMat, sCap, i);
 
   const wallB = [], slabB = [];
   layoutWalls(i, 0, (w, h, d, x, y, z) => boxEdges(w, h, d, x, y, z, wallB));
@@ -542,7 +540,7 @@ for (let i = 1; i <= 6; i++) {
     ex, ey, ez,  LABEL_X + 0.15, d0.yPos, 0,
   ], 0, 'soft', false);
 
-  levels.push({ wallG, slabG, sMat, sCap, wl1, sl1, secWall, secSlab, secLvl, leader, slabT: 1 });
+  levels.push({ wallG, slabG, sMat, sCap, wl1, sl1, secWall, secSlab, secLvl, leader, slabT: 1, flatMat: lvlFlatMat });
   state.push({ visible: true, t: 1 });
 
   const wrap = document.createElement('div');
@@ -604,6 +602,8 @@ lantern.rotation.y = Math.PI/4;
 lantern.castShadow = true;
 scene.add(lantern);
 solids.push({ mesh: lantern, std: lanternMat, cap: null });
+// Линии фонаря вынесены отдельно, чтобы их можно было скрывать вместе с «крышами».
+const lanternLinesArr = [];
 {
   const lApex = new THREE.Vector3(0, lanternBaseY + lanternH, 0);
   const lc = [
@@ -613,11 +613,12 @@ solids.push({ mesh: lantern, std: lanternMat, cap: null });
     new THREE.Vector3(-lanternHalf, lanternBaseY,  lanternHalf),
   ];
   for (let k = 0; k < 4; k++) {
-    sketchLineTo(gB, lc[k], lc[(k+1)%4]);
-    sketchLineTo(gB, lc[k], lApex);
+    sketchLineTo(lanternLinesArr, lc[k], lc[(k+1)%4]);
+    sketchLineTo(lanternLinesArr, lc[k], lApex);
   }
 }
 const gMain = mkLines(gB, 0.85, 'ink', true);
+const lanternLines = mkLines(lanternLinesArr, 0.85, 'ink', true);
 
 const secStaticArr = [], secSoftArr = [];
 secRect(secStaticArr, -baseHalf, baseHalf, 0, 0.04);
@@ -647,11 +648,9 @@ function applyTheme() {
   const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
   const dark = lum < 0.45;
 
-  /* Цвета UI всегда автоподбираются по фону — кнопки всегда читаемы */
   const uiInk  = dark ? '#F2EFE8' : '#1A1613';
   const uiSoft = dark ? '#B7AE9F' : '#8A7E6E';
 
-  /* Цвета линий сцены: авто (совпадают с UI) или выбраны пользователем */
   if (autoInk) {
     inkHex = uiInk;
     softHex = uiSoft;
@@ -666,13 +665,9 @@ function applyTheme() {
   const root = document.documentElement.style;
   root.setProperty('--paper', D.bg);
   root.setProperty('--paper-rgb', r + ',' + g + ',' + b);
-
-  /* UI — фиксированный контраст к фону, не зависит от цвета линий */
   root.setProperty('--ui-ink', uiInk);
   root.setProperty('--ui-ink-rgb', ur + ',' + ug + ',' + ub);
   root.setProperty('--ui-ink-soft', uiSoft);
-
-  /* Сцена — только линии и подписи Diltz */
   root.setProperty('--ink', inkHex);
   root.setProperty('--ink-rgb', ir + ',' + ig + ',' + ib);
   root.setProperty('--ink-soft', softHex);
@@ -681,31 +676,55 @@ function applyTheme() {
   softMats.forEach(m => m.color.set(softHex));
   stdRegs.forEach(({ mat, kind }) => mat.color.copy(tint(D.bld, OFFS[kind])));
   bpMat.color.set(D.bld);
+  flatMat.color.set(D.bld);
+  levels.forEach((L, idx) => {
+    if (L.flatMat) L.flatMat.color.copy(tint(D.bld, -idx * LEVEL_TINT_STEP));
+  });
 }
 
+/* ===== Режим: 3D / Flat / Чертёж ===== */
 let shadowsOn = true;
+let roofsOn = true;
+const roofsToggle = $('lpRoofs');
+roofsToggle.addEventListener('change', () => {
+  roofsOn = roofsToggle.checked;
+});
 function updateShadowVis() {
-  sun.castShadow = shadowsOn;
+  sun.castShadow = shadowsOn && mode === '3d';
   shadowCatcher.visible = shadowsOn && mode === '3d';
 }
 function setMode(m) {
   mode = m;
   const is3d = m === '3d';
-  solids.forEach(({ mesh, std, cap }) => {
-    mesh.material = is3d ? std : bpMat;
+  const isFlat = m === 'flat';
+  const isBp = m === 'bp';
+  const showSolid = is3d || isFlat;
+
+  // В Flat стены не утоньшаются: тонкие панели давали зазоры с перекрытиями
+  // и на углах. Графичность обеспечивает равномерный материал без света,
+  // а «слои» сверху читаются благодаря тону на ярус.
+  solids.forEach(({ mesh, std, cap, level }) => {
+    if (isFlat) {
+      mesh.material = (level != null && levels[level - 1]) ? levels[level - 1].flatMat : flatMat;
+    } else {
+      mesh.material = showSolid ? std : bpMat;
+    }
     mesh.castShadow = is3d;
     mesh.receiveShadow = is3d;
-    if (cap) cap.visible = is3d;
+    if (cap) cap.visible = showSolid && !isFlat;
   });
-  hemi.visible = is3d;
-  sun.visible = is3d;
+  hemi.visible = showSolid;
+  sun.visible = is3d;           // Flat использует равномерный цвет без направленного света
   updateShadowVis();
-  document.body.classList.toggle('bp-mode', !is3d);
+
+  document.body.classList.toggle('bp-mode', isBp);
+  document.body.classList.toggle('flat-mode', isFlat);
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
-  $('lpLight').style.display = is3d ? '' : 'none';
+  $('lpLight').style.display = showSolid ? '' : 'none';
   setView(currentView, true);
 }
 
+/* ===== Этапы / текст ===== */
 let textHidden = false;
 const textToggle = $('textToggle');
 textToggle.addEventListener('click', () => {
@@ -734,6 +753,7 @@ document.querySelectorAll('.module-btn').forEach(btn => {
 });
 applyStage(6);
 
+/* ===== Виды ===== */
 const VIEW_BASE = {
   axon:   { pos: new THREE.Vector3(13, 11.5, 18), target: new THREE.Vector3(0, 2.0, 0), fov: 34, enableRotate: true,  clip: false, flat: false },
   facade: { pos: new THREE.Vector3(0, 1.95, 24),  target: new THREE.Vector3(0, 1.95, 0), fov: 24, enableRotate: false, clip: false, flat: true },
@@ -742,7 +762,7 @@ const VIEW_BASE = {
 const SECTION_3D = { pos: new THREE.Vector3(4.5, 4.2, 17), target: new THREE.Vector3(0, 1.7, -0.6), fov: 28, enableRotate: true,  clip: true, flat: false };
 const SECTION_BP = { pos: new THREE.Vector3(0, 1.95, 24),  target: new THREE.Vector3(0, 1.95, 0),  fov: 24, enableRotate: false, clip: true, flat: true };
 function getView(name) {
-  if (name === 'section') return mode === '3d' ? SECTION_3D : SECTION_BP;
+  if (name === 'section') return mode === 'bp' ? SECTION_BP : SECTION_3D;
   return VIEW_BASE[name];
 }
 
@@ -769,7 +789,7 @@ function setView(name, force) {
   targetFov = v.fov;
   transitioning = true;
   clipEnabled = v.clip;
-  if (autoLight && mode === '3d') { Object.assign(lightTarget, name === 'top' ? LIGHT_TOP : LIGHT_DEFAULT); syncLightUI(); }
+  if (autoLight && mode !== 'bp') { Object.assign(lightTarget, name === 'top' ? LIGHT_TOP : LIGHT_DEFAULT); syncLightUI(); }
   document.querySelectorAll('.view-btn[data-view]').forEach(b => {
     b.classList.toggle('active', b.dataset.view === name);
   });
@@ -783,6 +803,7 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.addEventListener('click', () => { if (btn.dataset.mode !== mode) setMode(btn.dataset.mode); });
 });
 
+/* ===== Панель настроек ===== */
 const lightBtn = $('lightBtn'), lightPanel = $('lightPanel');
 const ui = {
   sun:  [$('lpSun'),  $('lpSunV'),  v => v.toFixed(2)],
@@ -832,7 +853,6 @@ setLineThickness(1);
 $('cBg').addEventListener('input', e => { D.bg = e.target.value; applyTheme(); });
 $('cBld').addEventListener('input', e => { D.bld = e.target.value; applyTheme(); });
 
-/* Ручной выбор цвета линий — выключает авто-режим */
 $('cInk').addEventListener('input', e => {
   inkHex = e.target.value;
   autoInk = false;
@@ -870,49 +890,55 @@ lightBtn.addEventListener('click', () => {
 });
 syncLightUI();
 
+/* ===== Снимок сцены ===== */
 function renderComposite(prMin = 2) {
   const oldPR = renderer.getPixelRatio();
   const pr = Math.max(prMin, oldPR);
-  renderer.setPixelRatio(pr);
-  renderer.setSize(innerWidth, innerHeight);
-  renderer.render(scene, camera);
+  let out;
+  try {
+    renderer.setPixelRatio(pr);
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.render(scene, camera);
 
-  const w = renderer.domElement.width, h = renderer.domElement.height;
-  const out = document.createElement('canvas');
-  out.width = w; out.height = h;
-  const ctx = out.getContext('2d');
-  ctx.drawImage(renderer.domElement, 0, 0);
+    const w = renderer.domElement.width, h = renderer.domElement.height;
+    out = document.createElement('canvas');
+    out.width = w; out.height = h;
+    const ctx = out.getContext('2d');
+    if (!ctx) throw new Error('Не удалось создать 2D-контекст для экспорта изображения.');
+    ctx.drawImage(renderer.domElement, 0, 0);
 
-  if (!textHidden) {
-    const [pr_, pg_, pb_] = hexToRgb(D.bg);
-    const v = new THREE.Vector3();
-    diltzLabels.forEach(({ element, pos }) => {
-      const o = parseFloat(element.style.opacity) || 0;
-      if (o < 0.05) return;
-      v.copy(pos).project(camera);
-      if (v.z > 1) return;
-      const x = (v.x * 0.5 + 0.5) * w, y = (-v.y * 0.5 + 0.5) * h;
-      const fs = 13 * pr;
-      ctx.save();
-      ctx.globalAlpha = o;
-      ctx.font = '600 ' + fs + 'px Manrope, "Helvetica Neue", Arial, sans-serif';
-      if ('letterSpacing' in ctx) ctx.letterSpacing = (0.05 * fs) + 'px';
-      const txt = element.textContent;
-      const tw = ctx.measureText(txt).width;
-      const padX = 10 * pr, padY = 3 * pr;
-      ctx.fillStyle = 'rgba(' + pr_ + ',' + pg_ + ',' + pb_ + ',0.9)';
-      ctx.fillRect(x - tw - 2 * padX, y - fs / 2 - padY, tw + 2 * padX, fs + 2 * padY);
-      ctx.fillStyle = inkHex;
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(txt, x - padX, y);
-      ctx.restore();
-    });
+    if (!textHidden) {
+      const [pr_, pg_, pb_] = hexToRgb(D.bg);
+      const v = new THREE.Vector3();
+      diltzLabels.forEach(({ element, pos }) => {
+        const o = parseFloat(element.style.opacity) || 0;
+        if (o < 0.05) return;
+        v.copy(pos).project(camera);
+        if (v.z > 1) return;
+        const x = (v.x * 0.5 + 0.5) * w, y = (-v.y * 0.5 + 0.5) * h;
+        const fs = 13 * pr;
+        ctx.save();
+        ctx.globalAlpha = o;
+        ctx.font = '600 ' + fs + 'px Manrope, "Helvetica Neue", Arial, sans-serif';
+        if ('letterSpacing' in ctx) ctx.letterSpacing = (0.05 * fs) + 'px';
+        const txt = element.textContent;
+        const tw = ctx.measureText(txt).width;
+        const padX = 10 * pr, padY = 3 * pr;
+        ctx.fillStyle = 'rgba(' + pr_ + ',' + pg_ + ',' + pb_ + ',0.9)';
+        ctx.fillRect(x - tw - 2 * padX, y - fs / 2 - padY, tw + 2 * padX, fs + 2 * padY);
+        ctx.fillStyle = inkHex;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(txt, x - padX, y);
+        ctx.restore();
+      });
+    }
+    return out;
+  } finally {
+    // Восстанавливаем обычный размер WebGL-canvas даже при ошибке экспорта.
+    renderer.setPixelRatio(oldPR);
+    renderer.setSize(innerWidth, innerHeight);
   }
-
-  renderer.setPixelRatio(oldPR);
-  renderer.setSize(innerWidth, innerHeight);
-  return out;
 }
 function stamp() {
   const t = new Date(), p = n => String(n).padStart(2, '0');
@@ -920,12 +946,14 @@ function stamp() {
 }
 function downloadBlob(blob, name) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
+  a.href = url;
   a.download = name;
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  // Сохраняем URL отдельно: не зависим от состояния удалённого DOM-элемента.
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 function flash() {
   const fl = $('shotFlash');
@@ -933,10 +961,12 @@ function flash() {
 }
 function takeShot() {
   const out = renderComposite();
-  out.toBlob(blob => { if (blob) downloadBlob(blob, 'museum-' + (mode === '3d' ? '3d-' : 'plan-') + stamp() + '.png'); }, 'image/png');
+  const prefix = mode === '3d' ? '3d-' : mode === 'flat' ? 'flat-' : 'plan-';
+  out.toBlob(blob => { if (blob) downloadBlob(blob, 'museum-' + prefix + stamp() + '.png'); }, 'image/png');
   flash();
 }
 
+/* ===== SVG ===== */
 const depthMat = new THREE.ShaderMaterial({
   side: THREE.DoubleSide, clipping: true, clippingPlanes: clipPlanes,
   vertexShader: `
@@ -1010,6 +1040,7 @@ function vectorBody(W, H) {
       if (L.slabT > 0.01) src.push({ o: L.sl1, g: 'main', yFix: mode === '3d' ? L.slabG.position.y : 0 });
     });
     src.push({ o: gMain, g: 'main' });
+    if (roofsOn) src.push({ o: lanternLines, g: 'main' });
   }
 
   const groups = { main: { parts: [], last: null }, soft: { parts: [], last: null }, faint: { parts: [], last: null } };
@@ -1092,7 +1123,7 @@ function vectorBody(W, H) {
 
 function exportSVG() {
   const W = Math.round(innerWidth), H = Math.round(innerHeight);
-  const raster = mode === '3d' && $('lpSvgRaster').checked;
+  const raster = mode !== 'bp' && $('lpSvgRaster').checked;
   let inner;
   if (raster) {
     const url = renderComposite(2).toDataURL('image/png');
@@ -1109,11 +1140,15 @@ function exportSVG() {
 $('svgBtn').addEventListener('click', exportSVG);
 $('shotBtn').addEventListener('click', takeShot);
 
+/* ===== Анимация ===== */
 let secT = 0;
 let labT = 0;
 function animate() {
   requestAnimationFrame(animate);
   const is3d = mode === '3d';
+  const isFlat = mode === 'flat';
+  const isBp = mode === 'bp';
+  const isSolid = is3d || isFlat;
 
   if (transitioning) {
     camera.position.lerp(targetPos, 0.08);
@@ -1129,17 +1164,23 @@ function animate() {
     }
   }
 
+  /* Плавный переход к стилю Flat: солнце гаснет, hemi разгорается */
+  const flatGoal = isFlat ? 1 : 0;
+  flatBlend += (flatGoal - flatBlend) * 0.15;
+  if (Math.abs(flatBlend - flatGoal) < 0.005) flatBlend = flatGoal;
+
   for (const k of ['az', 'el', 'sunI', 'hemiI']) lightCur[k] += (lightTarget[k] - lightCur[k]) * 0.12;
   const ar = lightCur.az * Math.PI / 180, er = lightCur.el * Math.PI / 180;
   sun.position.set(18 * Math.cos(er) * Math.sin(ar), 18 * Math.sin(er), 18 * Math.cos(er) * Math.cos(ar));
-  sun.intensity = lightCur.sunI;
-  hemi.intensity = lightCur.hemiI;
+  sun.intensity = lightCur.sunI * (1 - flatBlend);
+  hemi.intensity = lightCur.hemiI * (1 + flatBlend * 0.8);
+  if (isFlat) { sun.visible = false; shadowCatcher.visible = false; }
 
   const curClip = clipPlane.constant;
   const tgtClip = clipEnabled ? 0 : 100;
   clipPlane.constant = curClip + (tgtClip - curClip) * 0.12;
 
-  const secGoal = (!is3d && currentView === 'section') ? 1 : 0;
+  const secGoal = (isBp && currentView === 'section') ? 1 : 0;
   secT += (secGoal - secT) * 0.12;
   if (Math.abs(secT - secGoal) < 0.005) secT = secGoal;
   const k3 = 1 - secT;
@@ -1153,32 +1194,40 @@ function animate() {
     const slabT = Math.max(0, Math.min(1, (s.t - 0.5) / 0.5));
     L.slabT = slabT;
 
-    L.wallG.visible = s.t > 0.01 && (is3d || k3 > 0.01);
+    /* Тела видны во всех режимах, в bp — через bpMat */
+    L.wallG.visible = s.t > 0.01 && (isSolid || k3 > 0.01);
     L.wallG.scale.y = Math.max(0.001, s.t);
-    L.wl1.visible = !is3d;
-    L.wl1.material.opacity = 0.85 * s.t * k3;
-
-    L.slabG.visible = slabT > 0.01 && (is3d || k3 > 0.01);
+    L.slabG.visible = roofsOn && slabT > 0.01 && (isSolid || k3 > 0.01);
     L.slabG.position.y = is3d ? (1 - slabT) * 0.5 : 0;
-    L.sl1.visible = !is3d;
+
+    /* Штриховые линии — только в чертеже */
+    L.wl1.visible = isBp;
+    L.wl1.material.opacity = 0.85 * s.t * k3;
+    L.sl1.visible = isBp && roofsOn;
     L.sl1.material.opacity = 0.85 * slabT * k3;
     L.sMat.opacity = slabT;
     L.sCap.opacity = slabT;
 
-    L.secWall.visible = !is3d && secT > 0.01 && s.t > 0.01;
+    /* Линии разреза — только в чертеже */
+    L.secWall.visible = isBp && secT > 0.01 && s.t > 0.01;
     L.secWall.scale.y = Math.max(0.001, s.t);
     L.secWall.material.opacity = 0.85 * secT * s.t;
-    L.secSlab.visible = !is3d && secT > 0.01 && slabT > 0.01;
+    L.secSlab.visible = roofsOn && isBp && secT > 0.01 && slabT > 0.01;
     L.secSlab.material.opacity = 0.85 * secT * slabT;
-    L.secLvl.visible = !is3d && secT > 0.01 && slabT > 0.01;
+    L.secLvl.visible = roofsOn && isBp && secT > 0.01 && slabT > 0.01;
     L.secLvl.material.opacity = 0.7 * secT * slabT;
   });
 
-  gMain.visible = !is3d && k3 > 0.01;
+  gMain.visible = isBp && k3 > 0.01;
   gMain.material.opacity = 0.85 * k3;
-  secStatic.visible = secSoft.visible = !is3d && secT > 0.01;
+  secStatic.visible = secSoft.visible = isBp && secT > 0.01;
   secStatic.material.opacity = 0.85 * secT;
   secSoft.material.opacity = 0.3 * secT;
+
+  /* Фонарь-пирамидка — часть «крыш»: скрывается вместе с перекрытиями. */
+  lantern.visible = roofsOn && (isSolid || k3 > 0.01);
+  lanternLines.visible = isBp && k3 > 0.01 && roofsOn;
+  lanternLines.material.opacity = 0.85 * k3;
 
   labT += ((currentView === 'section' ? 1 : 0) - labT) * 0.12;
   if (Math.abs(labT - (currentView === 'section' ? 1 : 0)) < 0.005) labT = currentView === 'section' ? 1 : 0;
@@ -1186,12 +1235,14 @@ function animate() {
   let showFromCam = (camera.position.x < 0 || camera.position.z > 0) ? 1 : 0;
   if (currentView === 'top') showFromCam = 0;
 
+  /* Подписи показываем в 3D и Flat в разрезе */
+  const showLeaders = isSolid;
   diltzLabels.forEach(({ ring, element }) => {
     const L = levels[ring - 1];
     const o = textHidden ? 0 : L.slabT * showFromCam * labT;
     element.style.opacity = String(o);
-    L.leader.visible = is3d;
-    L.leader.material.opacity = is3d ? 0.6 * o : 0;
+    L.leader.visible = showLeaders;
+    L.leader.material.opacity = showLeaders ? 0.6 * o : 0;
   });
 
   controls.update();
