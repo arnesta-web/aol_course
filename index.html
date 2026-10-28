@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Музей безграничного роста</title>
+<title>Архитектоника лидера · Музей безграничного роста</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F2F5EC;
-    --ui-ink:#1A1613; --ui-ink-rgb:26,22,19; --ui-ink-soft:#8A7E6E;
-    --ink:#1A1613; --ink-rgb:26,22,19; --ink-soft:#8A7E6E;
+    --ui-ink:#202020; --ui-ink-rgb:32,32,32; --ui-ink-soft:#B9BDBF;
+    --ink:#202020; --ink-rgb:32,32,32; --ink-soft:#B9BDBF;
     --paper-rgb:242,245,236;
   }
   *{box-sizing:border-box}
@@ -31,25 +31,21 @@
   .build { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 1000; width: 320px; max-width: calc(100vw - 60px); }
   .build-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 9px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ui-ink-soft); margin-bottom: 8px; }
   .build-label strong { font-weight: 700; color: var(--ui-ink); font-variant-numeric: tabular-nums; letter-spacing: 0.12em; }
-  #stageRange { display: block; width: 100%; height: 14px; appearance: none; background: transparent; cursor: pointer; }
-  #stageRange::-webkit-slider-runnable-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); border: 0; }
-  #stageRange::-moz-range-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); border: 0; }
-  #stageRange::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; margin-top: -5.5px; background: var(--paper); border: 1px solid var(--ui-ink); box-shadow: 0 0 0 1px var(--paper) inset; cursor: grab; }
-  #stageRange::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--paper); border: 1px solid var(--ui-ink); cursor: grab; }
+  #stageRange, #growthRange { display: block; width: 100%; height: 14px; appearance: none; background: transparent; cursor: pointer; }
+  #stageRange::-webkit-slider-runnable-track, #growthRange::-webkit-slider-runnable-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); border: 0; }
+  #stageRange::-moz-range-track, #growthRange::-moz-range-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); border: 0; }
+  #stageRange::-webkit-slider-thumb, #growthRange::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; margin-top: -5.5px; background: var(--paper); border: 1px solid var(--ui-ink); box-shadow: 0 0 0 1px var(--paper) inset; cursor: grab; }
+  #stageRange::-moz-range-thumb, #growthRange::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--paper); border: 1px solid var(--ui-ink); cursor: grab; }
   #hint { position: fixed; bottom: 14px; left: 30px; font-size: 9px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--ui-ink-soft); opacity: .65; pointer-events: none; z-index: 1000; }
-  .diltz-wrap { width: 0; height: 0; position: relative; pointer-events: none; }
-  .diltz-lbl { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-family: "Manrope", sans-serif; font-weight: 600; color: var(--ink); background: rgba(var(--paper-rgb), 0.9); padding: 3px 10px 3px; white-space: nowrap; line-height: 1; letter-spacing: 0.05em; text-align: right; font-variant-numeric: tabular-nums; }
+  
   .text-toggle { position: fixed; right: 30px; bottom: 28px; z-index: 1001; width: 38px; height: 38px; border-radius: 50%; padding: 0; display: grid; place-items: center; background: rgba(var(--paper-rgb),.85); border: 1px solid rgba(var(--ui-ink-rgb),.22); color: var(--ui-ink); cursor: pointer; backdrop-filter: blur(8px); opacity: .7; transition: opacity .25s, background .25s; }
   .text-toggle:hover { opacity: 1; background: var(--paper); }
   .text-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
-  .text-toggle .slash { display: none; }
-  body.notext .text-toggle .slash { display: block; }
   #lightBtn { right: 76px; }
   #shotBtn { right: 122px; }
   #svgBtn { right: 168px; }
   .light-panel { position: fixed; right: 30px; bottom: 76px; z-index: 1001; width: 260px; padding: 14px 16px 12px; background: rgba(var(--paper-rgb),.94); border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 14px; backdrop-filter: blur(10px); display: none; max-height: calc(100vh - 120px); overflow-y: auto; }
   .light-panel.open { display: block; }
-  body.notext .light-panel { display: none; }
   .lp-title { font-size: 9px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--ui-ink-soft); padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(var(--ui-ink-rgb),.18); }
   .lp-row { margin-bottom: 8px; }
   .lp-lab { display: flex; justify-content: space-between; font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ui-ink-soft); margin-bottom: 2px; }
@@ -85,7 +81,6 @@
   .shot-flash.go { animation: shotflash .35s ease-out; }
   @keyframes shotflash { 0% { opacity: .75; } 100% { opacity: 0; } }
   .views, .modes, #hint, .build-label { transition: opacity .35s; }
-  body.notext .views, body.notext .modes, body.notext #hint, body.notext .build-label { opacity: 0 !important; pointer-events: none; }
   @media (max-width: 820px) {
     .text-toggle { right: 20px; bottom: 20px; }
     #lightBtn { right: 66px; }
@@ -97,16 +92,21 @@
     .view-btn { padding: 7px 11px; font-size: 8px; letter-spacing: 0.14em; }
     .build { bottom: 110px; }
     #hint { display: none; }
-    .diltz-lbl { font-size: 10px !important; padding: 2px 6px; }
   }
+  .models { position: fixed; top: 102px; left: 30px; z-index: 1000; display: flex; gap: 6px; }
+  .build.growth { bottom: 92px; }
+  .legend { position: fixed; right: 30px; top: 26px; z-index: 1000; width: 250px; padding: 14px 16px; background: rgba(var(--paper-rgb),.9); border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 14px; backdrop-filter: blur(8px); display: none; font-size: 11px; line-height: 1.5; }
+  .legend h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; }
+  .legend .lg-t { font-size: 9px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--ui-ink-soft); margin: 10px 0 4px; }
+  .legend .r { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; border: 1px solid rgba(var(--ui-ink-rgb),.35); flex: none; }
 </style>
 </head>
 <body>
 <div class="views" role="group" aria-label="Вид">
   <button class="view-btn active" data-view="axon">аксонометрия</button>
-  <button class="view-btn" data-view="facade">фасад</button>
-  <button class="view-btn" data-view="top">сверху</button>
-  <button class="view-btn" data-view="section">разрез</button>
+  <button class="view-btn" data-view="top">сверху (план)</button>
+  <button class="view-btn" data-view="facade">фасад (уровни)</button>
 </div>
 <div class="modes" role="group" aria-label="Режим">
   <button class="view-btn mode-btn active" data-mode="3d">3D</button>
@@ -117,28 +117,40 @@
   <div class="build-label"><span>Собрано</span><strong id="stageValue">06 / 06</strong></div>
   <input id="stageRange" type="range" min="1" max="6" step="1" value="6" aria-label="Сколько витков показать">
 </div>
+<div class="models" role="group" aria-label="Модель">
+  <button class="view-btn model-btn active" data-model="museum">Музей роста</button>
+</div>
+<div class="build growth">
+  <div class="build-label"><span>Уровень роста</span><strong id="growthValue">06 / 06</strong></div>
+  <input id="growthRange" type="range" min="1" max="6" step="1" value="6" aria-label="Уровень роста (этажность)">
+</div>
+<div class="legend" id="legend"></div>
 <div id="hint">drag · scroll</div>
-<button class="text-toggle" id="textToggle" type="button" aria-label="Скрыть / показать весь текст" aria-pressed="false" title="Скрыть / показать текст">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7V5h16v2M12 5v14M9 19h6"/><path class="slash" d="M3 21L21 3"/></svg>
-</button>
 <div class="shot-flash" id="shotFlash"></div>
-<button class="text-toggle" id="svgBtn" type="button" aria-label="Скачать SVG" title="Скачать SVG">
+
+<button class="text-toggle" id="svgBtn" type="button" aria-label="Скачать SVG" title="Скачать настоящий векторный SVG">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></svg>
 </button>
-<button class="text-toggle" id="shotBtn" type="button" aria-label="Сохранить снимок сцены" title="Сохранить снимок (PNG)">
+<button class="text-toggle" id="shotBtn" type="button" aria-label="Сохранить снимок" title="Сохранить снимок (PNG)">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg>
 </button>
-<button class="text-toggle" id="lightBtn" type="button" aria-label="Настройки: цвета и освещение" aria-expanded="false" title="Цвета и освещение">
+<button class="text-toggle" id="lightBtn" type="button" aria-label="Настройки" title="Цвета и освещение">
   <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/></svg>
 </button>
+
 <div class="light-panel" id="lightPanel" role="group" aria-label="Настройки">
   <div class="lp-title">Настройки</div>
   <div class="lp-colors">
     <label class="lp-color"><span>Фон</span><input id="cBg" type="color" value="#F2F5EC"></label>
-    <label class="lp-color"><span>Здание</span><input id="cBld" type="color" value="#EEF1E6"></label>
-    <label class="lp-color"><span>Линии</span><input id="cInk" type="color" value="#1A1613"></label>
-    <label class="lp-color"><span>Вспом.</span><input id="cSoft" type="color" value="#8A7E6E"></label>
+    <label class="lp-color"><span>Здание</span><input id="cBld" type="color" value="#FFFFFF"></label>
+    <label class="lp-color"><span>Круг</span><input id="cDot" type="color" value="#F8F4C0"></label>
+    <label class="lp-color"><span>Опоры</span><input id="cSupports" type="color" value="#B9BDBF"></label>
+    <label class="lp-color"><span>Линии</span><input id="cInk" type="color" value="#202020"></label>
+    <label class="lp-color"><span>Вспом.</span><input id="cSoft" type="color" value="#B9BDBF"></label>
   </div>
+  <label class="lp-check"><input id="lpWalls" type="checkbox"> Стены под платформами</label>
+  <label class="lp-check"><input id="lpFloor" type="checkbox"> Пол здания</label>
+  <label class="lp-check"><input id="lpStairs" type="checkbox" checked> Лесенки (аксонометрия)</label>
   <label class="lp-check"><input id="lpInkAuto" type="checkbox" checked> Цвет линий авто по фону</label>
   <div class="lp-sep"></div>
   <div class="lp-row">
@@ -156,14 +168,18 @@
   <div class="lp-row">
     <div class="lp-lab"><span>Детализация чертежа</span></div>
     <div class="lp-style-group">
-      <button class="lp-style-btn active" data-draw="full" type="button" title="Стены с толщиной: все рёбра, все кольца перекрытий">Полная</button>
-      <button class="lp-style-btn" data-draw="medium" type="button" title="Стены: верх + вертикали; перекрытия: внешнее кольцо">Средняя</button>
-      <button class="lp-style-btn" data-draw="min" type="button" title="Только верхние контуры стен и перекрытий">Минимум</button>
+      <button class="lp-style-btn active" data-draw="full" type="button" title="Все рёбра">Полная</button>
+      <button class="lp-style-btn" data-draw="medium" type="button" title="Верх + вертикали">Средняя</button>
+      <button class="lp-style-btn" data-draw="min" type="button" title="Только контуры">Минимум</button>
     </div>
   </div>
   <div class="lp-row">
     <div class="lp-lab"><span>Толщина линии</span><b id="lpLineV">1.0</b></div>
     <input id="lpLine" type="range" min="0.5" max="4" step="0.1" value="1">
+  </div>
+  <div class="lp-row">
+    <div class="lp-lab"><span>Толщина стен</span><b id="lpWallV">0.16</b></div>
+    <input id="lpWall" type="range" min="0.06" max="0.40" step="0.01" value="0.16">
   </div>
   <div class="lp-row">
     <div class="lp-lab"><span>Стиль линий</span></div>
@@ -178,12 +194,8 @@
     <div class="lp-row"><div class="lp-lab"><span>Рассеянный свет</span><b id="lpHemiV"></b></div><input id="lpHemi" type="range" min="0" max="4" step="0.05"></div>
     <div class="lp-row flat-hide"><div class="lp-lab"><span>Направление</span><b id="lpAzV"></b></div><input id="lpAz" type="range" min="0" max="360" step="1"></div>
     <div class="lp-row flat-hide"><div class="lp-lab"><span>Высота солнца</span><b id="lpElV"></b></div><input id="lpEl" type="range" min="8" max="88" step="1"></div>
-    <div class="lp-row flat-hide"><div class="lp-lab"><span>Тень на земле</span><b id="lpGndV"></b></div><input id="lpGnd" type="range" min="0" max="0.6" step="0.01"></div>
     <label class="lp-check flat-hide"><input id="lpShadows" type="checkbox" checked> Тени</label>
     <label class="lp-check"><input id="lpAuto" type="checkbox" checked> Авто по виду</label>
-    <label class="lp-check"><input id="lpRoofs" type="checkbox" checked> Крыши и перекрытия</label>
-    <label class="lp-check"><input id="lpDoors" type="checkbox"> Двери</label>
-    <label class="lp-check" title="Для 3D: включит в SVG растровый рендер вместо векторных линий."><input id="lpSvgRaster" type="checkbox"> SVG с 3D-рендером</label>
   </div>
   <button class="lp-reset" id="lpReset" type="button">Сбросить</button>
 </div>
@@ -197,66 +209,58 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
 const $ = id => document.getElementById(id);
 
-/* ===== Тема / режим ===== */
+/* ===== Константы темы ===== */
 const BG_DEFAULT = '#F2F5EC';
-const BLD_DEFAULT = '#EEF1E6';
-const INK_DEFAULT = '#1A1613';
-const SOFT_DEFAULT = '#8A7E6E';
+const BLD_DEFAULT = '#FFFFFF';
+const INK_DEFAULT = '#202020';
+const SOFT_DEFAULT = '#B9BDBF';
+const DOT_DEFAULT = '#F8F4C0';
+const SUPPORT_DEFAULT = '#B9BDBF';
+const GROWTH_DEFAULT = '#7C7085';
 const D = { bg: BG_DEFAULT, bld: BLD_DEFAULT };
+let dotHex = DOT_DEFAULT;
+let supportHex = SUPPORT_DEFAULT;
 let mode = '3d';
 let flatBlend = 0;
 let inkHex = INK_DEFAULT, softHex = SOFT_DEFAULT;
 let autoInk = true;
 let lineThickness = 1.0;
 let lineStyle = 'sketch';
-let drawLevel = 'full';   // 'full' | 'medium' | 'min'
-const LEVEL_TINT_STEP = 0.022;
+let drawLevel = 'full';
 const levelColors = [null, null, null, null, null, null];
-let doorsOn = false;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(D.bg);
 
-const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 0.1, 500);
-camera.position.set(13, 11.5, 18);
-camera.lookAt(0, 2.0, 0);
+const camera = new THREE.PerspectiveCamera(32, innerWidth/innerHeight, 0.5, 200);
+camera.position.set(12, 9, 15);
+camera.lookAt(0, 2, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.localClippingEnabled = true;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-const labelRenderer = new CSS2DRenderer();
-labelRenderer.setSize(innerWidth, innerHeight);
-labelRenderer.domElement.style.position = 'fixed';
-labelRenderer.domElement.style.top = '0';
-labelRenderer.domElement.style.left = '0';
-labelRenderer.domElement.style.pointerEvents = 'none';
-labelRenderer.domElement.style.zIndex = '5';
-document.body.appendChild(labelRenderer.domElement);
-
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 2.0, 0);
+controls.target.set(0, 2, 0);
 controls.enableDamping = true;
 controls.dampingFactor = 0.07;
 controls.maxPolarAngle = Math.PI * 0.48;
 controls.minDistance = 6;
 controls.maxDistance = 45;
 
-const hemi = new THREE.HemisphereLight(0xFFFFFF, 0xF0EEE4, 2.0);
+const hemi = new THREE.HemisphereLight(0xFFFFFF, 0xB9BDBF, 2.0);
 scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xFFF8EC, 1.8);
+const sun = new THREE.DirectionalLight(0xFFFFFF, 1.8);
 sun.position.set(7, 15, 9);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
@@ -266,9 +270,6 @@ sun.shadow.camera.near = 1;  sun.shadow.camera.far = 40;
 sun.shadow.bias = -0.0008;
 sun.shadow.normalBias = 0.035;
 scene.add(sun);
-
-const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 100);
-const clipPlanes = [clipPlane];
 
 const stdRegs = [];
 const inkMats = [], softMats = [];
@@ -283,28 +284,28 @@ function tint(hex, off) {
   c.setHSL(hsl.h, hsl.s, Math.min(1, Math.max(0, hsl.l + off)), THREE.SRGBColorSpace);
   return c;
 }
-function stdMat(kind, extra = {}) {
+function stdMat(kind, extra = {}, level = null) {
   const m = new THREE.MeshStandardMaterial({
     color: tint(D.bld, OFFS[kind]), roughness: 0.92, metalness: 0,
-    clippingPlanes: clipPlanes, clipShadows: true, ...extra,
+    ...extra,
   });
-  stdRegs.push({ mat: m, kind });
+  stdRegs.push({ mat: m, kind, level });
   return m;
 }
 function capMat(extra = {}) {
   const m = new THREE.MeshBasicMaterial({
-    color: tint(D.bld, OFFS.cap), side: THREE.BackSide, clippingPlanes: clipPlanes,
+    color: tint(D.bld, OFFS.cap), side: THREE.BackSide,
     polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2, ...extra,
   });
   stdRegs.push({ mat: m, kind: 'cap' });
   return m;
 }
 const bpMat = new THREE.MeshBasicMaterial({
-  color: D.bld, side: THREE.DoubleSide, clippingPlanes: clipPlanes,
+  color: D.bld, side: THREE.DoubleSide,
   polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2,
 });
 const flatMat = new THREE.MeshBasicMaterial({
-  color: D.bld, side: THREE.DoubleSide, clippingPlanes: clipPlanes,
+  color: D.bld, side: THREE.DoubleSide,
 });
 
 function solid(geo, mat, cap, x, y, z, parent, level = null) {
@@ -322,7 +323,10 @@ function solid(geo, mat, cap, x, y, z, parent, level = null) {
   return m;
 }
 function box(w, h, d, x, y, z, parent, mat, cap, level = null) {
-  return solid(new THREE.BoxGeometry(w, h, d), mat, cap, x, y, z, parent, level);
+  const m = solid(new THREE.BoxGeometry(w, h, d), mat, cap, x, y, z, parent, level);
+  m.userData.blk = 1;
+  exportBlocks.push({ mesh: m, parent, x0: x - w/2, x1: x + w/2, y0: y - h/2, y1: y + h/2, z0: z - d/2, z1: z + d/2 });
+  return m;
 }
 
 function sketchLineTo(arr, p1, p2) {
@@ -370,57 +374,21 @@ function boxEdges3(w, h, d, x, y, z, fullArr, medArr, minArr) {
   ];
   const P = idx => new THREE.Vector3(...c[idx]);
   const targets = { full: fullArr, medium: medArr, min: minArr };
-
-  // нижнее кольцо — только в full
   [[0,1],[1,2],[2,3],[3,0]].forEach(([a, b]) => emitEdge(P(a), P(b), ['full'], targets));
-  // верхнее кольцо — во всех трёх
   [[4,5],[5,6],[6,7],[7,4]].forEach(([a, b]) => emitEdge(P(a), P(b), ['full', 'medium', 'min'], targets));
-  // вертикали — full + medium
   [[0,4],[1,5],[2,6],[3,7]].forEach(([a, b]) => emitEdge(P(a), P(b), ['full', 'medium'], targets));
 }
 
-function addSlabOutline3(i, yCenter, fullArr, medArr, minArr) {
-  const outerR = i * STEP - WALL_T / 2;
-  const innerR = (i - 1) * STEP + WALL_T / 2;
-  if (outerR - innerR <= 0.05) return;
-  const y0 = yCenter - SLAB_T / 2, y1 = yCenter + SLAB_T / 2;
-  const sq = (r, y) => [[-r,-r],[r,-r],[r,r],[-r,r]].map(([x, z]) => new THREE.Vector3(x, y, z));
-  const targets = { full: fullArr, medium: medArr, min: minArr };
-
-  const outerTop = sq(outerR, y1);
-  const outerBot = sq(outerR, y0);
-  const innerTop = i > 1 ? sq(innerR, y1) : null;
-  const innerBot = i > 1 ? sq(innerR, y0) : null;
-
-  for (let k = 0; k < 4; k++) {
-    emitEdge(outerTop[k], outerTop[(k+1)%4], ['full', 'medium', 'min'], targets);
-  }
-  for (let k = 0; k < 4; k++) {
-    emitEdge(outerBot[k], outerBot[(k+1)%4], ['full', 'medium'], targets);
-    emitEdge(outerTop[k], outerBot[k], ['full', 'medium'], targets);
-  }
-  if (innerTop) {
-    for (let k = 0; k < 4; k++) {
-      emitEdge(innerTop[k], innerTop[(k+1)%4], ['full'], targets);
-      emitEdge(innerBot[k], innerBot[(k+1)%4], ['full'], targets);
-      emitEdge(innerTop[k], innerBot[k], ['full'], targets);
-    }
-  }
-}
-
-function mkLines(arr, opacity, kind, clip, parent = scene) {
+function mkLines(arr, opacity, kind, parent = scene) {
   const geo = new LineSegmentsGeometry();
   geo.setPositions(arr);
   geo.computeBoundingSphere();
   const mat = new LineMaterial({
     color: kind === 'soft' ? softHex : inkHex,
-    transparent: true,
-    opacity,
-    depthWrite: false,
+    transparent: true, opacity, depthWrite: false,
     linewidth: lineThickness,
     resolution: new THREE.Vector2(innerWidth, innerHeight),
   });
-  if (clip) mat.clippingPlanes = clipPlanes;
   (kind === 'soft' ? softMats : inkMats).push(mat);
   const l = new LineSegments2(geo, mat);
   l.userData.srcArr = arr;
@@ -429,8 +397,8 @@ function mkLines(arr, opacity, kind, clip, parent = scene) {
   allLines.push(l);
   return l;
 }
-function mkLines3(arrays, opacity, kind, clip, parent = scene) {
-  const l = mkLines(arrays.full, opacity, kind, clip, parent);
+function mkLines3(arrays, opacity, kind, parent = scene) {
+  const l = mkLines(arrays.full, opacity, kind, parent);
   l.userData.arrs = arrays;
   return l;
 }
@@ -441,25 +409,17 @@ function getLineArray(l) {
   }
   return l.userData.srcArr;
 }
-
-/**
- * Строит геометрию заново. setPositions на существующей LineSegmentsGeometry
- * в Three.js r160 не всегда корректно пере-биндит instance-атрибуты при
- * изменении размера буфера — линия может «пропасть». Поэтому создаём
- * свежую LineSegmentsGeometry и подменяем у меша.
- */
 function refreshLineGeometry(l) {
   const arr = getLineArray(l);
   if (!arr || !arr.length) return;
   const data = lineStyle === 'strict' ? (arr.cleanData || arr) : arr;
   if (!data || !data.length) return;
-
   const geo = new LineSegmentsGeometry();
   geo.setPositions(data);
   geo.computeBoundingSphere();
+  if (l.geometry) l.geometry.dispose();
   l.geometry = geo;
 }
-
 function applyLineStyle(style) {
   lineStyle = style;
   allLines.forEach(refreshLineGeometry);
@@ -475,279 +435,495 @@ function applyDrawLevel(level) {
   });
 }
 document.querySelectorAll('.lp-style-btn[data-style]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.dataset.style !== lineStyle) applyLineStyle(btn.dataset.style);
-  });
+  btn.addEventListener('click', () => { if (btn.dataset.style !== lineStyle) applyLineStyle(btn.dataset.style); });
 });
 document.querySelectorAll('.lp-style-btn[data-draw]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.dataset.draw !== drawLevel) applyDrawLevel(btn.dataset.draw);
-  });
+  btn.addEventListener('click', () => { if (btn.dataset.draw !== drawLevel) applyDrawLevel(btn.dataset.draw); });
 });
 
-const SEC_Z = -0.01;
-function secLine(arr, x1, y1, x2, y2) {
-  sketchLineTo(arr, new THREE.Vector3(x1, y1, SEC_Z), new THREE.Vector3(x2, y2, SEC_Z));
-}
-function secRect(arr, xa, xb, ya, yb) {
-  secLine(arr, xa, ya, xb, ya); secLine(arr, xb, ya, xb, yb);
-  secLine(arr, xb, yb, xa, yb); secLine(arr, xa, yb, xa, ya);
-}
+/* =========================================================
+   КОНСТАНТЫ И МОДУЛЬНОЕ СОСТОЯНИЕ
+   ========================================================= */
+const STEP = 0.8;
+const hallSize = 1.6;
+let wallWidth = 0.16;
+const slabT = 0.08;
 
-const LABEL_X = -6.5;
-const STEP = 0.65;
-const WALL_T = 0.1;
-const SLAB_T = 0.05;
-const OV = 0.02;
-const floor_heights = [0, 0.7, 1.2, 1.7, 2.2, 2.7, 3.2];
-
-const gapSideByRing = { 6:'south', 5:'east', 4:'north', 3:'west', 2:'south', 1:'east' };
-function gapSizeFor(i) { return i === 6 ? 0.42 : i === 1 ? 0.32 : 0.24; }
-
-const diltzData = [
-  { ring: 6, label: 'СРЕДА' },
-  { ring: 5, label: 'ПОВЕДЕНИЕ' },
-  { ring: 4, label: 'СПОСОБНОСТИ' },
-  { ring: 3, label: 'УБЕЖДЕНИЯ И ЦЕННОСТИ' },
-  { ring: 2, label: 'ИДЕНТИЧНОСТЬ' },
-  { ring: 1, label: 'МИССИЯ' },
-];
-diltzData.forEach(d => { d.yPos = floor_heights[7 - d.ring] + 0.08; });
-const diltzByRing = {};
-diltzData.forEach(d => { diltzByRing[d.ring] = d; });
-
-function layoutWalls(i, ov, fn) {
-  const half = i * STEP;
-  const wallH = floor_heights[7 - i];
-  const wallYc = wallH / 2;
-  const sideLen = half * 2 + WALL_T;
-  const gapSize = gapSizeFor(i);
-  const segLen = (sideLen - gapSize) / 2;
-  const gapSide = gapSideByRing[i];
-  const sideS = sideLen - 2 * WALL_T;
-  const segS = (sideS - gapSize) / 2;
-
-  [['north', -half], ['south', half]].forEach(([name, z]) => {
-    if (gapSide === name) {
-      fn(segLen, wallH, WALL_T, -(half + WALL_T/2) + segLen/2, wallYc, z);
-      fn(segLen, wallH, WALL_T,  (half + WALL_T/2) - segLen/2, wallYc, z);
-    } else {
-      fn(sideLen, wallH, WALL_T, 0, wallYc, z);
-    }
-  });
-  [['west', -half], ['east', half]].forEach(([name, x]) => {
-    if (gapSide === name) {
-      fn(WALL_T, wallH, segS + ov, x, wallYc, -(sideS/2 + ov) + (segS + ov)/2);
-      fn(WALL_T, wallH, segS + ov, x, wallYc,  (sideS/2 + ov) - (segS + ov)/2);
-    } else {
-      fn(WALL_T, wallH, sideS + 2 * ov, x, wallYc, 0);
-    }
-  });
-}
-
-function addSlabMesh(parent, i, yCenter, mat, cap, level = null) {
-  const outerR = i * STEP - WALL_T / 2;
-  const innerR = (i - 1) * STEP + WALL_T / 2;
-  if (outerR - innerR <= 0.05) return;
-  const pc = (outerR + innerR) / 2;
-  const pw = outerR - innerR;
-  const spanX = outerR * 2;
-  const spanZ = innerR * 2 + 2 * OV;
-  box(spanX, SLAB_T, pw, 0, yCenter, -pc, parent, mat, cap, level);
-  box(spanX, SLAB_T, pw, 0, yCenter,  pc, parent, mat, cap, level);
-  box(pw, SLAB_T, spanZ, -pc, yCenter, 0, parent, mat, cap, level);
-  box(pw, SLAB_T, spanZ,  pc, yCenter, 0, parent, mat, cap, level);
-}
+let turnHeights = [], coreY = 0, floorOf = [];
+const wallLines = [];
+const MODELS = {
+  museum:   { turns: 5, name: 'Музей безграничного роста' },
+  supports: { turns: 4, name: '5 опор устойчивости',
+    mods: ['Я (центральный зал)', 'Ценности', 'Способности', 'Действия', 'Окружающая среда'],
+    sups: ['Физическая', 'Эмоциональная', 'Интеллектуальная', 'Энергетическая', 'Духовная'] },
+};
+let modelKey = 'museum', growth = 6;
+const MN = () => MODELS[modelKey].turns + 1;
+const turnColors = [0xD5DAC8, 0xF8F4C0, 0x62B0DA, 0x7C7085, 0xB9BDBF];
 
 const levels = [];
 const state = [];
-const diltzLabels = [];
+const museumGroup = new THREE.Group();
+scene.add(museumGroup);
 
-for (let i = 1; i <= 6; i++) {
-  const wallG = new THREE.Group();
-  const slabG = new THREE.Group();
-  scene.add(wallG);
-  scene.add(slabG);
+const LIFT = STEP - slabT;
+const WALL_HEIGHT = STEP;
+const wallGroups = [];
+const stairGroups = [];
+const wallMeshes = [], colMeshes = [], colBlocks = [];
+let lift = 0, liftTarget = 0;
+const flatPlanes = [];
+const FACADE_EXT = 0.1;
+const supportObjs = [];
+const exportBlocks = [];
+let stairsOn = true;
+let wallsOn = false;
 
-  const wMat = stdMat('wall');
-  const wCap = capMat();
-  const sMat = stdMat('slab', { transparent: true });
-  const sCap = capMat({ transparent: true });
+// Пересоздаются при генерации
+let dot, dotEdges, dotMat;
+let colMat, supportFlatMat;
+let colL;
+let floorGroup;
+let growthLine;
+let facadeFillers = null;
 
-  const lvlFlatMat = new THREE.MeshBasicMaterial({
-    color: tint(D.bld, -(i - 1) * LEVEL_TINT_STEP),
-    side: THREE.DoubleSide, clippingPlanes: clipPlanes,
+function updateStairs() {
+  const fac = currentView === 'facade';
+  stairGroups.forEach(g => { g.visible = stairsOn && currentView === 'axon' && !wallsOn; });
+  wallGroups.forEach(g => { g.visible = wallsOn || fac; });
+  liftTarget = (wallsOn || fac) ? LIFT : 0;
+  flatPlanes.forEach(({ mesh }) => { if (mesh.userData.col) mesh.visible = mode === 'flat' && !fac; });
+  supportObjs.forEach(o => { o.visible = !fac && mode !== 'flat'; });
+  wallMeshes.forEach(m => { const e = fac ? FACADE_EXT : 0, d = m.userData.depth; m.scale.y = (d + e) / d; m.position.y = m.userData.baseY - e; });
+  wallLines.forEach(l => { const [yb, d] = l.userData.wx, e = fac ? FACADE_EXT : 0, k = (d + e) / d; l.scale.y = k; l.position.y = yb * (1 - k) - e; });
+}
+
+function makeOffsetPolygon(points, width) {
+  const half = width / 2;
+  const offsetSide = sign => points.map((p, i) => {
+    let dx0, dz0, dx1, dz1;
+    if (i === 0) {
+      dx1 = points[1][0] - p[0]; dz1 = points[1][1] - p[1];
+      const len = Math.hypot(dx1, dz1) || 1;
+      return [p[0] - dz1 / len * half * sign, p[1] + dx1 / len * half * sign];
+    }
+    if (i === points.length - 1) {
+      dx0 = p[0] - points[i - 1][0]; dz0 = p[1] - points[i - 1][1];
+      const len = Math.hypot(dx0, dz0) || 1;
+      return [p[0] - dz0 / len * half * sign, p[1] + dx0 / len * half * sign];
+    }
+    dx0 = p[0] - points[i - 1][0]; dz0 = p[1] - points[i - 1][1];
+    dx1 = points[i + 1][0] - p[0]; dz1 = points[i + 1][1] - p[1];
+    const len0 = Math.hypot(dx0, dz0) || 1;
+    const len1 = Math.hypot(dx1, dz1) || 1;
+    dx0 /= len0; dz0 /= len0; dx1 /= len1; dz1 /= len1;
+    const n0x = -dz0 * sign, n0z = dx0 * sign;
+    const n1x = -dz1 * sign, n1z = dx1 * sign;
+    const denom = 1 + dx0 * dx1 + dz0 * dz1;
+    if (Math.abs(denom) < 1e-5) {
+      return [p[0] + n1x * half, p[1] + n1z * half];
+    }
+    return [p[0] + (n0x + n1x) * half / denom, p[1] + (n0z + n1z) * half / denom];
   });
+  const a = offsetSide(1);
+  const b = offsetSide(-1).reverse();
+  return [...a, ...b];
+}
 
-  const half = i * STEP;
-  const wallTop = floor_heights[7 - i];
-  const outerR = i * STEP - WALL_T / 2, innerR = (i - 1) * STEP + WALL_T / 2;
+function shapeFromWorldPolygon(polygon) {
+  const shape = new THREE.Shape();
+  if (!polygon.length) return shape;
+  shape.moveTo(polygon[0][0], -polygon[0][1]);
+  for (let i = 1; i < polygon.length; i++) shape.lineTo(polygon[i][0], -polygon[i][1]);
+  shape.closePath();
+  return shape;
+}
 
-  layoutWalls(i, OV, (w, h, d, x, y, z) => box(w, h, d, x, y, z, wallG, wMat, wCap, i));
-  if (i !== 6) addSlabMesh(slabG, i, floor_heights[6 - i] + SLAB_T/2, sMat, sCap, i);
-  addSlabMesh(slabG, i, wallTop - SLAB_T/2, sMat, sCap, i);
+function extrudedGeometry(shape, depth) {
+  const geo = new THREE.ExtrudeGeometry(shape, { depth, steps: 1, bevelEnabled: false, curveSegments: 1 });
+  geo.rotateX(-Math.PI / 2);
+  return geo;
+}
 
-  const gapSide = gapSideByRing[i];
-  const gapSize = gapSizeFor(i);
-  let doorMesh = null;
-  if (gapSide === 'north' || gapSide === 'south') {
-    const z = gapSide === 'north' ? -half : half;
-    doorMesh = new THREE.Mesh(new THREE.BoxGeometry(gapSize, wallTop, WALL_T), wMat);
-    doorMesh.position.set(0, wallTop / 2, z);
-  } else {
-    const x = gapSide === 'west' ? -half : half;
-    doorMesh = new THREE.Mesh(new THREE.BoxGeometry(WALL_T, wallTop, gapSize), wMat);
-    doorMesh.position.set(x, wallTop / 2, 0);
+function regLegs(mesh, pts, yb, yt) {
+  mesh.userData.blk = 1;
+  const h = wallWidth / 2, n = pts.length;
+  for (let i = 0; i + 1 < n; i++) {
+    const [ax, az] = pts[i], [bx, bz] = pts[i + 1];
+    const dx = Math.sign(bx - ax), dz = Math.sign(bz - az);
+    const e0 = i > 0 ? h : 0, e1 = i + 2 < n ? h : 0;
+    const sx = ax - dx * e0, sz = az - dz * e0, ex = bx + dx * e1, ez = bz + dz * e1;
+    exportBlocks.push({ mesh, parent: mesh.parent,
+      x0: Math.min(sx, ex) - (dx ? 0 : h), x1: Math.max(sx, ex) + (dx ? 0 : h),
+      z0: Math.min(sz, ez) - (dz ? 0 : h), z1: Math.max(sz, ez) + (dz ? 0 : h), y0: yb, y1: yt, legDir: [dx, dz] });
   }
-  doorMesh.castShadow = true;
-  doorMesh.receiveShadow = true;
-  doorMesh.visible = false;
-  wallG.add(doorMesh);
-  solids.push({ mesh: doorMesh, std: wMat, cap: null, level: i, isDoor: true });
+}
+function attachExtrudedMesh(parent, shape, depth, baseY, material, level, role = 'building') {
+  const mesh = new THREE.Mesh(extrudedGeometry(shape, depth), material);
+  mesh.position.y = baseY;
+  mesh.userData.baseY = baseY; mesh.userData.depth = depth;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  parent.add(mesh);
+  solids.push({ mesh, std: material, cap: null, level, role });
+  return mesh;
+}
 
-  const wallB_full = [], wallB_med = [], wallB_min = [];
-  const slabB_full = [], slabB_med = [], slabB_min = [];
-  layoutWalls(i, 0, (w, h, d, x, y, z) => boxEdges3(w, h, d, x, y, z, wallB_full, wallB_med, wallB_min));
-  if (i !== 6) addSlabOutline3(i, floor_heights[6 - i] + SLAB_T/2, slabB_full, slabB_med, slabB_min);
-  addSlabOutline3(i, wallTop - SLAB_T/2, slabB_full, slabB_med, slabB_min);
-  const wl1 = mkLines3({ full: wallB_full, medium: wallB_med, min: wallB_min }, 0.85, 'ink', true, wallG);
-  const sl1 = mkLines3({ full: slabB_full, medium: slabB_med, min: slabB_min }, 0.85, 'ink', true, slabG);
+function freshEdgeArrays() { return { full: [], medium: [], min: [] }; }
+function addLineEdge(arr, a, b) {
+  sketchLineTo(arr, new THREE.Vector3(a[0], a[1], a[2]), new THREE.Vector3(b[0], b[1], b[2]));
+}
+function addClosedContourEdges(arrays, contour, yBottom, yTop) {
+  for (let i = 0; i < contour.length; i++) {
+    const a = contour[i], b = contour[(i + 1) % contour.length];
+    addLineEdge(arrays.full, [a[0], yTop, a[1]], [b[0], yTop, b[1]]);
+    addLineEdge(arrays.medium, [a[0], yTop, a[1]], [b[0], yTop, b[1]]);
+    addLineEdge(arrays.min, [a[0], yTop, a[1]], [b[0], yTop, b[1]]);
+    addLineEdge(arrays.full, [a[0], yBottom, a[1]], [b[0], yBottom, b[1]]);
+    addLineEdge(arrays.full, [a[0], yBottom, a[1]], [a[0], yTop, a[1]]);
+    addLineEdge(arrays.medium, [a[0], yBottom, a[1]], [a[0], yTop, a[1]]);
+  }
+}
+function makeRibbonEdgeArrays(polygon, pathPointCount, yBottom, yTop) {
+  const arrays = freshEdgeArrays();
+  const n = polygon.length;
+  const endCapIndex = pathPointCount - 1;
+  const startCapIndex = n - 1;
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    const isCap = i === startCapIndex || i === endCapIndex;
+    if (!isCap) {
+      addLineEdge(arrays.full, [polygon[i][0], yTop, polygon[i][1]], [polygon[j][0], yTop, polygon[j][1]]);
+      addLineEdge(arrays.medium, [polygon[i][0], yTop, polygon[i][1]], [polygon[j][0], yTop, polygon[j][1]]);
+      addLineEdge(arrays.min, [polygon[i][0], yTop, polygon[i][1]], [polygon[j][0], yTop, polygon[j][1]]);
+      addLineEdge(arrays.full, [polygon[i][0], yBottom, polygon[i][1]], [polygon[j][0], yBottom, polygon[j][1]]);
+    }
+    addLineEdge(arrays.full, [polygon[i][0], yBottom, polygon[i][1]], [polygon[i][0], yTop, polygon[i][1]]);
+    addLineEdge(arrays.medium, [polygon[i][0], yBottom, polygon[i][1]], [polygon[i][0], yTop, polygon[i][1]]);
+  }
+  return arrays;
+}
+function makeCoreWallPolygon(outerHalf, thickness, openingWidth) {
+  const innerHalf = Math.max(0.001, outerHalf - thickness);
+  const openingHalf = Math.min(openingWidth / 2, innerHalf * 0.8);
+  return [
+    [-outerHalf, -outerHalf], [-openingHalf, -outerHalf],
+    [-openingHalf, -innerHalf], [-innerHalf, -innerHalf],
+    [-innerHalf, innerHalf], [innerHalf, innerHalf],
+    [innerHalf, -innerHalf], [openingHalf, -innerHalf],
+    [openingHalf, -outerHalf], [outerHalf, -outerHalf],
+    [outerHalf, outerHalf], [-outerHalf, outerHalf]
+  ];
+}
+function setWallsVisible(visible) { wallsOn = !!visible; updateStairs(); }
 
-  const sW = [], sS = [], sL = [];
-  [-1, 1].forEach(sg => secRect(sW, sg * (half - WALL_T/2), sg * (half + WALL_T/2), 0, wallTop));
-  const slabYs = [wallTop - SLAB_T];
-  if (i !== 6) slabYs.push(floor_heights[6 - i]);
-  slabYs.forEach(y0 => {
-    if (i === 1) secRect(sS, -outerR, outerR, y0, y0 + SLAB_T);
-    else [-1, 1].forEach(sg => secRect(sS, sg * innerR, sg * outerR, y0, y0 + SLAB_T));
+/* =========================================================
+   ГЕНЕРАЦИЯ МУЗЕЯ
+   ========================================================= */
+function generateMuseum() {
+  const M = MN(), G = 0.09 * (M - growth);
+  floorOf = Array.from({ length: M }, (_, i) => Math.floor((M - 1 - i) * growth / M));
+  turnHeights = floorOf.map(f => +(0.08 + G + f * STEP).toFixed(3));
+  coreY = turnHeights[0];
+  // --- Модуль 1: центральный зал ---
+  const coreGroup = new THREE.Group();
+  museumGroup.add(coreGroup);
+
+  box(hallSize, slabT, hallSize, 0, coreY - slabT/2, 0, coreGroup, stdMat('slab', {}, 1), capMat(), 1);
+  const coreEdges = freshEdgeArrays();
+  boxEdges3(hallSize, slabT, hallSize, 0, coreY - slabT/2, 0, coreEdges.full, coreEdges.medium, coreEdges.min);
+  mkLines3(coreEdges, 0.85, 'ink', coreGroup);
+
+  const coreWallGroup = new THREE.Group();
+  coreWallGroup.visible = false;
+  coreGroup.add(coreWallGroup);
+  wallGroups.push(coreWallGroup);
+  const coreWallPolygon = makeCoreWallPolygon(hallSize / 2, wallWidth, 0.42);
+  const coreWallShape = shapeFromWorldPolygon(coreWallPolygon);
+  const coreWallMat = stdMat('wall', {}, 1);
+  const coreWallMesh = attachExtrudedMesh(coreWallGroup, coreWallShape, WALL_HEIGHT - slabT, coreY - WALL_HEIGHT, coreWallMat, 1, 'wall');
+  coreWallMesh.userData.blk = 1; if (floorOf[0] > 0) { coreWallMesh.userData.ext = FACADE_EXT; wallMeshes.push(coreWallMesh); }
+  {
+    const H = hallSize / 2, t = wallWidth, o = 0.21, y0 = coreY - WALL_HEIGHT, y1 = coreY - slabT;
+    [[-H, H, H - t, H], [H - t, H, -H, H], [-H, -H + t, -H, H], [-H, -o, -H, -H + t], [o, H, -H, -H + t]]
+      .forEach(([x0, x1, z0, z1]) => exportBlocks.push({ mesh: coreWallMesh, parent: coreWallGroup, x0, x1, y0, y1, z0, z1 }));
+  }
+  const coreWallFlatMat = new THREE.MeshBasicMaterial({ color: tint(D.bld, -0.08), side: THREE.DoubleSide });
+  const coreWallEdgeArrays = freshEdgeArrays();
+  addClosedContourEdges(coreWallEdgeArrays, coreWallPolygon, coreY - WALL_HEIGHT, coreY - slabT);
+  { const wl = mkLines3(coreWallEdgeArrays, 0.85, 'ink', coreWallGroup); if (floorOf[0] > 0) { wl.userData.wx = [coreY - WALL_HEIGHT, WALL_HEIGHT - slabT]; wallLines.push(wl); } }
+
+  // Пять опор
+  colMat = stdMat('col');
+  supportFlatMat = new THREE.MeshBasicMaterial({ color: supportHex, side: THREE.DoubleSide });
+  const colLines = [];
+  [[-0.55,-0.55],[0.55,-0.55],[0.55,0.55],[-0.55,0.55],[0,0]].forEach(([x, z]) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, coreY - slabT, 16), colMat);
+    m.position.set(x, (coreY - slabT)/2, z);
+    m.castShadow = true; m.receiveShadow = true;
+    coreGroup.add(m);
+    solids.push({ mesh: m, std: colMat, cap: null, level: 1, role: 'support' });
+    supportObjs.push(m); m.userData.blk = 1;
+    const cb = { mesh: m, parent: coreGroup, x0: x - 0.05, x1: x + 0.05, y0: 0, y1: coreY - slabT, z0: z - 0.05, z1: z + 0.05 };
+    exportBlocks.push(cb); colBlocks.push(cb); colMeshes.push(m);
+    for (let k = 0; k < 4; k++) {
+      const a = k / 4 * Math.PI * 2;
+      const px = x + 0.05 * Math.cos(a), pz = z + 0.05 * Math.sin(a);
+      sketchLineTo(colLines, new THREE.Vector3(px, 0, pz), new THREE.Vector3(px, coreY - slabT, pz));
+    }
   });
-  secLine(sL, LABEL_X, wallTop, -(half + WALL_T/2), wallTop);
-  const secWall = mkLines(sW, 0, 'ink', false);
-  const secSlab = mkLines(sS, 0, 'ink', false);
-  const secLvl = mkLines(sL, 0, 'soft', false);
+  colL = mkLines(colLines, 0.85, 'ink', coreGroup);
 
-  const d0 = diltzByRing[i];
-  const ex = -half - WALL_T/2, ey = wallTop - 0.1;
-  const ez = gapSide === 'west' ? 0.3 : 0;
-  const leader = mkLines([
-    ex, ey - 0.07, ez,  ex, ey + 0.07, ez,
-    ex, ey, ez,  LABEL_X + 0.15, d0.yPos, 0,
-  ], 0, 'soft', false);
+  // Центральная точка — всегда 3D-сфера
+  dotMat = new THREE.MeshBasicMaterial({ color: dotHex });
+  dot = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), dotMat);
+  dot.position.set(0, coreY + 0.1, 0);
+  dot.userData.dot = 1;
+  coreGroup.add(dot);
 
-  levels.push({ wallG, slabG, wMat, wCap, sMat, sCap, wl1, sl1, secWall, secSlab, secLvl, leader, slabT: 1, flatMat: lvlFlatMat, door: doorMesh });
+  // Проволочный контур для режима «чертёж»
+  {
+    const ringPts = [];
+    const N = 48;
+    for (let i = 0; i < N; i++) {
+      const a0 = i / N * Math.PI * 2;
+      const a1 = (i + 1) / N * Math.PI * 2;
+      const r = 0.1;
+      ringPts.push(r*Math.cos(a0), r*Math.sin(a0), 0);
+      ringPts.push(r*Math.cos(a1), r*Math.sin(a1), 0);
+      ringPts.push(r*Math.cos(a0), 0, r*Math.sin(a0));
+      ringPts.push(r*Math.cos(a1), 0, r*Math.sin(a1));
+      ringPts.push(0, r*Math.cos(a0), r*Math.sin(a0));
+      ringPts.push(0, r*Math.cos(a1), r*Math.sin(a1));
+    }
+    const ringGeo = new THREE.BufferGeometry();
+    ringGeo.setAttribute('position', new THREE.Float32BufferAttribute(ringPts, 3));
+    dotEdges = new THREE.LineSegments(ringGeo, new THREE.LineBasicMaterial({
+      color: inkHex, transparent: true, opacity: 0.85, depthWrite: false
+    }));
+    dotEdges.position.copy(dot.position);
+    dotEdges.visible = false;
+    dotEdges.userData.dotEdges = 1;
+    coreGroup.add(dotEdges);
+  }
+
+  const coreFlatMat = new THREE.MeshBasicMaterial({ color: tint(D.bld, 0), side: THREE.DoubleSide });
+  levels.push({ wallG: coreGroup, slabG: coreGroup, flatMat: coreFlatMat, wallFlatMat: coreWallFlatMat, slabT: 1 });
   state.push({ visible: true, t: 1 });
 
-  const wrap = document.createElement('div');
-  wrap.className = 'diltz-wrap';
-  const inner = document.createElement('span');
-  inner.className = 'diltz-lbl';
-  inner.textContent = d0.label;
-  inner.style.fontSize = '13px';
-  wrap.appendChild(inner);
-  const lblObj = new CSS2DObject(wrap);
-  lblObj.position.set(LABEL_X, d0.yPos, 0);
-  scene.add(lblObj);
-  diltzLabels.push({ ring: i, element: inner, pos: new THREE.Vector3(LABEL_X, d0.yPos, 0) });
-}
+  // --- Модули 2–6: квадратная спираль ---
+  let pathEnd = [0, -hallSize/2];
 
-const shadowCatcher = new THREE.Mesh(
-  new THREE.PlaneGeometry(80, 80),
-  new THREE.ShadowMaterial({ opacity: 0.2 })
-);
-shadowCatcher.rotation.x = -Math.PI / 2;
-shadowCatcher.position.y = -0.002;
-shadowCatcher.receiveShadow = true;
-scene.add(shadowCatcher);
+  for (let turn = 0; turn < M - 1; turn++) {
+    const mg = new THREE.Group();
+    mg.name = 'Модуль ' + (turn + 2);
+    museumGroup.add(mg);
 
-const gB = [];
-const baseHalf = 6 * STEP + WALL_T + 0.2;
-box(baseHalf * 2, 0.04, baseHalf * 2, 0, 0.02, 0, scene, stdMat('base'), capMat());
-boxEdges3(baseHalf * 2, 0.04, baseHalf * 2, 0, 0.02, 0, gB, [], []);
+    const y = turnHeights[turn + 1];
+    const outer = hallSize/2 + (turn + 1) * STEP;
+    let next;
+    if (turn === 0) {
+      next = [[0, -outer], [outer, -outer], [outer, outer], [-outer, outer]];
+    } else {
+      const inner = hallSize/2 + turn * STEP;
+      next = [[-inner, -outer], [outer, -outer], [outer, outer], [-outer, outer]];
+    }
+    const points = [pathEnd, ...next];
+    const polygon = makeOffsetPolygon(points, wallWidth);
+    const shape = shapeFromWorldPolygon(polygon);
 
-const colH = 3.5;
-const colR = 0.05;
-const colMat = stdMat('col');
-[[-0.35,-0.35],[0.35,-0.35],[0.35,0.35],[-0.35,0.35],[0,0]].forEach(([x, z]) => {
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(colR, colR, colH, 20), colMat);
-  m.position.set(x, colH/2, z);
-  m.castShadow = true; m.receiveShadow = true;
-  scene.add(m);
-  solids.push({ mesh: m, std: colMat, cap: null });
-  for (let k = 0; k < 6; k++) {
-    const a = k / 6 * Math.PI * 2;
-    const px = x + colR * Math.cos(a), pz = z + colR * Math.sin(a);
-    sketchLineTo(gB, new THREE.Vector3(px, 0, pz), new THREE.Vector3(px, colH, pz));
+    const flatM = new THREE.MeshBasicMaterial({ color: turnColors[turn], side: THREE.DoubleSide });
+    const slabM = stdMat('slab', {}, turn + 2);
+    regLegs(attachExtrudedMesh(mg, shape, slabT, y - slabT, slabM, turn + 2, 'building'), points, y - slabT, y);
+    const edgeArrays = makeRibbonEdgeArrays(polygon, points.length, y - slabT, y);
+    mkLines3(edgeArrays, 0.85, 'ink', mg);
+
+    const wallGroup = new THREE.Group();
+    wallGroup.name = 'Стены модуля ' + (turn + 2);
+    wallGroup.visible = wallsOn;
+    mg.add(wallGroup);
+    wallGroups.push(wallGroup);
+    {
+      const wm = attachExtrudedMesh(wallGroup, shape, WALL_HEIGHT - slabT, y - WALL_HEIGHT, stdMat('wall', {}, turn + 2), turn + 2, 'wall');
+      if (floorOf[turn + 1] > 0) { wm.userData.ext = FACADE_EXT; wallMeshes.push(wm); }
+      regLegs(wm, points, y - WALL_HEIGHT, y - slabT);
+      const wl = mkLines3(makeRibbonEdgeArrays(polygon, points.length, y - WALL_HEIGHT, y - slabT), 0.85, 'ink', wallGroup);
+      if (floorOf[turn + 1] > 0) { wl.userData.wx = [y - WALL_HEIGHT, WALL_HEIGHT - slabT]; wallLines.push(wl); }
+    }
+
+    if (turnHeights[turn] - y > 0.05) {
+      const sg = new THREE.Group();
+      sg.name = 'Лесенка ' + (turn + 2);
+      mg.add(sg); stairGroups.push(sg);
+      const [p0, p1] = points;
+      const dx = Math.sign(p1[0] - p0[0]), dz = Math.sign(p1[1] - p0[1]);
+      const yHi = turnHeights[turn], N = 8, tread = 0.1, rise = (yHi - y) / N;
+      const sMat = stdMat('slab', {}, turn + 2), ea = freshEdgeArrays();
+      for (let i = 0; i < N; i++) {
+        const h = yHi - i * rise - y - 0.003;
+        const run = -wallWidth / 2 + (i + 0.5) * tread;
+        const w = dx ? tread : wallWidth, d = dz ? tread : wallWidth;
+        const cx = p0[0] + dx * run, cz = p0[1] + dz * run, cy = y + h / 2;
+        const stm = box(w, h, d, cx, cy, cz, sg, sMat, null, turn + 2);
+        stm.userData.stair = 1; stm.userData.dir = [dx, dz];
+        boxEdges3(w, h, d, cx, cy, cz, ea.full, ea.medium, ea.min);
+      }
+      mkLines3(ea, 0.85, 'ink', sg);
+    }
+
+    const wallFlatM = new THREE.MeshBasicMaterial({ color: tint(new THREE.Color(turnColors[turn]), -0.08), side: THREE.DoubleSide });
+    levels.push({ wallG: mg, slabG: mg, flatMat: flatM, wallFlatMat: wallFlatM, slabT: 1 });
+    state.push({ visible: true, t: 1 });
+    pathEnd = points[points.length - 1];
   }
-  for (let k = 0; k < 8; k++) {
-    const a1 = k / 8 * Math.PI * 2, a2 = (k+1) / 8 * Math.PI * 2;
-    sketchLineTo(gB,
-      new THREE.Vector3(x + colR*Math.cos(a1), colH, z + colR*Math.sin(a1)),
-      new THREE.Vector3(x + colR*Math.cos(a2), colH, z + colR*Math.sin(a2)));
-  }
-});
 
-const lanternBaseY = colH;
-const lanternH = 0.4;
-const lanternHalf = 0.35;
-const lanternMat = stdMat('wall');
-const lantern = new THREE.Mesh(new THREE.ConeGeometry(lanternHalf * Math.SQRT2, lanternH, 4), lanternMat);
-lantern.position.set(0, lanternBaseY + lanternH/2, 0);
-lantern.rotation.y = Math.PI/4;
-lantern.castShadow = true;
-scene.add(lantern);
-solids.push({ mesh: lantern, std: lanternMat, cap: null });
-const lanternLinesArr = [];
-{
-  const lApex = new THREE.Vector3(0, lanternBaseY + lanternH, 0);
-  const lc = [
-    new THREE.Vector3(-lanternHalf, lanternBaseY, -lanternHalf),
-    new THREE.Vector3( lanternHalf, lanternBaseY, -lanternHalf),
-    new THREE.Vector3( lanternHalf, lanternBaseY,  lanternHalf),
-    new THREE.Vector3(-lanternHalf, lanternBaseY,  lanternHalf),
+  // Пол здания
+  floorGroup = new THREE.Group();
+  floorGroup.visible = false;
+  museumGroup.add(floorGroup);
+  {
+    const half = hallSize / 2 + (M - 1) * STEP + wallWidth / 2, fe = freshEdgeArrays();
+    box(half * 2, slabT, half * 2, 0, -slabT / 2, 0, floorGroup, stdMat('slab'), null, null);
+    boxEdges3(half * 2, slabT, half * 2, 0, -slabT / 2, 0, fe.full, fe.medium, fe.min);
+    mkLines3(fe, 0.85, 'ink', floorGroup);
+  }
+
+  // Пунктир безграничного роста
+  const growthR = hallSize/2 + (M - 1) * STEP + 0.8;
+  const growthY = turnHeights[M - 1] + 0.035;
+  const growthPts = [
+    new THREE.Vector3(-growthR, growthY, -growthR),
+    new THREE.Vector3( growthR, growthY, -growthR),
+    new THREE.Vector3( growthR, growthY,  growthR),
+    new THREE.Vector3(-growthR, growthY,  growthR),
+    new THREE.Vector3(-growthR, growthY, -growthR)
   ];
-  for (let k = 0; k < 4; k++) {
-    sketchLineTo(lanternLinesArr, lc[k], lc[(k+1)%4]);
-    sketchLineTo(lanternLinesArr, lc[k], lApex);
+  const growthGeo = new THREE.BufferGeometry().setFromPoints(growthPts);
+  const growthMat = new THREE.LineDashedMaterial({
+    color: GROWTH_DEFAULT, dashSize: 0.4, gapSize: 0.3, linewidth: 2,
+    transparent: true, opacity: 1, depthTest: true, depthWrite: false
+  });
+  growthLine = new THREE.Line(growthGeo, growthMat);
+  growthLine.computeLineDistances();
+  museumGroup.add(growthLine);
+
+  // Фасадный вид: западный зазор закрываем виртуальными блоками,
+  // привязанными к этапам сборки. Южная грань — вровень с южной гранью платформы.
+  facadeFillers = new THREE.Group();
+  facadeFillers.name = 'Facade symmetry fillers';
+  facadeFillers.visible = false;
+  museumGroup.add(facadeFillers);
+  for (let turn = 0; turn < M - 1; turn++) {
+    const y = turnHeights[turn + 1], outer = hallSize / 2 + (turn + 1) * STEP, ww = wallWidth;
+    const h = WALL_HEIGHT + (floorOf[turn + 1] > 0 ? FACADE_EXT : 0), w = ww / 2;
+    const std = stdMat('wall', {}, turn + 2);
+    const f = new THREE.Mesh(new THREE.BoxGeometry(w, h, ww), std);
+    f.position.set(-(outer + ww / 4), y - h / 2, outer);
+    f.castShadow = f.receiveShadow = true;
+    Object.assign(f.userData, { facadeFiller: true, stage: turn + 2, topY: y, height: h, std });
+    const fa = freshEdgeArrays(), p = [-w/2, -h/2, ww/2], q = [-w/2, h/2, ww/2], r = [w/2, h/2, ww/2], t = [w/2, -h/2, ww/2];
+    addLineEdge(fa.full, p, q); addLineEdge(fa.medium, p, q);
+    addLineEdge(fa.full, q, r); addLineEdge(fa.medium, q, r); addLineEdge(fa.min, q, r);
+    addLineEdge(fa.full, p, t);
+    mkLines3(fa, 0.85, 'ink', f);
+    facadeFillers.add(f);
   }
+
+  // Flat: плоскости соседних уровней могут лежать в одной плоскости (одинаковая
+  // высота перекрытий, ступени vs плита) — задаём приоритет: меньший уровень сверху.
+  levels.forEach((L, i) => {
+    const k = M - i;
+    [L.flatMat, L.wallFlatMat].forEach(mm => {
+      if (!mm) return;
+      mm.polygonOffset = true;
+      mm.polygonOffsetFactor = -k * 0.5;
+      mm.polygonOffsetUnits = -k * 4;
+    });
+  });
+
+  // Начальное состояние видимости этапов — без «мигания» при пересборке
+  state.forEach((s, i) => {
+    const vis = i < currentStage;
+    s.visible = vis;
+    s.t = vis ? 1 : 0;
+  });
 }
 
-const topPlateMat = stdMat('slab');
-const topPlateFlatMat = new THREE.MeshBasicMaterial({
-  color: tint(D.bld, OFFS.slab),
-  side: THREE.DoubleSide,
-  clippingPlanes: clipPlanes,
-});
-stdRegs.push({ mat: topPlateFlatMat, kind: 'slab' });
-const topPlate = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.06, 1.0), topPlateMat);
-topPlate.position.set(0, colH - 0.03, 0);
-topPlate.castShadow = true;
-topPlate.receiveShadow = true;
-topPlate.visible = false;
-scene.add(topPlate);
-solids.push({ mesh: topPlate, std: topPlateMat, cap: null, isTopPlate: true });
+/* =========================================================
+   ОЧИСТКА И ПЕРЕСБОРКА
+   ========================================================= */
+function disposeDeep(obj, mats) {
+  if (obj.geometry) obj.geometry.dispose();
+  if (obj.material) {
+    const ms = Array.isArray(obj.material) ? obj.material : [obj.material];
+    ms.forEach(m => mats.add(m));
+  }
+  obj.children.forEach(c => disposeDeep(c, mats));
+}
 
-const gMain = mkLines(gB, 0.85, 'ink', true);
-const lanternLines = mkLines(lanternLinesArr, 0.85, 'ink', true);
-
-const secStaticArr = [], secSoftArr = [];
-secRect(secStaticArr, -baseHalf, baseHalf, 0, 0.04);
-const colSegs = (x, arr) => {
-  [[0.04, 2.7], [2.75, 3.15], [3.2, colH]].forEach(([a, b]) => {
-    secLine(arr, x - colR, a, x - colR, b);
-    secLine(arr, x + colR, a, x + colR, b);
+function clearMuseum() {
+  const mats = new Set();
+  museumGroup.children.slice().forEach(child => {
+    disposeDeep(child, mats);
+    museumGroup.remove(child);
   });
-  secLine(arr, x - colR, colH, x + colR, colH);
-};
-colSegs(0, secStaticArr);
-colSegs(-0.35, secSoftArr);
-colSegs(0.35, secSoftArr);
-secLine(secStaticArr, -lanternHalf, colH, lanternHalf, colH);
-secLine(secStaticArr, -lanternHalf, colH, 0, colH + lanternH);
-secLine(secStaticArr, lanternHalf, colH, 0, colH + lanternH);
-const secStatic = mkLines(secStaticArr, 0, 'ink', false);
-const secSoft = mkLines(secSoftArr, 0, 'ink', false);
+  stdRegs.forEach(r => { if (r.mat) mats.add(r.mat); });
+  inkMats.forEach(m => mats.add(m));
+  softMats.forEach(m => mats.add(m));
+  levels.forEach(L => {
+    if (L.flatMat) mats.add(L.flatMat);
+    if (L.wallFlatMat) mats.add(L.wallFlatMat);
+  });
+  if (colMat) mats.add(colMat);
+  if (supportFlatMat) mats.add(supportFlatMat);
+  if (dotMat) mats.add(dotMat);
+  if (dotEdges && dotEdges.material) mats.add(dotEdges.material);
+  if (growthLine && growthLine.material) mats.add(growthLine.material);
+  // Общие модульные материалы не уничтожаем
+  const keep = new Set([bpMat, flatMat]);
+  mats.forEach(m => { if (!keep.has(m)) m.dispose(); });
 
-/* ===== Тема (цвета) ===== */
+  levels.length = 0;
+  state.length = 0;
+  wallGroups.length = 0;
+  stairGroups.length = 0;
+  wallMeshes.length = 0;
+  colMeshes.length = 0;
+  colBlocks.length = 0;
+  flatPlanes.length = 0;
+  supportObjs.length = 0;
+  exportBlocks.length = 0;
+  wallLines.length = 0;
+  solids.length = 0;
+  allLines.length = 0;
+  stdRegs.length = 0;
+  inkMats.length = 0;
+  softMats.length = 0;
+
+  facadeFillers = null;
+  dot = dotEdges = dotMat = null;
+  colMat = supportFlatMat = null;
+  colL = null;
+  floorGroup = null;
+  growthLine = null;
+
+  lift = 0; liftTarget = 0;
+}
+
+function rebuild() {
+  clearMuseum();
+  generateMuseum();
+  buildFlatPlanes();
+  applyTheme();
+  setMode(mode);
+  if (floorGroup) floorGroup.visible = $('lpFloor').checked;
+  lift = liftTarget;
+  applyStage(currentStage);
+  applyLineStyle(lineStyle);
+  applyDrawLevel(drawLevel);
+}
+
+/* ===== Тема ===== */
 function hexToRgb(h) {
   const n = parseInt(h.slice(1), 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
@@ -757,13 +933,10 @@ function applyTheme() {
   const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
   const dark = lum < 0.45;
 
-  const uiInk  = dark ? '#F2EFE8' : '#1A1613';
-  const uiSoft = dark ? '#B7AE9F' : '#8A7E6E';
+  const uiInk  = dark ? '#FFFFFF' : '#202020';
+  const uiSoft = '#B9BDBF';
 
-  if (autoInk) {
-    inkHex = uiInk;
-    softHex = uiSoft;
-  }
+  if (autoInk) { inkHex = uiInk; softHex = uiSoft; }
   $('cInk').value = inkHex;
   $('cSoft').value = softHex;
 
@@ -783,41 +956,41 @@ function applyTheme() {
 
   inkMats.forEach(m => m.color.set(inkHex));
   softMats.forEach(m => m.color.set(softHex));
-  stdRegs.forEach(({ mat, kind }) => mat.color.copy(tint(D.bld, OFFS[kind])));
+  if (growthLine) growthLine.material.color.set(GROWTH_DEFAULT);
+  stdRegs.forEach(({ mat, kind, level }) => mat.color.copy(tint((level && levelColors[level - 1]) || D.bld, OFFS[kind])));
+  if (colMat) colMat.color.set(supportHex);
+  if (supportFlatMat) supportFlatMat.color.set(supportHex);
+  if (dotMat) dotMat.color.set(dotHex);
+  if (dotEdges) dotEdges.material.color.set(inkHex);
   bpMat.color.set(D.bld);
   flatMat.color.set(D.bld);
 
   levels.forEach((L, idx) => {
+    if (!L.flatMat) return;
     const custom = levelColors[idx];
-    if (custom) {
-      const c = new THREE.Color(custom);
-      L.wMat.color.copy(c);
-      L.sMat.color.copy(c);
-      L.wCap.color.copy(tint(custom, OFFS.cap));
-      L.sCap.color.copy(tint(custom, OFFS.cap));
-      L.flatMat.color.copy(c);
-    } else {
-      L.wMat.color.copy(tint(D.bld, OFFS.wall));
-      L.sMat.color.copy(tint(D.bld, OFFS.slab));
-      L.wCap.color.copy(tint(D.bld, OFFS.cap));
-      L.sCap.color.copy(tint(D.bld, OFFS.cap));
-      L.flatMat.color.copy(tint(D.bld, -(idx * LEVEL_TINT_STEP)));
+    const baseColor = idx === 0
+      ? (custom ? new THREE.Color(custom) : tint(D.bld, 0))
+      : (custom ? new THREE.Color(custom) : new THREE.Color(turnColors[idx - 1]));
+    L.flatMat.color.copy(baseColor);
+    if (L.wallFlatMat) {
+      const wallColor = baseColor.clone();
+      const hsl = {};
+      wallColor.getHSL(hsl, THREE.SRGBColorSpace);
+      wallColor.setHSL(hsl.h, hsl.s, Math.max(0, hsl.l - 0.08), THREE.SRGBColorSpace);
+      L.wallFlatMat.color.copy(wallColor);
     }
   });
-
   syncLevelColors();
 }
 
+function defaultLevelColorHex(level) {
+  if (level <= 1) return BLD_DEFAULT;
+  return '#' + turnColors[level - 2].toString(16).padStart(6, '0').toUpperCase();
+}
 function syncLevelColors() {
   document.querySelectorAll('.lp-level-color input').forEach(inp => {
     const lvl = Number(inp.dataset.level);
-    const custom = levelColors[lvl - 1];
-    if (custom) {
-      inp.value = custom;
-    } else {
-      const c = tint(D.bld, -((lvl - 1) * LEVEL_TINT_STEP));
-      inp.value = '#' + c.getHexString();
-    }
+    inp.value = levelColors[lvl - 1] || defaultLevelColorHex(lvl);
   });
 }
 document.querySelectorAll('.lp-level-color input').forEach(inp => {
@@ -830,16 +1003,54 @@ document.querySelectorAll('.lp-level-color input').forEach(inp => {
 
 /* ===== Режим: 3D / Flat / Чертёж ===== */
 let shadowsOn = true;
-let roofsOn = true;
-const roofsToggle = $('lpRoofs');
-roofsToggle.addEventListener('change', () => {
-  roofsOn = roofsToggle.checked;
-});
-$('lpDoors').addEventListener('change', e => { doorsOn = e.target.checked; });
-function updateShadowVis() {
-  sun.castShadow = shadowsOn && mode === '3d';
-  shadowCatcher.visible = shadowsOn && mode === '3d';
+function updateShadowVis() { sun.castShadow = shadowsOn && mode === '3d'; }
+
+function buildFlatPlanes() {
+  exportBlocks.forEach(b => {
+    const rec = solids.find(r => r.mesh === b.mesh);
+    if (!rec) return;
+    b.rec = rec;
+    const ud = b.mesh.userData, w = b.x1 - b.x0, d = b.z1 - b.z0, h = b.y1 - b.y0;
+    const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2;
+    const add = (geo, x, y, z, rotY, riser = false) => {
+      const m = new THREE.Mesh(geo, flatMat);
+      m.position.set(x, y, z); m.rotation.y = rotY; m.visible = false; m.userData.fp = 1;
+      b.parent.add(m); flatPlanes.push({ mesh: m, rec, riser });
+      return m;
+    };
+    const hPlane = y => { const g = new THREE.PlaneGeometry(w, d); g.rotateX(-Math.PI / 2); return add(g, cx, y, cz, 0); };
+    const vPlane = (len, hh, x, y, z, rotY, riser) => { const g = new THREE.PlaneGeometry(len, hh); g.translate(0, hh / 2, 0); return add(g, x, y, z, rotY, riser); };
+    let kind = null;
+    if (rec.role === 'wall') {
+      // Flat: плоскость стены ставим на её НАРУЖНУЮ грань (а не на осевую линию),
+      // иначе при большой толщине плоскости соседних стен перекрещиваются «крестом»
+      // и не стыкуются с краем плиты.
+      kind = 'v'; const hh = h + slabT;
+      let ax, ox = 0, oz = 0;
+      if (b.legDir) {                       // спираль: наружу = (dz, -dx)
+        const [ldx, ldz] = b.legDir, hw = wallWidth / 2;
+        ax = ldx !== 0; ox = ldz * hw; oz = -ldx * hw;
+      } else {                              // стены центрального зала: наружу от центра
+        ax = w >= d;
+        if (ax) oz = (cz > 0 ? 1 : -1) * d / 2; else ox = (cx > 0 ? 1 : -1) * w / 2;
+      }
+      b.wp = { ax, ox, oz };
+      const m = vPlane(ax ? w : d, hh, cx + ox, b.y0, cz + oz, ax ? 0 : Math.PI / 2);
+      if (ud.ext) { m.userData.baseY = b.y0; m.userData.depth = hh; m.userData.ext = ud.ext; wallMeshes.push(m); }
+    } else if (rec.role === 'support') {
+      kind = 'c'; const y = (b.y0 + b.y1) / 2;
+      [add(new THREE.PlaneGeometry(w, h), cx, y, cz, 0), add(new THREE.PlaneGeometry(d, h), cx, y, cz, Math.PI / 2)]
+        .forEach(m => { m.userData.col = 1; colMeshes.push(m); });
+    } else if (ud.stair) {
+      kind = 's'; hPlane(b.y1);
+      const [dx, dz] = ud.dir;
+      if (dz) vPlane(w, h, cx, b.y0, dz > 0 ? b.z1 : b.z0, 0, true);
+      else vPlane(d, h, dx > 0 ? b.x1 : b.x0, b.y0, cz, Math.PI / 2, true);
+    } else if (h <= slabT + 1e-3) { kind = 'h'; hPlane(b.y1); }
+    if (kind) { b.plane = kind; b.dir = ud.dir; ud.hasPlanes = 1; }
+  });
 }
+
 function setMode(m) {
   mode = m;
   const is3d = m === '3d';
@@ -848,77 +1059,94 @@ function setMode(m) {
   const showSolid = is3d || isFlat;
 
   solids.forEach(rec => {
-    const { mesh, std, cap, level, isTopPlate } = rec;
-    if (isTopPlate) {
-      mesh.material = isFlat ? topPlateFlatMat : topPlateMat;
-      mesh.castShadow = is3d;
-      mesh.receiveShadow = is3d;
-      return;
-    }
+    const { mesh, std, cap, level } = rec;
     if (isFlat) {
-      mesh.material = (level != null && levels[level - 1]) ? levels[level - 1].flatMat : flatMat;
+      mesh.material = rec.role === 'support' ? supportFlatMat
+        : (rec.role === 'wall' && level != null && levels[level - 1] ? levels[level - 1].wallFlatMat
+        : ((level != null && levels[level - 1]) ? levels[level - 1].flatMat : flatMat));
     } else {
       mesh.material = showSolid ? std : bpMat;
     }
     mesh.castShadow = is3d;
     mesh.receiveShadow = is3d;
     if (cap) cap.visible = showSolid && !isFlat;
+    if (mesh.userData.hasPlanes) mesh.visible = !isFlat;
+  });
+  flatPlanes.forEach(pr => {
+    const { mesh, rec } = pr, L = rec.level != null ? levels[rec.level - 1] : null;
+    mesh.visible = isFlat;
+    mesh.material = rec.role === 'support' ? supportFlatMat
+      : ((pr.riser || rec.role === 'wall') && L ? L.wallFlatMat : (L ? L.flatMat : flatMat));
   });
   hemi.visible = showSolid;
+  if (facadeFillers) facadeFillers.children.forEach(f => {
+    const L = levels[f.userData.stage - 1];
+    f.material = isFlat ? L.wallFlatMat : isBp ? bpMat : f.userData.std;
+    f.castShadow = f.receiveShadow = is3d;
+  });
+  if (dot) dot.visible = true;
+  if (dotEdges) dotEdges.visible = isBp;
   sun.visible = is3d;
+  allLines.forEach(line => { line.visible = isBp; });
   updateShadowVis();
 
   document.body.classList.toggle('bp-mode', isBp);
   document.body.classList.toggle('flat-mode', isFlat);
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
   $('lpLight').style.display = showSolid ? '' : 'none';
+  updateStairs();
 
-  if (currentView === 'section') {
-    setView('section', true);
-  } else {
-    const v = getView(currentView);
-    clipEnabled = v.clip;
-    controls.enableRotate = v.enableRotate;
-    controls.maxPolarAngle = v.flat ? Math.PI / 2 : Math.PI * 0.48;
-  }
+  const v = getView(currentView);
+  controls.enableRotate = v.enableRotate;
+  controls.maxPolarAngle = v.flat ? Math.PI / 2 : Math.PI * 0.48;
 }
 
 /* ===== Этапы ===== */
-let textHidden = false;
-const textToggle = $('textToggle');
-textToggle.addEventListener('click', () => {
-  textHidden = !textHidden;
-  document.body.classList.toggle('notext', textHidden);
-  textToggle.setAttribute('aria-pressed', String(textHidden));
-});
 let currentStage = 6;
 function applyStage(stage) {
   currentStage = stage;
   state.forEach((s, i) => { s.visible = i < stage; });
-  $('stageValue').textContent = String(stage).padStart(2, '0') + ' / 06';
+  $('stageValue').textContent = String(stage).padStart(2, '0') + ' / ' + String(MN()).padStart(2, '0');
 }
 const range = $('stageRange');
 range.addEventListener('input', () => applyStage(Number(range.value)));
-applyStage(6);
+
+/* ===== Уровни роста ===== */
+const gRange = $('growthRange'); let gTimer = null;
+function applyGrowth(v) { growth = v; $('growthValue').textContent = String(v).padStart(2, '0') + ' / ' + String(MN()).padStart(2, '0'); }
+gRange.addEventListener('input', () => { applyGrowth(Number(gRange.value)); clearTimeout(gTimer); gTimer = setTimeout(rebuild, 40); });
+
+/* ===== Модели ===== */
+function renderLegend() {
+  const m = MODELS[modelKey], el = $('legend');
+  if (!m.mods) { el.style.display = 'none'; return; }
+  const hex = n => '#' + n.toString(16).padStart(6, '0');
+  const row = (c, t) => '<div class="r"><i style="background:' + c + '"></i>' + t + '</div>';
+  el.innerHTML = '<h4>«' + m.name + '»</h4><div class="lg-t">Витки от центра</div>' +
+    m.mods.map((t, i) => row(i ? hex(turnColors[i - 1]) : dotHex, i + ' · ' + t)).join('') +
+    '<div class="lg-t">5 опор</div>' + m.sups.map((t, i) => row(supportHex, (i + 1) + ' · ' + t)).join('');
+  el.style.display = 'block';
+}
+function setModel(k) {
+  modelKey = k; const M = MN(); currentStage = M;
+  range.max = gRange.max = M; range.value = gRange.value = M; applyGrowth(M);
+  document.querySelectorAll('.model-btn').forEach(x => x.classList.toggle('active', x.dataset.model === k));
+  rebuild(); renderLegend();
+}
+document.querySelectorAll('.model-btn').forEach(b => b.addEventListener('click', () => { if (b.dataset.model !== modelKey) setModel(b.dataset.model); }));
 
 /* ===== Виды ===== */
 const VIEW_BASE = {
-  axon:   { pos: new THREE.Vector3(13, 11.5, 18), target: new THREE.Vector3(0, 2.0, 0), fov: 34, enableRotate: true,  clip: false, flat: false },
-  facade: { pos: new THREE.Vector3(0, 1.95, 24),  target: new THREE.Vector3(0, 1.95, 0), fov: 24, enableRotate: false, clip: false, flat: true },
-  top:    { pos: new THREE.Vector3(0, 24, 0.01),  target: new THREE.Vector3(0, 0, 0),    fov: 32, enableRotate: false, clip: false, flat: false },
+  axon:   { pos: new THREE.Vector3(12, 9, 15), target: new THREE.Vector3(0, 2.0, 0), fov: 34, enableRotate: true, flat: false },
+  top:    { pos: new THREE.Vector3(0, 22, 0.01), target: new THREE.Vector3(0, 0, 0), fov: 32, enableRotate: false, flat: false },
+  facade: { pos: new THREE.Vector3(0, 2.3, 18), target: new THREE.Vector3(0, 2.3, 0), fov: 28, enableRotate: false, flat: true },
 };
-const SECTION_3D = { pos: new THREE.Vector3(4.5, 4.2, 17), target: new THREE.Vector3(0, 1.7, -0.6), fov: 28, enableRotate: true,  clip: true, flat: false };
-const SECTION_BP = { pos: new THREE.Vector3(0, 1.95, 24),  target: new THREE.Vector3(0, 1.95, 0),  fov: 24, enableRotate: false, clip: true, flat: true };
-function getView(name) {
-  if (name === 'section') return mode === 'bp' ? SECTION_BP : SECTION_3D;
-  return VIEW_BASE[name];
-}
+function getView(name) { return VIEW_BASE[name]; }
 
 const LIGHT_DEFAULT = { az: 38, el: 53, sunI: 1.8, hemiI: 2.0 };
 const LIGHT_TOP     = { az: 61, el: 32, sunI: 2.1, hemiI: 1.4 };
-const GROUND_SHADOW_DEFAULT = 0.2;
-const lightTarget = { ...LIGHT_DEFAULT };
-const lightCur = { ...LIGHT_DEFAULT };
+const lightTarget = { ...LIGHT_TOP };
+const lightCur = { ...LIGHT_TOP };
 let autoLight = true;
 
 let currentView = 'axon';
@@ -926,11 +1154,8 @@ let transitioning = false;
 let targetPos = VIEW_BASE.axon.pos.clone();
 let targetTarget = VIEW_BASE.axon.target.clone();
 let targetFov = VIEW_BASE.axon.fov;
-let clipEnabled = false;
 
-controls.addEventListener('start', () => {
-  if (transitioning) transitioning = false;
-});
+controls.addEventListener('start', () => { if (transitioning) transitioning = false; });
 
 function setView(name, force) {
   if (name === currentView && !force) return;
@@ -940,13 +1165,11 @@ function setView(name, force) {
   targetTarget.copy(v.target);
   targetFov = v.fov;
   transitioning = true;
-  clipEnabled = v.clip;
   if (autoLight && mode !== 'bp') { Object.assign(lightTarget, name === 'top' ? LIGHT_TOP : LIGHT_DEFAULT); syncLightUI(); }
-  document.querySelectorAll('.view-btn[data-view]').forEach(b => {
-    b.classList.toggle('active', b.dataset.view === name);
-  });
+  document.querySelectorAll('.view-btn[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === name));
   controls.enableRotate = v.enableRotate;
   controls.maxPolarAngle = v.flat ? Math.PI / 2 : Math.PI * 0.48;
+  updateStairs();
 }
 document.querySelectorAll('.view-btn[data-view]').forEach(btn => {
   btn.addEventListener('click', () => setView(btn.dataset.view));
@@ -962,28 +1185,25 @@ const ui = {
   hemi: [$('lpHemi'), $('lpHemiV'), v => v.toFixed(2)],
   az:   [$('lpAz'),   $('lpAzV'),   v => Math.round(v) + '°'],
   el:   [$('lpEl'),   $('lpElV'),   v => Math.round(v) + '°'],
-  gnd:  [$('lpGnd'),  $('lpGndV'),  v => v.toFixed(2)],
 };
 function syncLightUI() {
   ui.sun[0].value = lightTarget.sunI;
   ui.hemi[0].value = lightTarget.hemiI;
   ui.az[0].value = lightTarget.az;
   ui.el[0].value = lightTarget.el;
-  ui.gnd[0].value = shadowCatcher.material.opacity;
   Object.values(ui).forEach(([inp, out, fmt]) => { out.textContent = fmt(Number(inp.value)); });
 }
-function manualLight(key, el, apply) {
+function manualLight(el, apply) {
   el.addEventListener('input', () => {
     apply(Number(el.value));
-    if (key !== 'gnd') { autoLight = false; $('lpAuto').checked = false; }
+    autoLight = false; $('lpAuto').checked = false;
     syncLightUI();
   });
 }
-manualLight('sun',  ui.sun[0],  v => { lightTarget.sunI = v; });
-manualLight('hemi', ui.hemi[0], v => { lightTarget.hemiI = v; });
-manualLight('az',   ui.az[0],   v => { lightTarget.az = v; });
-manualLight('el',   ui.el[0],   v => { lightTarget.el = v; });
-manualLight('gnd',  ui.gnd[0],  v => { shadowCatcher.material.opacity = v; });
+manualLight(ui.sun[0],  v => { lightTarget.sunI = v; });
+manualLight(ui.hemi[0], v => { lightTarget.hemiI = v; });
+manualLight(ui.az[0],   v => { lightTarget.az = v; });
+manualLight(ui.el[0],   v => { lightTarget.el = v; });
 $('lpShadows').addEventListener('change', e => { shadowsOn = e.target.checked; updateShadowVis(); });
 function applyViewLight() {
   Object.assign(lightTarget, currentView === 'top' ? LIGHT_TOP : LIGHT_DEFAULT);
@@ -995,49 +1215,59 @@ const lpLineEl = $('lpLine'), lpLineV = $('lpLineV');
 function setLineThickness(v) {
   lineThickness = v;
   lpLineV.textContent = v.toFixed(1);
-  [...inkMats, ...softMats].forEach(m => {
-    m.linewidth = v;
-  });
+  [...inkMats, ...softMats].forEach(m => { m.linewidth = v; });
 }
 lpLineEl.addEventListener('input', () => setLineThickness(Number(lpLineEl.value)));
-setLineThickness(1);
+
+const lpWallEl = $('lpWall'), lpWallV = $('lpWallV');
+let wallRebuildTimer = null;
+function setWallWidth(v) {
+  wallWidth = v;
+  lpWallV.textContent = v.toFixed(2);
+}
+lpWallEl.addEventListener('input', () => {
+  setWallWidth(Number(lpWallEl.value));
+  clearTimeout(wallRebuildTimer);
+  wallRebuildTimer = setTimeout(rebuild, 120);
+});
 
 $('cBg').addEventListener('input', e => { D.bg = e.target.value; applyTheme(); });
 $('cBld').addEventListener('input', e => { D.bld = e.target.value; applyTheme(); });
+$('cDot').addEventListener('input', e => { dotHex = e.target.value; applyTheme(); });
+$('cSupports').addEventListener('input', e => { supportHex = e.target.value; applyTheme(); });
+$('lpWalls').addEventListener('change', e => setWallsVisible(e.target.checked));
+$('lpFloor').addEventListener('change', e => { if (floorGroup) floorGroup.visible = e.target.checked; });
+$('lpStairs').addEventListener('change', e => { stairsOn = e.target.checked; updateStairs(); });
 
-$('cInk').addEventListener('input', e => {
-  inkHex = e.target.value;
-  autoInk = false;
-  $('lpInkAuto').checked = false;
-  applyTheme();
-});
-$('cSoft').addEventListener('input', e => {
-  softHex = e.target.value;
-  autoInk = false;
-  $('lpInkAuto').checked = false;
-  applyTheme();
-});
-$('lpInkAuto').addEventListener('change', e => {
-  autoInk = e.target.checked;
-  applyTheme();
-});
+$('cInk').addEventListener('input', e => { inkHex = e.target.value; autoInk = false; $('lpInkAuto').checked = false; applyTheme(); });
+$('cSoft').addEventListener('input', e => { softHex = e.target.value; autoInk = false; $('lpInkAuto').checked = false; applyTheme(); });
+$('lpInkAuto').addEventListener('change', e => { autoInk = e.target.checked; applyTheme(); });
 
 $('lpReset').addEventListener('click', () => {
   D.bg = BG_DEFAULT; D.bld = BLD_DEFAULT;
+  dotHex = DOT_DEFAULT; supportHex = SUPPORT_DEFAULT;
   $('cBg').value = BG_DEFAULT; $('cBld').value = BLD_DEFAULT;
+  $('cDot').value = DOT_DEFAULT; $('cSupports').value = SUPPORT_DEFAULT;
+  $('lpWalls').checked = false; setWallsVisible(false);
+  $('lpStairs').checked = true; stairsOn = true; updateStairs();
+  $('lpFloor').checked = false; if (floorGroup) floorGroup.visible = false;
   autoInk = true; $('lpInkAuto').checked = true;
   inkHex = INK_DEFAULT; softHex = SOFT_DEFAULT;
   levelColors.fill(null);
-  doorsOn = false; $('lpDoors').checked = false;
   applyTheme();
   autoLight = true; $('lpAuto').checked = true;
   $('lpShadows').checked = true; shadowsOn = true; updateShadowVis();
-  shadowCatcher.material.opacity = GROUND_SHADOW_DEFAULT;
   applyViewLight();
-  $('lpLine').value = 1;
-  setLineThickness(1);
-  applyLineStyle('sketch');
-  applyDrawLevel('full');
+  $('lpLine').value = 1; setLineThickness(1);
+  applyLineStyle('sketch'); applyDrawLevel('full');
+
+  if (wallWidth !== 0.16) {
+    wallWidth = 0.16;
+    lpWallEl.value = '0.16';
+    lpWallV.textContent = '0.16';
+    clearTimeout(wallRebuildTimer);
+    rebuild();
+  }
 });
 lightBtn.addEventListener('click', () => {
   const open = lightPanel.classList.toggle('open');
@@ -1049,45 +1279,16 @@ syncLightUI();
 function renderComposite(prMin = 2) {
   const oldPR = renderer.getPixelRatio();
   const pr = Math.max(prMin, oldPR);
-  let out;
   try {
     renderer.setPixelRatio(pr);
     renderer.setSize(innerWidth, innerHeight);
     renderer.render(scene, camera);
-
     const w = renderer.domElement.width, h = renderer.domElement.height;
-    out = document.createElement('canvas');
+    const out = document.createElement('canvas');
     out.width = w; out.height = h;
     const ctx = out.getContext('2d');
-    if (!ctx) throw new Error('Не удалось создать 2D-контекст для экспорта изображения.');
+    if (!ctx) throw new Error('Не удалось создать 2D-контекст.');
     ctx.drawImage(renderer.domElement, 0, 0);
-
-    if (!textHidden) {
-      const [pr_, pg_, pb_] = hexToRgb(D.bg);
-      const v = new THREE.Vector3();
-      diltzLabels.forEach(({ element, pos }) => {
-        const o = parseFloat(element.style.opacity) || 0;
-        if (o < 0.05) return;
-        v.copy(pos).project(camera);
-        if (v.z > 1) return;
-        const x = (v.x * 0.5 + 0.5) * w, y = (-v.y * 0.5 + 0.5) * h;
-        const fs = 13 * pr;
-        ctx.save();
-        ctx.globalAlpha = o;
-        ctx.font = '600 ' + fs + 'px Manrope, "Helvetica Neue", Arial, sans-serif';
-        if ('letterSpacing' in ctx) ctx.letterSpacing = (0.05 * fs) + 'px';
-        const txt = element.textContent;
-        const tw = ctx.measureText(txt).width;
-        const padX = 10 * pr, padY = 3 * pr;
-        ctx.fillStyle = 'rgba(' + pr_ + ',' + pg_ + ',' + pb_ + ',0.9)';
-        ctx.fillRect(x - tw - 2 * padX, y - fs / 2 - padY, tw + 2 * padX, fs + 2 * padY);
-        ctx.fillStyle = inkHex;
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(txt, x - padX, y);
-        ctx.restore();
-      });
-    }
     return out;
   } finally {
     renderer.setPixelRatio(oldPR);
@@ -1101,11 +1302,8 @@ function stamp() {
 function downloadBlob(blob, name) {
   const a = document.createElement('a');
   const url = URL.createObjectURL(blob);
-  a.href = url;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 function flash() {
@@ -1118,315 +1316,284 @@ function takeShot() {
   out.toBlob(blob => { if (blob) downloadBlob(blob, 'museum-' + prefix + stamp() + '.png'); }, 'image/png');
   flash();
 }
+$('shotBtn').addEventListener('click', takeShot);
 
-/* ===== SVG (векторный экспорт) ===== */
-const depthMat = new THREE.ShaderMaterial({
-  side: THREE.DoubleSide, clipping: true, clippingPlanes: clipPlanes,
-  vertexShader: `
-    #include <clipping_planes_pars_vertex>
-    varying float vD;
-    void main() {
-      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-      vD = -mvPosition.z;
-      gl_Position = projectionMatrix * mvPosition;
-      #include <clipping_planes_vertex>
-    }`,
-  fragmentShader: `
-    #include <clipping_planes_pars_fragment>
-    varying float vD;
-    void main() {
-      #include <clipping_planes_fragment>
-      float v = clamp(vD / 100.0, 0.0, 0.999999);
-      vec3 enc = fract(vec3(1.0, 255.0, 65025.0) * v);
-      enc -= enc.yzz * vec3(1.0 / 255.0, 1.0 / 255.0, 0.0);
-      gl_FragColor = vec4(enc, 1.0);
-    }`,
-});
-function depthPass(W, H) {
-  const rt = new THREE.WebGLRenderTarget(W, H);
-  const hidden = [];
-  scene.traverse(o => {
-    if ((o.isLine || o.isLineSegments2 || o.isLine2) && o.visible) {
-      hidden.push(o); o.visible = false;
-    }
-  });
-  const catcherWas = shadowCatcher.visible;
-  shadowCatcher.visible = false;
-  const oldBg = scene.background;
-  scene.background = null;
-  const oldClear = new THREE.Color();
-  renderer.getClearColor(oldClear);
-  const oldAlpha = renderer.getClearAlpha();
-  renderer.setClearColor(0xffffff, 1);
-  scene.overrideMaterial = depthMat;
-  renderer.setRenderTarget(rt);
-  renderer.clear();
-  renderer.render(scene, camera);
-  renderer.setRenderTarget(null);
-  scene.overrideMaterial = null;
-  renderer.setClearColor(oldClear, oldAlpha);
-  scene.background = oldBg;
-  shadowCatcher.visible = catcherWas;
-  hidden.forEach(o => { o.visible = true; });
-  const buf = new Uint8Array(W * H * 4);
-  renderer.readRenderTargetPixels(rt, 0, 0, W, H, buf);
-  rt.dispose();
-  return buf;
-}
-
-function convexHull2D(points) {
-  if (points.length < 3) return points.slice();
-  const pts = points.slice().sort((a, b) => (a.x - b.x) || (a.y - b.y));
-  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
-  const lower = [];
-  for (const p of pts) {
-    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
-    lower.push(p);
+function tessellate(a, b, c, max, out) {
+  const st = [[a, b, c]];
+  while (st.length) {
+    const [p, q, r] = st.pop();
+    const e = [p.distanceTo(q), q.distanceTo(r), r.distanceTo(p)];
+    const m = Math.max(e[0], e[1], e[2]);
+    if (m <= max || st.length > 50000) { out.push([p, q, r]); continue; }
+    if (m === e[0]) { const h = p.clone().add(q).multiplyScalar(.5); st.push([p, h, r], [h, q, r]); }
+    else if (m === e[1]) { const h = q.clone().add(r).multiplyScalar(.5); st.push([p, q, h], [p, h, r]); }
+    else { const h = r.clone().add(p).multiplyScalar(.5); st.push([p, q, h], [h, q, r]); }
   }
-  const upper = [];
-  for (let i = pts.length - 1; i >= 0; i--) {
-    const p = pts[i];
-    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
-    upper.push(p);
-  }
-  lower.pop(); upper.pop();
-  return lower.concat(upper);
-}
-
-function cornersOfGeometry(geo) {
-  const gp = geo.parameters || {};
-  const t = geo.type;
-  if (t === 'BoxGeometry') {
-    const hw = gp.width/2, hh = gp.height/2, hd = gp.depth/2;
-    return [
-      [-hw,-hh,-hd],[hw,-hh,-hd],[hw,-hh,hd],[-hw,-hh,hd],
-      [-hw, hh,-hd],[hw, hh,-hd],[hw, hh,hd],[-hw, hh,hd],
-    ];
-  }
-  if (t === 'CylinderGeometry') {
-    const r = Math.max(gp.radiusTop, gp.radiusBottom);
-    const hh = gp.height/2;
-    const arr = [];
-    for (let i = 0; i < 8; i++) {
-      const a = i / 8 * Math.PI * 2;
-      arr.push([r*Math.cos(a), -hh, r*Math.sin(a)]);
-      arr.push([r*Math.cos(a),  hh, r*Math.sin(a)]);
-    }
-    return arr;
-  }
-  if (t === 'ConeGeometry') {
-    const r = gp.radius, hh = gp.height/2;
-    const arr = [];
-    for (let i = 0; i < 4; i++) {
-      const a = i / 4 * Math.PI * 2;
-      arr.push([r*Math.cos(a), -hh, r*Math.sin(a)]);
-    }
-    arr.push([0, hh, 0]);
-    return arr;
-  }
-  return null;
-}
-
-function isReallyVisible(obj) {
-  let o = obj, vis = obj.visible;
-  while (o && vis) {
-    vis = vis && o.visible;
-    o = o.parent;
-  }
-  return vis;
-}
-
-function flatSilhouettes(W, H) {
-  scene.updateMatrixWorld(true);
-  camera.updateMatrixWorld(true);
-  const camPos = camera.position;
-
-  const items = [];
-  const tmp = new THREE.Vector3();
-  const centroid = new THREE.Vector3();
-
-  solids.forEach(rec => {
-    const mesh = rec.mesh;
-    if (!isReallyVisible(mesh)) return;
-    const corners = cornersOfGeometry(mesh.geometry);
-    if (!corners) return;
-
-    const screenPts = [];
-    centroid.set(0, 0, 0);
-    let ok = true;
-    corners.forEach(c => {
-      tmp.set(c[0], c[1], c[2]).applyMatrix4(mesh.matrixWorld);
-      centroid.add(tmp);
-      tmp.project(camera);
-      if (tmp.z > 1) { ok = false; return; }
-      screenPts.push({
-        x: (tmp.x * 0.5 + 0.5) * W,
-        y: (-tmp.y * 0.5 + 0.5) * H,
-      });
-    });
-    if (!ok || screenPts.length < 3) return;
-    centroid.divideScalar(corners.length);
-
-    const mat = mesh.material;
-    const color = mat && mat.color ? ('#' + mat.color.getHexString()) : '#EEF1E6';
-
-    items.push({
-      screenPts,
-      depth: centroid.distanceTo(camPos),
-      color,
-    });
-  });
-
-  items.sort((a, b) => b.depth - a.depth);
-
-  let svg = '';
-  items.forEach(item => {
-    const hull = convexHull2D(item.screenPts);
-    if (hull.length < 3) return;
-    const d = 'M' + hull.map(p => p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join('L') + 'Z';
-    svg += '<path d="' + d + '" fill="' + item.color + '" stroke="none"/>\n';
-  });
-  return svg;
-}
-
-function labelsSVG() {
-  if (textHidden) return '';
-  const [br, bgc, bb] = hexToRgb(D.bg);
-  let svg = '';
-  diltzLabels.forEach(({ element }) => {
-    const o = parseFloat(element.style.opacity) || 0;
-    if (o < 0.05) return;
-    const r = element.getBoundingClientRect();
-    svg += '<g opacity="' + o.toFixed(2) + '">'
-      + '<rect x="' + r.left.toFixed(1) + '" y="' + r.top.toFixed(1) + '" width="' + r.width.toFixed(1) + '" height="' + r.height.toFixed(1) + '" fill="rgb(' + br + ',' + bgc + ',' + bb + ')" fill-opacity="0.9"/>'
-      + '<text x="' + (r.right - 10).toFixed(1) + '" y="' + (r.top + r.height / 2).toFixed(1) + '" text-anchor="end" dominant-baseline="central"'
-      + ' font-family="Manrope, \'Helvetica Neue\', Arial, sans-serif" font-size="13" font-weight="600" letter-spacing="0.65" fill="' + inkHex + '">'
-      + element.textContent + '</text></g>\n';
-  });
-  return svg;
-}
-
-function vectorBody(W, H) {
-  const sec = currentView === 'section';
-  scene.updateMatrixWorld(true);
-  camera.updateMatrixWorld(true);
-  const occl = sec ? null : depthPass(W, H);
-
-  const src = [];
-  if (sec) {
-    levels.forEach((L, i) => {
-      if (state[i].t > 0.01) src.push({ o: L.secWall, g: 'main' });
-      if (L.slabT > 0.01) { src.push({ o: L.secSlab, g: 'main' }); src.push({ o: L.secLvl, g: 'soft' }); }
-    });
-    src.push({ o: secStatic, g: 'main' }, { o: secSoft, g: 'faint' });
-  } else {
-    levels.forEach((L, i) => {
-      if (state[i].t > 0.01) src.push({ o: L.wl1, g: 'main' });
-      if (L.slabT > 0.01) src.push({ o: L.sl1, g: 'main', yFix: mode === '3d' ? L.slabG.position.y : 0 });
-    });
-    src.push({ o: gMain, g: 'main' });
-    if (roofsOn) src.push({ o: lanternLines, g: 'main' });
-  }
-
-  const groups = { main: { parts: [], last: null }, soft: { parts: [], last: null }, faint: { parts: [], last: null } };
-  const tmp = new THREE.Vector3(), A = new THREE.Vector3(), B = new THREE.Vector3(), S = new THREE.Vector3();
-  const pA = { x: 0, y: 0, d: 0 }, pB = { x: 0, y: 0, d: 0 }, pS = { x: 0, y: 0, d: 0 };
-  function proj(v, out) {
-    tmp.copy(v).applyMatrix4(camera.matrixWorldInverse);
-    out.d = -tmp.z;
-    tmp.applyMatrix4(camera.projectionMatrix);
-    out.x = (tmp.x * 0.5 + 0.5) * W;
-    out.y = (-tmp.y * 0.5 + 0.5) * H;
-  }
-  function visible(p) {
-    if (!occl) return true;
-    const ix = Math.round(p.x), iy = Math.round(p.y);
-    if (ix < 0 || iy < 0 || ix >= W || iy >= H) return true;
-    const idx = ((H - 1 - iy) * W + ix) * 4;
-    const v = occl[idx] / 255 + occl[idx + 1] / 65025 + occl[idx + 2] / 16581375;
-    return p.d <= v * 100 + 0.03;
-  }
-  const f = n => n.toFixed(1);
-  function emit(g, p, q) {
-    if (Math.hypot(q.x - p.x, q.y - p.y) < 0.3) return;
-    const G = groups[g];
-    if (G.last && Math.abs(G.last.x - p.x) < 0.05 && Math.abs(G.last.y - p.y) < 0.05) {
-      G.parts.push('L' + f(q.x) + ' ' + f(q.y));
-    } else {
-      G.parts.push('M' + f(p.x) + ' ' + f(p.y) + 'L' + f(q.x) + ' ' + f(q.y));
-    }
-    G.last = { x: q.x, y: q.y };
-  }
-
-  src.forEach(({ o, g, yFix = 0 }) => {
-    const arrBase = getLineArray(o);
-    if (!arrBase) return;
-    const arr = lineStyle === 'strict' ? (arrBase.cleanData || arrBase) : arrBase;
-    for (let k = 0; k + 5 < arr.length; k += 6) {
-      A.set(arr[k], arr[k+1], arr[k+2]).applyMatrix4(o.matrixWorld); A.y -= yFix;
-      B.set(arr[k+3], arr[k+4], arr[k+5]).applyMatrix4(o.matrixWorld); B.y -= yFix;
-      proj(A, pA); proj(B, pB);
-      if (pA.d < 0.1 || pB.d < 0.1) continue;
-      const n = Math.max(1, Math.ceil(Math.hypot(pB.x - pA.x, pB.y - pA.y) / 1.5));
-      let start = null, end = null;
-      for (let j = 0; j <= n; j++) {
-        S.lerpVectors(A, B, j / n);
-        proj(S, pS);
-        if (visible(pS)) {
-          if (!start) start = { x: pS.x, y: pS.y };
-          end = { x: pS.x, y: pS.y };
-        } else if (start) {
-          emit(g, start, end); start = null;
-        }
-      }
-      if (start) emit(g, start, end);
-    }
-  });
-
-  let svg = '';
-  const style = 'fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="' + lineThickness + '"';
-  if (groups.faint.parts.length) svg += '<path ' + style + ' stroke="' + inkHex + '" stroke-opacity="0.3" d="' + groups.faint.parts.join('') + '"/>\n';
-  if (groups.soft.parts.length)  svg += '<path ' + style + ' stroke="' + softHex + '" stroke-opacity="0.7" d="' + groups.soft.parts.join('') + '"/>\n';
-  if (groups.main.parts.length)  svg += '<path ' + style + ' stroke="' + inkHex + '" stroke-opacity="0.85" d="' + groups.main.parts.join('') + '"/>\n';
-  return svg;
 }
 
 function exportSVG() {
-  const W = Math.round(innerWidth), H = Math.round(innerHeight);
-  let inner = '<rect width="' + W + '" height="' + H + '" fill="' + D.bg + '"/>\n';
-  if (mode === 'flat') {
-    inner += flatSilhouettes(W, H);
-    inner += labelsSVG();
-  } else if (mode === 'bp') {
-    inner += vectorBody(W, H);
-    inner += labelsSVG();
-  } else {
-    if ($('lpSvgRaster').checked) {
-      const url = renderComposite(2).toDataURL('image/png');
-      inner = '<image x="0" y="0" width="' + W + '" height="' + H + '" href="' + url + '" xlink:href="' + url + '"/>\n';
-    } else {
-      inner += vectorBody(W, H);
-      inner += labelsSVG();
+  const W = Math.max(1, Math.round(innerWidth)), H = Math.max(1, Math.round(innerHeight));
+  const ns = 'http://www.w3.org/2000/svg';
+  try {
+    scene.updateMatrixWorld(true); camera.updateMatrixWorld(true);
+    const eye = camera.position.clone();
+    const nearZ = -camera.near;
+    const shown = o => { for (let p = o; p; p = p.parent) if (!p.visible) return false; return true; };
+
+    const proj = v => {
+      const vz = v.clone().applyMatrix4(camera.matrixWorldInverse).z;
+      if (!(vz < nearZ)) return null;
+      const n = v.clone().project(camera);
+      const x = (n.x + 1) * W / 2, y = (1 - n.y) * H / 2;
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      return [x, y, n.z];
+    };
+    const f2 = n => n.toFixed(2);
+    const lightDir = sun.position.clone().normalize();
+    const styleCache = new Map();
+    const items = [];
+
+    scene.traverse(o => {
+      if (!o.isMesh || mode === 'bp' || !shown(o) || o.userData.blk || o.userData.dot || (mode === 'flat' && o.userData.fp)) return;
+      const mat = o.material;
+      if (!mat || !mat.color || mat.side === THREE.BackSide || mat.wireframe) return;
+      const pos = o.geometry.attributes.position, idx = o.geometry.index;
+      const cnt = idx ? idx.count : pos.count;
+      const V = i => new THREE.Vector3().fromBufferAttribute(pos, idx ? idx.getX(i) : i).applyMatrix4(o.matrixWorld);
+      const lit = mode === '3d' && mat.isMeshStandardMaterial;
+      for (let i = 0; i + 2 < cnt; i += 3) {
+        const tris = [];
+        tessellate(V(i), V(i + 1), V(i + 2), 0.45, tris);
+        for (const [a, b, c] of tris) {
+          const P = [a, b, c].map(proj);
+          if (P.some(q => !q)) continue;
+          const ctr = a.clone().add(b).add(c).divideScalar(3);
+          let kq = 30;
+          if (lit) {
+            const n = b.clone().sub(a).cross(c.clone().sub(a)).normalize();
+            if (n.dot(eye.clone().sub(ctr)) < 0) n.negate();
+            kq = Math.round((0.6 + 0.4 * Math.max(0, n.dot(lightDir))) * 30);
+          }
+          const key = mat.uuid + '|' + kq;
+          let fill = styleCache.get(key);
+          if (!fill) { fill = mat.color.clone().multiplyScalar(kq / 30).getStyle(); styleCache.set(key, fill); }
+          items.push({ d: eye.distanceTo(ctr), k: 'p', key: 'p' + fill, pts: P,
+            attrs: { fill, stroke: fill, 'stroke-width': '0.6', 'stroke-linejoin': 'round' } });
+        }
+      }
+    });
+
+    if (mode !== 'bp') {
+      const bl = [];
+      for (const b of exportBlocks) {
+        if ((b.plane === 'c' && currentView === 'facade')) continue;
+        if (!(b.mesh.visible || (mode === 'flat' && b.plane))) continue;
+        if (!shown(b.parent)) continue;
+        if (!b.mesh.material || !b.mesh.material.color) continue;
+        const A = b.parent.localToWorld(new THREE.Vector3(b.x0, b.y0, b.z0));
+        const B = b.parent.localToWorld(new THREE.Vector3(b.x1, b.y1, b.z1));
+        const mn = [Math.min(A.x, B.x), Math.min(A.y, B.y), Math.min(A.z, B.z)];
+        const mx = [Math.max(A.x, B.x), Math.max(A.y, B.y), Math.max(A.z, B.z)];
+        if (b.mesh.userData.ext && currentView === 'facade') mn[1] -= b.mesh.userData.ext;
+        if (mx[1] - mn[1] < 1e-4) continue;
+        bl.push({ b, mn, mx, c: eye.distanceTo(new THREE.Vector3((mn[0] + mx[0]) / 2, (mn[1] + mx[1]) / 2, (mn[2] + mx[2]) / 2)) });
+      }
+      const n = bl.length, adj = bl.map(() => []), indeg = new Array(n).fill(0), E = 1e-4;
+      const inFront = (B, A) => {
+        for (let a = 0; a < 3; a++) {
+          if (B.mn[a] >= A.mx[a] - E && eye.getComponent(a) >= B.mn[a]) return true;
+          if (B.mx[a] <= A.mn[a] + E && eye.getComponent(a) <= B.mx[a]) return true;
+        }
+        return false;
+      };
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (i !== j && inFront(bl[j], bl[i])) { adj[i].push(j); indeg[j]++; }
+      const done = new Array(n).fill(false), order = [];
+      while (order.length < n) {
+        let pick = -1;
+        for (let i = 0; i < n; i++) if (!done[i] && indeg[i] === 0 && (pick < 0 || bl[i].c > bl[pick].c)) pick = i;
+        if (pick < 0) for (let i = 0; i < n; i++) if (!done[i] && (pick < 0 || bl[i].c > bl[pick].c)) pick = i;
+        done[pick] = true; order.push(pick); adj[pick].forEach(j => indeg[j]--);
+      }
+      const faces = [
+        [[1, 0, 0], [[1,0,0],[1,0,1],[1,1,1],[1,1,0]]], [[-1, 0, 0], [[0,0,0],[0,1,0],[0,1,1],[0,0,1]]],
+        [[0, 1, 0], [[0,1,0],[1,1,0],[1,1,1],[0,1,1]]], [[0, -1, 0], [[0,0,0],[0,0,1],[1,0,1],[1,0,0]]],
+        [[0, 0, 1], [[0,0,1],[0,1,1],[1,1,1],[1,0,1]]], [[0, 0, -1], [[0,0,0],[1,0,0],[1,1,0],[0,1,0]]],
+      ];
+      order.forEach((bi, rank) => {
+        const { b, mn, mx } = bl[bi], mat = b.mesh.material, lit = mode === '3d' && mat.isMeshStandardMaterial;
+        if (mode === 'flat' && b.plane) {
+          const cx = (mn[0] + mx[0]) / 2, cz = (mn[2] + mx[2]) / 2, yt = mx[1] + slabT;
+          const hq = y => [[mn[0], y, mn[2]], [mx[0], y, mn[2]], [mx[0], y, mx[2]], [mn[0], y, mx[2]]];
+          const xq = (y0, y1, z) => [[mn[0], y0, z], [mx[0], y0, z], [mx[0], y1, z], [mn[0], y1, z]];
+          const zq = (y0, y1, x) => [[x, y0, mn[2]], [x, y0, mx[2]], [x, y1, mx[2]], [x, y1, mn[2]]];
+          const rl = b.rec && b.rec.level != null ? levels[b.rec.level - 1] : null, rmat = rl ? rl.wallFlatMat : mat;
+          const quads = [];
+          if (b.plane === 'h') quads.push([hq(mx[1]), mat]);
+          else if (b.plane === 'v') { const wp = b.wp || { ax: (mx[0] - mn[0]) >= (mx[2] - mn[2]), ox: 0, oz: 0 }; quads.push([wp.ax ? xq(mn[1], yt, cz + wp.oz) : zq(mn[1], yt, cx + wp.ox), mat]); }
+          else if (b.plane === 'c') quads.push([xq(mn[1], mx[1], cz), mat], [zq(mn[1], mx[1], cx), mat]);
+          else if (b.plane === 's') {
+            quads.push([hq(mx[1]), mat]);
+            const [dx, dz] = b.dir;
+            quads.push([dz ? xq(mn[1], mx[1], dz > 0 ? mx[2] : mn[2]) : zq(mn[1], mx[1], dx > 0 ? mx[0] : mn[0]), rmat]);
+          }
+          for (const [C, m2] of quads) {
+            const P = C.map(c => proj(new THREE.Vector3(...c)));
+            if (P.some(q => !q)) continue;
+            const fill = m2.color.getStyle();
+            items.push({ d: 1e6 - rank, k: 'p', key: 'b' + items.length, pts: P,
+              attrs: { fill, stroke: fill, 'stroke-width': '0.4', 'stroke-linejoin': 'round' } });
+          }
+          return;
+        }
+        for (const [nv, cs] of faces) {
+          const nrm = new THREE.Vector3(...nv);
+          const ctr = new THREE.Vector3(
+            (mn[0] + mx[0]) / 2 + nv[0] * (mx[0] - mn[0]) / 2,
+            (mn[1] + mx[1]) / 2 + nv[1] * (mx[1] - mn[1]) / 2,
+            (mn[2] + mx[2]) / 2 + nv[2] * (mx[2] - mn[2]) / 2
+          );
+          if (nrm.dot(eye.clone().sub(ctr)) <= 0) continue;
+          const P = cs.map(([ix, iy, iz]) => proj(new THREE.Vector3(ix ? mx[0] : mn[0], iy ? mx[1] : mn[1], iz ? mx[2] : mn[2])));
+          if (P.some(q => !q)) continue;
+          const kq = lit ? Math.round((0.6 + 0.4 * Math.max(0, nrm.dot(lightDir))) * 30) : 30;
+          const fill = mat.color.clone().multiplyScalar(kq / 30).getStyle();
+          items.push({ d: 1e6 - rank, k: 'p', key: 'b' + items.length, pts: P,
+            attrs: { fill, stroke: fill, 'stroke-width': '0.4', 'stroke-linejoin': 'round' } });
+        }
+      });
+      if (dot && shown(dot)) {
+        const c = dot.getWorldPosition(new THREE.Vector3()), C = proj(c);
+        if (C) {
+          const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+          const rProj = proj(c.clone().addScaledVector(right, 0.1));
+          if (rProj) {
+            const R = Math.abs(rProj[0] - C[0]);
+            const pts = Array.from({ length: 32 }, (_, i) => [C[0] + R * Math.cos(i / 32 * 2 * Math.PI), C[1] + R * Math.sin(i / 32 * 2 * Math.PI)]);
+            const fill = dotMat.color.getStyle();
+            items.push({ d: -1, k: 'p', key: 'dot', pts, attrs: { fill, stroke: fill, 'stroke-width': '0.4' } });
+          }
+        }
+      }
     }
+
+    const pushSeg = (a, b, color, w, op, bias, extra = {}) => {
+      const near = -camera.near;
+      const av = a.clone().applyMatrix4(camera.matrixWorldInverse);
+      const bv = b.clone().applyMatrix4(camera.matrixWorldInverse);
+      const aBehind = av.z >= near, bBehind = bv.z >= near;
+      if (aBehind && bBehind) return;
+      let aa = a, bb = b;
+      if (aBehind) {
+        const t = (near - av.z) / (bv.z - av.z);
+        aa = a.clone().lerp(b, t);
+      } else if (bBehind) {
+        const t = (near - bv.z) / (av.z - bv.z);
+        bb = b.clone().lerp(a, t);
+      }
+      const A = proj(aa), B = proj(bb);
+      if (!A || !B) return;
+      const mid = aa.clone().add(bb).multiplyScalar(.5);
+      items.push({ d: eye.distanceTo(mid) - bias, k: 's', key: 's' + color + w + op, pts: [A, B],
+        attrs: { fill: 'none', stroke: color, 'stroke-width': String(w), 'stroke-opacity': String(op), 'stroke-linecap': 'round', ...extra } });
+    };
+
+    if (mode === 'bp') {
+      const rc = new THREE.Raycaster();
+      const occ = solids.map(r => r.mesh);
+      if (facadeFillers) occ.push(...facadeFillers.children);
+      const occl = occ.filter(shown);
+      const hidden = p => {
+        const dv = p.clone().sub(eye), dist = dv.length();
+        rc.set(eye, dv.divideScalar(dist)); rc.near = 0; rc.far = dist - 0.03;
+        return rc.intersectObjects(occl, false).length > 0;
+      };
+      for (const line of allLines) {
+        if (!line.visible || !shown(line)) continue;
+        const arr = getLineArray(line);
+        if (!arr || !arr.length) continue;
+        const data = lineStyle === 'strict' ? (arr.cleanData || arr) : arr;
+        const color = line.material.color.getStyle(), op = line.material.opacity ?? 1;
+        for (let i = 0; i + 5 < data.length; i += 6) {
+          const A = line.localToWorld(new THREE.Vector3(data[i], data[i + 1], data[i + 2]));
+          const B = line.localToWorld(new THREE.Vector3(data[i + 3], data[i + 4], data[i + 5]));
+          const n = Math.min(40, Math.max(1, Math.ceil(A.distanceTo(B) / 0.12)));
+          let st = -1;
+          for (let k = 0; k <= n; k++) {
+            const vis = k < n && !hidden(A.clone().lerp(B, (k + 0.5) / n));
+            if (vis && st < 0) st = k;
+            if (!vis && st >= 0) { pushSeg(A.clone().lerp(B, st / n), A.clone().lerp(B, k / n), color, lineThickness, op, 0.06); st = -1; }
+          }
+        }
+      }
+      if (dot && shown(dot)) {
+        const c = dot.getWorldPosition(new THREE.Vector3()), C = proj(c);
+        const rp = C && proj(c.clone().addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0), 0.1));
+        if (rp) {
+          const R = Math.abs(rp[0] - C[0]);
+          const pts = Array.from({ length: 33 }, (_, i) => [C[0] + R * Math.cos(i / 32 * 2 * Math.PI), C[1] + R * Math.sin(i / 32 * 2 * Math.PI)]);
+          items.push({ d: eye.distanceTo(c) - 0.06, k: 's', key: 'sdot', pts,
+            attrs: { fill: 'none', stroke: inkHex, 'stroke-width': String(lineThickness), 'stroke-linecap': 'round' } });
+        }
+      }
+    }
+
+    if (growthLine && growthLine.visible && shown(growthLine)) {
+      const gp = growthLine.geometry.getAttribute('position');
+      const color = growthLine.material.color.getStyle(), op = growthLine.material.opacity ?? 1;
+      const dash = growthLine.material.dashSize, gap = growthLine.material.gapSize;
+      for (let i = 0; i + 1 < gp.count; i++) {
+        const a = new THREE.Vector3().fromBufferAttribute(gp, i).applyMatrix4(growthLine.matrixWorld);
+        const b = new THREE.Vector3().fromBufferAttribute(gp, i + 1).applyMatrix4(growthLine.matrixWorld);
+        const len = a.distanceTo(b);
+        for (let t = 0; t < len; t += dash + gap) {
+          const t2 = Math.min(len, t + dash);
+          pushSeg(a.clone().lerp(b, t / len), a.clone().lerp(b, t2 / len), color, 1.7, op, 0.02);
+        }
+      }
+    }
+
+    items.sort((x, y) => y.d - x.d);
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('xmlns', ns);
+    svg.setAttribute('width', String(W)); svg.setAttribute('height', String(H));
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('version', '1.1');
+    const bg = document.createElementNS(ns, 'rect');
+    for (const [k, v] of Object.entries({ x: 0, y: 0, width: W, height: H, fill: D.bg })) bg.setAttribute(k, String(v));
+    svg.appendChild(bg);
+    const g = document.createElementNS(ns, 'g');
+    svg.appendChild(g);
+    let cur = null, curKey = null, d = '';
+    const flush = () => { if (cur) { cur.setAttribute('d', d); g.appendChild(cur); } cur = null; };
+    for (const it of items) {
+      if (it.key !== curKey) {
+        flush(); curKey = it.key; d = '';
+        cur = document.createElementNS(ns, 'path');
+        for (const [k, v] of Object.entries(it.attrs)) cur.setAttribute(k, v);
+      }
+      d += 'M' + it.pts.map(q => f2(q[0]) + ' ' + f2(q[1])).join('L') + (it.k === 'p' ? 'Z' : '');
+    }
+    flush();
+    if (!g.childNodes.length) throw new Error('Нет геометрии для экспорта.');
+
+    const source = new XMLSerializer().serializeToString(svg);
+    const parsed = new DOMParser().parseFromString(source, 'image/svg+xml');
+    if (parsed.querySelector('parsererror')) throw new Error('Generated SVG is not valid XML.');
+    const blob = new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n${source}`], { type: 'image/svg+xml;charset=utf-8' });
+    downloadBlob(blob, 'museum-' + mode + '-' + currentView + '-' + stamp() + '.svg');
+    flash();
+  } catch (error) {
+    console.error('SVG export failed:', error);
+    alert('Не удалось создать корректный SVG. Подробности — в консоли браузера.');
   }
-  const svg = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    + '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">\n'
-    + '<title>Музей безграничного роста</title>\n' + inner + '</svg>\n';
-  downloadBlob(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), 'museum-' + mode + '-' + stamp() + '.svg');
-  flash();
 }
+
 $('svgBtn').addEventListener('click', exportSVG);
-$('shotBtn').addEventListener('click', takeShot);
 
 /* ===== Анимация ===== */
-let secT = 0;
-let labT = 0;
 function animate() {
   requestAnimationFrame(animate);
   const is3d = mode === '3d';
   const isFlat = mode === 'flat';
-  const isBp = mode === 'bp';
-  const isSolid = is3d || isFlat;
 
   if (transitioning) {
     camera.position.lerp(targetPos, 0.08);
@@ -1451,19 +1618,7 @@ function animate() {
   sun.position.set(18 * Math.cos(er) * Math.sin(ar), 18 * Math.sin(er), 18 * Math.cos(er) * Math.cos(ar));
   sun.intensity = lightCur.sunI * (1 - flatBlend);
   hemi.intensity = lightCur.hemiI * (1 + flatBlend * 0.8);
-  if (isFlat) { sun.visible = false; shadowCatcher.visible = false; }
-
-  const curClip = clipPlane.constant;
-  const tgtClip = clipEnabled ? 0 : 100;
-  clipPlane.constant = curClip + (tgtClip - curClip) * 0.12;
-
-  const secGoal = (isBp && currentView === 'section') ? 1 : 0;
-  secT += (secGoal - secT) * 0.12;
-  if (Math.abs(secT - secGoal) < 0.005) secT = secGoal;
-  const k3 = 1 - secT;
-
-  // Линии рёбер — только в чертеже, вне зависимости от детализации.
-  const showEdges = isBp;
+  if (isFlat) { sun.visible = false; }
 
   state.forEach((s, i) => {
     const target = s.visible ? 1 : 0;
@@ -1471,75 +1626,67 @@ function animate() {
     if (Math.abs(s.t - target) < 0.005) s.t = target;
 
     const L = levels[i];
-    const slabT = Math.max(0, Math.min(1, (s.t - 0.5) / 0.5));
-    L.slabT = slabT;
+    if (!L) return;
+    L.slabT = Math.max(0, Math.min(1, (s.t - 0.5) / 0.5));
 
-    L.wallG.visible = s.t > 0.01 && (isSolid || k3 > 0.01);
-    L.wallG.scale.y = Math.max(0.001, s.t);
-    L.slabG.visible = roofsOn && slabT > 0.01 && (isSolid || k3 > 0.01);
-    L.slabG.position.y = is3d ? (1 - slabT) * 0.5 : 0;
-
-    L.wl1.visible = showEdges && s.t > 0.01;
-    L.wl1.material.opacity = 0.85 * s.t * k3;
-    L.sl1.visible = showEdges && roofsOn && s.t > 0.01;
-    L.sl1.material.opacity = 0.85 * slabT * k3;
-    L.sMat.opacity = slabT;
-    L.sCap.opacity = slabT;
-
-    L.secWall.visible = isBp && secT > 0.01 && s.t > 0.01;
-    L.secWall.scale.y = Math.max(0.001, s.t);
-    L.secWall.material.opacity = 0.85 * secT * s.t;
-    L.secSlab.visible = roofsOn && isBp && secT > 0.01 && slabT > 0.01;
-    L.secSlab.material.opacity = 0.85 * secT * slabT;
-    L.secLvl.visible = roofsOn && isBp && secT > 0.01 && slabT > 0.01;
-    L.secLvl.material.opacity = 0.7 * secT * slabT;
-
-    if (L.door) L.door.visible = doorsOn && isSolid && s.t > 0.01;
+    if (L.wallG) {
+      L.wallG.visible = s.t > 0.01;
+      L.wallG.scale.y = Math.max(0.001, s.t);
+    }
   });
 
-  gMain.visible = isBp && k3 > 0.01;
-  gMain.material.opacity = 0.85 * k3;
-  secStatic.visible = isBp && secT > 0.01;
-  secSoft.visible = isBp && secT > 0.01;
-  secStatic.material.opacity = 0.85 * secT;
-  secSoft.material.opacity = 0.3 * secT;
+  // Фасадные «заполнители» — видимы только в фасад-виде 3D и только для
+  // реально собранных этапов; растут синхронно с state[i].t.
+  if (facadeFillers) {
+    facadeFillers.visible = currentView === 'facade';
+    if (facadeFillers.visible) {
+      facadeFillers.children.forEach(f => {
+        const s = state[f.userData.stage - 1];
+        const t = s ? s.t : 0;
+        f.visible = t > 0.01;
+        f.scale.y = Math.max(0.001, t);
+        f.position.y = t * (f.userData.topY - f.userData.height / 2);
+      });
+    }
+  }
 
-  lantern.visible = roofsOn && (isSolid || k3 > 0.01);
-  lanternLines.visible = isBp && k3 > 0.01 && roofsOn;
-  lanternLines.material.opacity = 0.85 * k3;
-  topPlate.visible = !roofsOn && isSolid;
+  const lastS = state[state.length - 1], showGrowth = currentStage === state.length && lastS && lastS.t > 0.9 && currentView === 'top';
+  if (growthLine) {
+    growthLine.visible = showGrowth;
+    if (showGrowth) growthLine.material.opacity = Math.min(1, Math.max(0.2, (lastS.t - 0.9) * 10));
+  }
 
-  labT += ((currentView === 'section' ? 1 : 0) - labT) * 0.12;
-  if (Math.abs(labT - (currentView === 'section' ? 1 : 0)) < 0.005) labT = currentView === 'section' ? 1 : 0;
-
-  let showFromCam = (camera.position.x < 0 || camera.position.z > 0) ? 1 : 0;
-  if (currentView === 'top') showFromCam = 0;
-
-  const showLeaders = isSolid;
-  diltzLabels.forEach(({ ring, element }) => {
-    const L = levels[ring - 1];
-    const o = textHidden ? 0 : L.slabT * showFromCam * labT;
-    element.style.opacity = String(o);
-    L.leader.visible = showLeaders;
-    L.leader.material.opacity = showLeaders ? 0.6 * o : 0;
-  });
+  lift += (liftTarget - lift) * 0.15;
+  if (Math.abs(lift - liftTarget) < 0.001) lift = liftTarget;
+  museumGroup.position.y = lift;
+  if (floorGroup) floorGroup.position.y = -lift;
+  const colTop = coreY - slabT;
+  colMeshes.forEach(m => { m.scale.y = (colTop + lift) / colTop; m.position.y = (colTop - lift) / 2; });
+  if (colL) { colL.position.y = -lift; colL.scale.y = (colTop + lift) / colTop; }
+  colBlocks.forEach(b => { b.y0 = -lift; });
 
   controls.update();
   renderer.render(scene, camera);
-  labelRenderer.render(scene, camera);
 }
 
+/* ===== Инициализация ===== */
+applyStage(6);
+generateMuseum();
+buildFlatPlanes();
 applyTheme();
 setMode('3d');
+updateStairs();
+lift = liftTarget;
 applyLineStyle('sketch');
 applyDrawLevel('full');
+setLineThickness(1);
+setWallWidth(0.16);
 animate();
 
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
-  labelRenderer.setSize(innerWidth, innerHeight);
   [...inkMats, ...softMats].forEach(m => {
     if (m.resolution && typeof m.resolution.set === 'function') {
       m.resolution.set(innerWidth, innerHeight);
