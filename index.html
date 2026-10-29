@@ -2,1697 +2,687 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Архитектоника лидера · Музей безграничного роста</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Генератор графики курса</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js"></script>
 <style>
-  :root{
-    --paper:#F2F5EC;
-    --ui-ink:#202020; --ui-ink-rgb:32,32,32; --ui-ink-soft:#B9BDBF;
-    --ink:#202020; --ink-rgb:32,32,32; --ink-soft:#B9BDBF;
-    --paper-rgb:242,245,236;
-  }
-  *{box-sizing:border-box}
-  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--paper);
-    font-family: "Manrope", -apple-system, "Helvetica Neue", Arial, sans-serif; color: var(--ui-ink); }
-  canvas { display: block; }
-  body::after {
-    content: ""; position: fixed; inset: 0; pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
-    opacity: 0.07; mix-blend-mode: multiply; z-index: 998;
-  }
-  .modes { position: fixed; top: 64px; left: 30px; z-index: 1000; display: flex; gap: 6px; }
-  .views { position: fixed; top: 26px; left: 30px; z-index: 1000; display: flex; gap: 6px; }
-  .view-btn { background: rgba(var(--paper-rgb), 0.85); border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ui-ink); cursor: pointer; transition: background .25s, border-color .25s, opacity .25s; opacity: 0.65; backdrop-filter: blur(8px); }
-  .view-btn:hover { opacity: 1; background: var(--paper); }
-  .view-btn.active { opacity: 1; background: var(--ui-ink); color: var(--paper); border-color: var(--ui-ink); }
-  .build { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 1000; width: 320px; max-width: calc(100vw - 60px); }
-  .build-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 9px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ui-ink-soft); margin-bottom: 8px; }
-  .build-label strong { font-weight: 700; color: var(--ui-ink); font-variant-numeric: tabular-nums; letter-spacing: 0.12em; }
-  #stageRange, #growthRange { display: block; width: 100%; height: 14px; appearance: none; background: transparent; cursor: pointer; }
-  #stageRange::-webkit-slider-runnable-track, #growthRange::-webkit-slider-runnable-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); border: 0; }
-  #stageRange::-moz-range-track, #growthRange::-moz-range-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); border: 0; }
-  #stageRange::-webkit-slider-thumb, #growthRange::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; margin-top: -5.5px; background: var(--paper); border: 1px solid var(--ui-ink); box-shadow: 0 0 0 1px var(--paper) inset; cursor: grab; }
-  #stageRange::-moz-range-thumb, #growthRange::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--paper); border: 1px solid var(--ui-ink); cursor: grab; }
-  #hint { position: fixed; bottom: 14px; left: 30px; font-size: 9px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--ui-ink-soft); opacity: .65; pointer-events: none; z-index: 1000; }
-  
-  .text-toggle { position: fixed; right: 30px; bottom: 28px; z-index: 1001; width: 38px; height: 38px; border-radius: 50%; padding: 0; display: grid; place-items: center; background: rgba(var(--paper-rgb),.85); border: 1px solid rgba(var(--ui-ink-rgb),.22); color: var(--ui-ink); cursor: pointer; backdrop-filter: blur(8px); opacity: .7; transition: opacity .25s, background .25s; }
-  .text-toggle:hover { opacity: 1; background: var(--paper); }
-  .text-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
-  #lightBtn { right: 76px; }
-  #shotBtn { right: 122px; }
-  #svgBtn { right: 168px; }
-  .light-panel { position: fixed; right: 30px; bottom: 76px; z-index: 1001; width: 260px; padding: 14px 16px 12px; background: rgba(var(--paper-rgb),.94); border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 14px; backdrop-filter: blur(10px); display: none; max-height: calc(100vh - 120px); overflow-y: auto; }
-  .light-panel.open { display: block; }
-  .lp-title { font-size: 9px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--ui-ink-soft); padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(var(--ui-ink-rgb),.18); }
-  .lp-row { margin-bottom: 8px; }
-  .lp-lab { display: flex; justify-content: space-between; font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ui-ink-soft); margin-bottom: 2px; }
-  .lp-lab b { color: var(--ui-ink); font-weight: 700; font-variant-numeric: tabular-nums; }
-  .light-panel input[type=range] { display: block; width: 100%; height: 14px; appearance: none; background: transparent; cursor: pointer; margin: 0; }
-  .light-panel input[type=range]::-webkit-slider-runnable-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); }
-  .light-panel input[type=range]::-moz-range-track { height: 1px; background: rgba(var(--ui-ink-rgb),.35); }
-  .light-panel input[type=range]::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; margin-top: -5.5px; background: var(--paper); border: 1px solid var(--ui-ink); cursor: grab; }
-  .light-panel input[type=range]::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--paper); border: 1px solid var(--ui-ink); cursor: grab; }
-  .lp-colors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-bottom: 8px; }
-  .lp-color { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ui-ink-soft); cursor: pointer; }
-  .lp-color input { width: 34px; height: 20px; padding: 0; border: 1px solid rgba(var(--ui-ink-rgb),.35); border-radius: 6px; background: none; cursor: pointer; }
-  .lp-color input::-webkit-color-swatch-wrapper { padding: 0; }
-  .lp-color input::-webkit-color-swatch { border: 0; border-radius: 5px; }
-  .lp-color input::-moz-color-swatch { border: 0; border-radius: 5px; }
-  .lp-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 4px; }
-  .lp-level-color { display: flex; align-items: center; gap: 4px; font-size: 8px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ui-ink-soft); cursor: pointer; }
-  .lp-level-color input { width: 28px; height: 18px; padding: 0; border: 1px solid rgba(var(--ui-ink-rgb),.35); border-radius: 5px; background: none; cursor: pointer; }
-  .lp-level-color input::-webkit-color-swatch-wrapper { padding: 0; }
-  .lp-level-color input::-webkit-color-swatch { border: 0; border-radius: 4px; }
-  .lp-level-color input::-moz-color-swatch { border: 0; border-radius: 4px; }
-  .lp-sep { height: 1px; background: rgba(var(--ui-ink-rgb),.18); margin: 2px 0 10px; }
-  .lp-check { display: flex; align-items: center; gap: 8px; font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ui-ink); margin: 6px 0; cursor: pointer; }
-  .lp-check input { accent-color: var(--ui-ink); margin: 0; }
-  .lp-reset { margin-top: 6px; width: 100%; background: transparent; border: 1px solid rgba(var(--ui-ink-rgb),.3); border-radius: 999px; padding: 7px 10px; font: inherit; font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ui-ink); cursor: pointer; }
-  .lp-reset:hover { background: var(--ui-ink); color: var(--paper); }
-  .lp-style-group { display: flex; gap: 4px; margin-top: 4px; }
-  .lp-style-btn { flex: 1; background: transparent; border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 999px; padding: 6px 8px; font: inherit; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ui-ink-soft); cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
-  .lp-style-btn.active { background: var(--ui-ink); color: var(--paper); border-color: var(--ui-ink); }
-  .lp-style-btn:hover:not(.active) { background: rgba(var(--ui-ink-rgb),.06); color: var(--ui-ink); }
-  body.flat-mode .flat-hide { display: none; }
-  .shot-flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 1002; }
-  .shot-flash.go { animation: shotflash .35s ease-out; }
-  @keyframes shotflash { 0% { opacity: .75; } 100% { opacity: 0; } }
-  .views, .modes, #hint, .build-label { transition: opacity .35s; }
-  @media (max-width: 820px) {
-    .text-toggle { right: 20px; bottom: 20px; }
-    #lightBtn { right: 66px; }
-    #shotBtn { right: 112px; }
-    #svgBtn { right: 158px; }
-    .light-panel { right: 20px; bottom: 66px; width: min(280px, calc(100vw - 40px)); }
-    .views { top: 20px; left: 20px; gap: 4px; }
-    .modes { top: 58px; left: 20px; gap: 4px; }
-    .view-btn { padding: 7px 11px; font-size: 8px; letter-spacing: 0.14em; }
-    .build { bottom: 110px; }
-    #hint { display: none; }
-  }
-  .models { position: fixed; top: 102px; left: 30px; z-index: 1000; display: flex; gap: 6px; }
-  .build.growth { bottom: 92px; }
-  .legend { position: fixed; right: 30px; top: 26px; z-index: 1000; width: 250px; padding: 14px 16px; background: rgba(var(--paper-rgb),.9); border: 1px solid rgba(var(--ui-ink-rgb),.22); border-radius: 14px; backdrop-filter: blur(8px); display: none; font-size: 11px; line-height: 1.5; }
-  .legend h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; }
-  .legend .lg-t { font-size: 9px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--ui-ink-soft); margin: 10px 0 4px; }
-  .legend .r { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
-  .legend i { width: 10px; height: 10px; border-radius: 2px; border: 1px solid rgba(var(--ui-ink-rgb),.35); flex: none; }
+:root{--paper:#F2F5EC;--ink:#202020;--line:rgba(32,32,32,.18)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{height:100dvh;display:grid;grid-template-columns:300px minmax(0,1fr);background:var(--paper);color:var(--ink);font:13px/1.4 Manrope,system-ui,Arial,sans-serif}
+aside{height:100%;overflow-y:auto;padding:18px;border-right:1px solid var(--line)}
+h1{font-size:15px;margin:0 0 12px}
+h2{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7a7f82;margin:16px 0 8px;padding-top:12px;border-top:1px solid var(--line)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;font-size:11px;font-weight:600;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:7px 13px;cursor:pointer;transition:background .2s,color .2s}
+button:hover{background:rgba(32,32,32,.07)}
+button.on,button.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.row{margin:8px 0}.row label{display:flex;justify-content:space-between;font-size:11px;color:#555}
+.row b{font-variant-numeric:tabular-nums;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--ink);margin:2px 0 0}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+.cols label{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#555}
+input[type=color]{width:32px;height:20px;padding:0;border:1px solid var(--line);border-radius:5px;background:none}
+.chk{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:12px}
+main{height:100%;min-height:0;min-width:0;display:flex;flex-direction:column;gap:12px;padding:16px}
+#stage{position:relative;flex:1;min-height:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+ background:repeating-conic-gradient(#e9ece3 0 25%,#f6f8f1 0 50%) 0 0/16px 16px}
+#stage svg{position:absolute;inset:14px;width:calc(100% - 28px);height:calc(100% - 28px)}
+.ctl{display:flex;align-items:center;gap:10px}
+.ctl .sl{flex:1;min-width:0}
+.ticks{display:flex;justify-content:space-between;padding:0 2px;margin-top:2px}
+.ticks button{padding:2px 9px;font-size:11px;border-color:transparent}
+.lab{font-size:11px;color:#555;white-space:nowrap}.lab b{color:var(--ink);font-variant-numeric:tabular-nums}
+.sq{width:34px;height:34px;padding:0;display:grid;place-items:center;font-size:13px}
+.fxh{font-weight:700;margin:10px 0 2px}
+.fxp{margin:0 0 8px 24px;padding:2px 0 4px 10px;border-left:2px solid var(--line)}
+.fxp[hidden]{display:none}
+.hint{font-size:10.5px;color:#7a7f82;margin:0 0 4px}
+.fxp .seg{margin:6px 0}
+.fxp button{padding:4px 10px}
+.fxp .cols{margin:6px 0}
+select{width:100%;font:inherit;font-size:11px;color:var(--ink);background:rgba(255,255,255,.5);border:1px solid var(--line);border-radius:8px;padding:7px 8px;min-width:0}
+.gif-field{margin:8px 0}.gif-field>label{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#555;margin-bottom:3px}.gif-field b{color:var(--ink);font-variant-numeric:tabular-nums}.gif-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.gif-status{font-size:10.5px;color:#7a7f82;min-height:14px;margin:7px 0 2px;overflow-wrap:anywhere}.gif-progress{height:3px;background:rgba(32,32,32,.10);border-radius:99px;overflow:hidden;margin-top:6px}.gif-progress>div{height:100%;width:0;background:var(--ink);transition:width .12s}
+.control-section{border-top:1px solid var(--line);margin-top:16px}
+.control-section>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;user-select:none;padding:12px 2px 8px 0;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#7a7f82}
+.control-section>summary::-webkit-details-marker{display:none}
+.control-section>summary::after{content:'+';font-size:17px;font-weight:400;letter-spacing:0;line-height:1;color:var(--ink);width:18px;text-align:center}
+.control-section[open]>summary::after{content:'−'}
+.control-section>summary:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:3px}
+.control-section[open]>summary{padding-bottom:8px}
+.control-section #fx,.control-section #gifControls{padding-bottom:4px}
+@media(max-width:800px){body{grid-template-columns:1fr;grid-template-rows:64dvh minmax(0,1fr)}main{order:-1;padding:10px}aside{border:0;border-top:1px solid var(--line)}}
 </style>
 </head>
 <body>
-<div class="views" role="group" aria-label="Вид">
-  <button class="view-btn active" data-view="axon">аксонометрия</button>
-  <button class="view-btn" data-view="top">сверху (план)</button>
-  <button class="view-btn" data-view="facade">фасад (уровни)</button>
-</div>
-<div class="modes" role="group" aria-label="Режим">
-  <button class="view-btn mode-btn active" data-mode="3d">3D</button>
-  <button class="view-btn mode-btn" data-mode="flat">Flat</button>
-  <button class="view-btn mode-btn" data-mode="bp">чертёж</button>
-</div>
-<div class="build">
-  <div class="build-label"><span>Собрано</span><strong id="stageValue">06 / 06</strong></div>
-  <input id="stageRange" type="range" min="1" max="6" step="1" value="6" aria-label="Сколько витков показать">
-</div>
-<div class="models" role="group" aria-label="Модель">
-  <button class="view-btn model-btn active" data-model="museum">Музей роста</button>
-</div>
-<div class="build growth">
-  <div class="build-label"><span>Уровень роста</span><strong id="growthValue">06 / 06</strong></div>
-  <input id="growthRange" type="range" min="1" max="6" step="1" value="6" aria-label="Уровень роста (этажность)">
-</div>
-<div class="legend" id="legend"></div>
-<div id="hint">drag · scroll</div>
-<div class="shot-flash" id="shotFlash"></div>
-
-<button class="text-toggle" id="svgBtn" type="button" aria-label="Скачать SVG" title="Скачать настоящий векторный SVG">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></svg>
-</button>
-<button class="text-toggle" id="shotBtn" type="button" aria-label="Сохранить снимок" title="Сохранить снимок (PNG)">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg>
-</button>
-<button class="text-toggle" id="lightBtn" type="button" aria-label="Настройки" title="Цвета и освещение">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/></svg>
-</button>
-
-<div class="light-panel" id="lightPanel" role="group" aria-label="Настройки">
-  <div class="lp-title">Настройки</div>
-  <div class="lp-colors">
-    <label class="lp-color"><span>Фон</span><input id="cBg" type="color" value="#F2F5EC"></label>
-    <label class="lp-color"><span>Здание</span><input id="cBld" type="color" value="#FFFFFF"></label>
-    <label class="lp-color"><span>Круг</span><input id="cDot" type="color" value="#F8F4C0"></label>
-    <label class="lp-color"><span>Опоры</span><input id="cSupports" type="color" value="#B9BDBF"></label>
-    <label class="lp-color"><span>Линии</span><input id="cInk" type="color" value="#202020"></label>
-    <label class="lp-color"><span>Вспом.</span><input id="cSoft" type="color" value="#B9BDBF"></label>
+<aside>
+  <h1>Генератор графики курса</h1>
+  <div class="seg" id="views"></div>
+  <h2>Размеры и пропорции</h2>
+  <div id="sliders"></div>
+  <h2>Цвета</h2>
+  <div class="cols" id="colors"></div>
+  <h2>Цвета уровней пирамиды</h2>
+  <div class="cols" id="levels"></div>
+  <h2>Опции</h2>
+  <div id="checks"></div>
+  <details class="control-section" id="effectsSection">
+    <summary>Эффекты</summary>
+    <div id="fx"></div>
+  </details>
+  <details class="control-section" id="gifSection">
+    <summary>GIF-анимация</summary>
+    <div id="gifControls"></div>
+    <button class="pri" id="exGif" style="width:100%;margin-top:5px">Скачать GIF</button>
+    <div class="gif-progress" aria-hidden="true"><div id="gifProgress"></div></div>
+    <div class="gif-status" id="gifStatus" role="status" aria-live="polite">GIF сохранит текущие фигуры, цвета и эффекты.</div>
+  </details>
+  <h2>Экспорт</h2>
+  <div class="seg">
+    <button class="pri" id="exSvg">Скачать SVG</button>
+    <button id="exCopy">Копировать SVG</button>
+    <button class="pri" id="exPng">Скачать PNG ×2</button>
+    <button class="pri" id="exPptx">PPTX (кадр)</button>
+    <button id="exPptxAll">PPTX (6 этапов)</button>
   </div>
-  <label class="lp-check"><input id="lpWalls" type="checkbox"> Стены под платформами</label>
-  <label class="lp-check"><input id="lpFloor" type="checkbox"> Пол здания</label>
-  <label class="lp-check"><input id="lpStairs" type="checkbox" checked> Лесенки (аксонометрия)</label>
-  <label class="lp-check"><input id="lpInkAuto" type="checkbox" checked> Цвет линий авто по фону</label>
-  <div class="lp-sep"></div>
-  <div class="lp-row">
-    <div class="lp-lab"><span>Цвета ярусов</span></div>
-    <div class="lp-levels">
-      <label class="lp-level-color"><span>01</span><input type="color" data-level="1"></label>
-      <label class="lp-level-color"><span>02</span><input type="color" data-level="2"></label>
-      <label class="lp-level-color"><span>03</span><input type="color" data-level="3"></label>
-      <label class="lp-level-color"><span>04</span><input type="color" data-level="4"></label>
-      <label class="lp-level-color"><span>05</span><input type="color" data-level="5"></label>
-      <label class="lp-level-color"><span>06</span><input type="color" data-level="6"></label>
+</aside>
+<main>
+  <div id="stage"></div>
+  <div class="ctl">
+    <button class="sq" id="prev" title="Назад (←)">‹</button>
+    <button class="sq" id="play" title="Автопоказ">▶</button>
+    <button class="sq" id="next" title="Вперёд (→)">›</button>
+    <div class="sl">
+      <input type="range" id="st" min="1" max="6" step="0.01" value="6" aria-label="Уровень сборки">
+      <div class="ticks" id="ticks"></div>
     </div>
+    <div class="lab">Собрано <b id="stLab"></b></div>
   </div>
-  <div class="lp-sep"></div>
-  <div class="lp-row">
-    <div class="lp-lab"><span>Детализация чертежа</span></div>
-    <div class="lp-style-group">
-      <button class="lp-style-btn active" data-draw="full" type="button" title="Все рёбра">Полная</button>
-      <button class="lp-style-btn" data-draw="medium" type="button" title="Верх + вертикали">Средняя</button>
-      <button class="lp-style-btn" data-draw="min" type="button" title="Только контуры">Минимум</button>
-    </div>
-  </div>
-  <div class="lp-row">
-    <div class="lp-lab"><span>Толщина линии</span><b id="lpLineV">1.0</b></div>
-    <input id="lpLine" type="range" min="0.5" max="4" step="0.1" value="1">
-  </div>
-  <div class="lp-row">
-    <div class="lp-lab"><span>Толщина стен</span><b id="lpWallV">0.16</b></div>
-    <input id="lpWall" type="range" min="0.06" max="0.40" step="0.01" value="0.16">
-  </div>
-  <div class="lp-row">
-    <div class="lp-lab"><span>Стиль линий</span></div>
-    <div class="lp-style-group">
-      <button class="lp-style-btn active" data-style="sketch" type="button">От руки</button>
-      <button class="lp-style-btn" data-style="strict" type="button">Строгие</button>
-    </div>
-  </div>
-  <div class="lp-sep"></div>
-  <div id="lpLight">
-    <div class="lp-row flat-hide"><div class="lp-lab"><span>Солнце</span><b id="lpSunV"></b></div><input id="lpSun" type="range" min="0" max="4" step="0.05"></div>
-    <div class="lp-row"><div class="lp-lab"><span>Рассеянный свет</span><b id="lpHemiV"></b></div><input id="lpHemi" type="range" min="0" max="4" step="0.05"></div>
-    <div class="lp-row flat-hide"><div class="lp-lab"><span>Направление</span><b id="lpAzV"></b></div><input id="lpAz" type="range" min="0" max="360" step="1"></div>
-    <div class="lp-row flat-hide"><div class="lp-lab"><span>Высота солнца</span><b id="lpElV"></b></div><input id="lpEl" type="range" min="8" max="88" step="1"></div>
-    <label class="lp-check flat-hide"><input id="lpShadows" type="checkbox" checked> Тени</label>
-    <label class="lp-check"><input id="lpAuto" type="checkbox" checked> Авто по виду</label>
-  </div>
-  <button class="lp-reset" id="lpReset" type="button">Сбросить</button>
-</div>
+</main>
 
-<script type="importmap">
-{ "imports": {
-  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-}}
-</script>
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
-import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+<script>
+/* Размеры в «залах» (сторона ядра = 1). Пропорции из 3D-модели: шаг 0.5, толщина витка 0.1.
+   Экспорт: 1 зал = 160 px (как ядро в Figma). */
+const N = 6, U = 160;
+const FX0 = () => ({
+  rad: 0,
+  noise: false, nAmt: 12, nSize: 1, nMode: 'overlay',
+  glass: false, gA: 35, gBlur: 40, gLine: true,
+  clay: false, cInt: 60, cSz: 14, cDrop: 50, cCol: '#3B3350',
+  aurora: false, aBlur: 160, aSeed: 1, ac: ['#62B0DA', '#F8F4C0', '#B79CE0', '#8EE3C8'],
+  hard: false, hOff: 8, hCol: '#000000', hLine: true,
+  chrome: false, chMode: 'palette', chDens: 1.5, chAng: 35,
+  gradient: false, gradMode: 'linear', gradC1: '#FFFFFF', gradC2: '#62B0DA', gradAng: 35,
+  blur: false, blurAmt: 5
+});
+const o = {
+  view: 'plan', stage: 6,
+  t: .1, dot: .2, h: .5, g: 6, m: .5,
+  bg: '#F2F5EC', ghost: '#B9BDBF', dotc: '#F8F4C0', frm: '#7C7085', sp: '#62B0DA',
+  lv: ['#FFFFFF', '#F8F4C0', '#D5DAC8', '#7C7085', '#62B0DA', '#B9BDBF'],
+  frame: true, gS: true, gP: false, tr: false,
+  fx: FX0()
+};
+const VIEWS = [['plan', 'Пирамида сверху'], ['facade', 'Пирамида, фасад'], ['spiral', 'Спираль']];
+const SL = [['t', 'Толщина витка (спираль)', .04, .25, .01], ['dot', 'Диаметр круга', .1, .4, .01],
+  ['h', 'Высота яруса (фасад)', .25, 1, .01], ['g', 'Этажность (фасад)', 1, 6, 1], ['m', 'Поля пунктирной рамки', 0, 1.5, .05]];
+const CL = [['bg', 'Фон'], ['sp', 'Спираль'], ['dotc', 'Круг'], ['frm', 'Рамка'], ['ghost', 'Контур будущих']];
+const CK = [['frame', 'Пунктирная рамка роста'], ['gS', 'Контур будущих витков (спираль)'],
+  ['gP', 'Контур будущих уровней (вид сверху)'], ['tr', 'Прозрачный фон']];
 
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const cl = x => Math.min(1, Math.max(0, x));
+
+/* p — дробный уровень сборки (для анимации); целое p = готовый этап */
+function build(o, p) {
+  const P = [], L = o.lv, r = o.dot / 2;
+  const k0 = Math.min(N, Math.floor(p)), fr = k0 >= N ? 0 : p - k0, k1 = Math.min(N, k0 + 1);
+  const rect = (x, y, w, h, c, a = 1, gh = 0) => { if (c && a > 0) P.push({ k: 'r', x, y, w, h, c, a, gh }); };
+  const part = (i, f) => i <= k0 ? 1 : i === k0 + 1 ? f : 0;      // доля появления уровня i
+  let ext;
+  if (o.view === 'plan') {
+    for (let i = N; i >= 1; i--) {
+      const a = i === 1 ? 1 : part(i, ease(fr));
+      if (o.gP && a < 1) rect(-i / 2, -i / 2, i, i, o.ghost, 1, 1);
+      const s = i === 1 ? 1 : (i - 1) + a;
+      rect(-s / 2, -s / 2, s, s, L[i - 1], a);
+    }
+    P.push({ k: 'e', cx: 0, cy: 0, r, c: o.dotc });
+    ext = [-N / 2, -N / 2, N / 2, N / 2];
+  } else if (o.view === 'facade') {
+    // пирамида стоит на земле: уровень i на этапе k лежит на «этаже» (k−i)
+    const e = (i, k) => Math.max(0, Math.floor((k - i) * o.g / N));
+    const lift = ease(cl(fr / .6)), app = ease(cl((fr - .35) / .65));
+    const elev = i => i > k0 ? 0 : e(i, k0) + (e(i, k1) - e(i, k0)) * lift;
+    for (let i = N; i >= 1; i--) {
+      const a = i === 1 ? 1 : part(i, app);
+      const w = i === 1 ? 1 : (i - 1) + a;
+      rect(-w / 2, -(elev(i) + 1) * o.h, w, o.h, L[i - 1], a);
+    }
+    P.push({ k: 'e', cx: 0, cy: -(elev(1) + 1) * o.h - r, r, c: o.dotc });
+    ext = [-N / 2, -(e(1, N) + 1) * o.h - o.dot, N / 2, 0];
+  } else {
+    rect(-.5, -.5, 1, 1, L[0]);
+    let s = [0, -.5];
+    const t = o.t, h2 = t / 2;
+    const leg = (a, b, last, d) => {              // d — сколько длины ноги нарисовать
+      const len = Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]);
+      const sx = Math.sign(b[0] - a[0]), sy = Math.sign(b[1] - a[1]);
+      const e0 = a.first ? 0 : h2, e1 = last ? 0 : h2;
+      const x0 = a[0] - sx * e0, y0 = a[1] - sy * e0, x1 = a[0] + sx * d + sx * (d >= len ? e1 : 0), y1 = a[1] + sy * d + sy * (d >= len ? e1 : 0);
+      if (sx === 0) rect(a[0] - h2, Math.min(y0, y1), t, Math.abs(y1 - y0), o.cur, 1, o.curG);
+      else rect(Math.min(x0, x1), a[1] - h2, Math.abs(x1 - x0), t, o.cur, 1, o.curG);
+    };
+    for (let k = 0; k < N - 1; k++) {
+      const out = .5 + (k + 1) * .5, inn = .5 + k * .5;
+      const pts = k ? [[-inn, -out], [out, -out], [out, out], [-out, out]] : [[0, -out], [out, -out], [out, out], [-out, out]];
+      const path = [s, ...pts]; s = pts[3];
+      const a = part(k + 2, ease(fr)), total = 4 * (2 * out) - (k ? 0 : out - .5) - (k ? 0 : 0);
+      const lens = path.slice(1).map((b, j) => Math.abs(b[0] - path[j][0]) + Math.abs(b[1] - path[j][1]));
+      const sum = lens.reduce((x, y) => x + y, 0);
+      const draw = (frac, color, gh) => {
+        let rem = frac * sum; o.cur = color; o.curG = gh;
+        for (let j = 0; j < 4 && rem > 1e-9; j++) {
+          const A = [...path[j]]; A.first = !k && !j;
+          leg(A, path[j + 1], k === N - 2 && j === 3, Math.min(lens[j], rem)); rem -= lens[j];
+        }
+      };
+      if (o.gS && a < 1) draw(1, o.ghost, 1);
+      if (a > 0) draw(a, o.sp);
+    }
+    P.push({ k: 'e', cx: 0, cy: 0, r, c: o.dotc });
+    ext = [-N / 2 - o.t / 2, -N / 2 - o.t / 2, N / 2 + o.t / 2, N / 2 + o.t / 2];
+  }
+  const m = o.frame ? o.m : 0, pad = .1;
+  const x0 = ext[0] - m, y0 = ext[1] - m, x1 = ext[2] + m, y1 = ext[3] + m;
+  if (o.frame) P.push({ k: 'f', x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+  return { P, bb: { x: x0 - pad, y: y0 - pad, w: x1 - x0 + 2 * pad, h: y1 - y0 + 2 * pad } };
+}
+
+const f = n => +(n * U).toFixed(2);
+const hx = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+const mix = (c, t) => { const w = t > 0 ? 255 : 0, a = Math.abs(t);   // t>0 — к белому, t<0 — к чёрному
+  return '#' + hx(c).map(v => Math.round(v + (w - v) * a).toString(16).padStart(2, '0')).join(''); };
+const rng = seed => () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
+const CHR_L = [[0, -.55], [.12, .62], [.28, -.38], [.44, .3], [.5, -.72], [.56, .55], [.74, -.3], [.9, .66], [1, -.5]];
+const CHR_C = [[0, .85], [.2, .3], [.48, -.5], [.62, -.75], [.82, .15], [1, -.2]];
+
+function toSVG(sc, o) {
+  const b = sc.bb, X = o.fx, defs = [], grads = new Set();
+  const px = n => +n.toFixed(2);
+  const bx = f(b.x), by = f(b.y), bw = f(b.w), bh = f(b.h), R0 = Math.max(bw, bh);
+  let uid = 0;
+
+  const geo = (q, at, dx = 0, dy = 0) => {
+    if (q.k === 'e') return `<circle cx="${px(f(q.cx) + dx)}" cy="${px(f(q.cy) + dy)}" r="${f(q.r)}" ${at}/>`;
+    const w = f(q.w), h = f(q.h), r = Math.min(X.rad, w / 2, h / 2);
+    return `<rect x="${px(f(q.x) + dx)}" y="${px(f(q.y) + dy)}" width="${w}" height="${h}"${r > 0 ? ` rx="${px(r)}"` : ''} ${at}/>`;
+  };
+  const box = q => q.k === 'e' ? [f(q.cx - q.r), f(q.cy - q.r), f(2 * q.r), f(2 * q.r)] : [f(q.x), f(q.y), f(q.w), f(q.h)];
+
+  /* Пользовательский градиент заливки. Можно сочетать со скруглением, стеклом и тенями. */
+  const fillOf = q => {
+    if (X.gradient) {
+      const id = 'user-gradient';
+      if (!grads.has(id)) {
+        grads.add(id);
+        if (X.gradMode === 'radial') {
+          defs.push(`<radialGradient id="${id}" cx="32%" cy="28%" r="88%"><stop offset="0%" stop-color="${X.gradC1}"/><stop offset="100%" stop-color="${X.gradC2}"/></radialGradient>`);
+        } else {
+          const a = X.gradAng * Math.PI / 180, dx = Math.cos(a) * 50, dy = Math.sin(a) * 50;
+          defs.push(`<linearGradient id="${id}" x1="${px(50-dx)}%" y1="${px(50-dy)}%" x2="${px(50+dx)}%" y2="${px(50+dy)}%"><stop offset="0%" stop-color="${X.gradC1}"/><stop offset="100%" stop-color="${X.gradC2}"/></linearGradient>`);
+        }
+      }
+      return `url(#${id})`;
+    }
+    if (!X.chrome) return q.c;
+    const base = X.chMode === 'silver' ? '#C3C9D2' : X.chMode === 'gold' ? '#E2B04A' : q.c, circ = q.k === 'e';
+    const id = (circ ? 'cr' : 'cl') + base.slice(1);
+    if (!grads.has(id)) {
+      grads.add(id);
+      if (circ) defs.push(`<radialGradient id="${id}" cx=".38" cy=".3" r=".8">${CHR_C.map(([t, m]) => `<stop offset="${t}" stop-color="${mix(base, m)}"/>`).join('')}</radialGradient>`);
+      else {
+        const a = X.chAng * Math.PI / 180, len = R0 * 1.25 / X.chDens, ph = (grads.size - 1) * len * .11, cx = bx + bw / 2 + Math.cos(a) * ph, cy = by + bh / 2 + Math.sin(a) * ph, dx = Math.cos(a) * len / 2, dy = Math.sin(a) * len / 2;
+        defs.push(`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${px(cx - dx)}" y1="${px(cy - dy)}" x2="${px(cx + dx)}" y2="${px(cy + dy)}" spreadMethod="reflect">${CHR_L.map(([t, m]) => `<stop offset="${t}" stop-color="${mix(base, m)}"/>`).join('')}</linearGradient>`);
+      }
+    }
+    return `url(#${id})`;
+  };
+
+  /* 3. Клэй: внутренний блик сверху-слева + внутренняя тень снизу-справа + мягкая внешняя тень */
+  const clayFilter = q => {
+    const id = 'cy' + uid++, s = X.cSz, k = X.cInt / 100, kd = X.cDrop / 100, off = s * .6, m = 7 * s + 12, [x, y, w, h] = box(q);
+    defs.push(`<filter id="${id}" filterUnits="userSpaceOnUse" x="${px(x - m)}" y="${px(y - m)}" width="${px(w + 2 * m)}" height="${px(h + 2 * m)}" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="${px(s * 1.1)}" result="d1"/><feOffset in="d1" dy="${px(s * 1.1)}" result="d2"/>
+<feFlood flood-color="${X.cCol}" flood-opacity="${px(.5 * kd)}"/><feComposite in2="d2" operator="in" result="drop"/>
+<feComponentTransfer in="SourceAlpha" result="inv"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer>
+<feGaussianBlur in="inv" stdDeviation="${px(s * .8)}" result="ib"/>
+<feOffset in="ib" dx="${px(off)}" dy="${px(off)}" result="lo"/><feComposite in="lo" in2="SourceAlpha" operator="in" result="lm"/>
+<feFlood flood-color="#fff" flood-opacity="${px(.95 * k)}"/><feComposite in2="lm" operator="in" result="light"/>
+<feOffset in="ib" dx="${px(-off)}" dy="${px(-off)}" result="do"/><feComposite in="do" in2="SourceAlpha" operator="in" result="dm"/>
+<feFlood flood-color="${X.cCol}" flood-opacity="${px(.6 * k)}"/><feComposite in2="dm" operator="in" result="dark"/>
+<feMerge><feMergeNode in="drop"/><feMergeNode in="SourceGraphic"/><feMergeNode in="light"/><feMergeNode in="dark"/></feMerge></filter>`);
+    return id;
+  };
+
+  /* 4. Аврора: несколько ярких кругов + Layer Blur на группу (в Figma blur 100–300 ≈ σ = blur/2) */
+  if (X.aurora) {
+    const rnd = rng(X.aSeed * 7919 + 13);
+    const a0 = rnd() * 6.283;                               // пятна расставлены по кругу вокруг центра, чтобы цвет был виден и в полях
+    const blobs = Array.from({ length: 6 }, (_, i) => {
+      const a = a0 + i * 1.047 + (rnd() - .5) * .9, d = R0 * (.28 + .2 * rnd());
+      return `<circle cx="${px(bx + bw / 2 + Math.cos(a) * d)}" cy="${px(by + bh / 2 + Math.sin(a) * d)}" r="${px(R0 * (.2 + .16 * rnd()))}" fill="${X.ac[i % 4]}"/>`;
+    }).join('');
+    defs.push(`<filter id="af" filterUnits="userSpaceOnUse" x="${px(bx - R0)}" y="${px(by - R0)}" width="${px(bw + 2 * R0)}" height="${px(bh + 2 * R0)}"><feGaussianBlur stdDeviation="${X.aBlur / 2}"/></filter>`);
+    defs.push(`<g id="aur" filter="url(#af)">${blobs}</g>`);
+    defs.push(`<clipPath id="bbc"><rect x="${bx}" y="${by}" width="${bw}" height="${bh}"/></clipPath>`);
+  }
+  /* 2. Глассморфизм: «задний план» = фон + аврора, размытый; под каждой фигурой показывается его вырез */
+  if (X.glass) {
+    defs.push(`<filter id="bdf" filterUnits="userSpaceOnUse" x="${px(bx - R0)}" y="${px(by - R0)}" width="${px(bw + 2 * R0)}" height="${px(bh + 2 * R0)}"><feGaussianBlur stdDeviation="${X.gBlur / 2}"/></filter>`);
+    defs.push(`<g id="bdb" filter="url(#bdf)">${o.tr ? '' : `<rect x="${px(bx - R0)}" y="${px(by - R0)}" width="${px(bw + 2 * R0)}" height="${px(bh + 2 * R0)}" fill="${o.bg}"/>`}${X.aurora ? '<use href="#aur"/>' : ''}</g>`);
+  }
+  /* 1. Шум: fractalNoise → серый → blend (Overlay / Color Burn / Multiply) с заданной непрозрачностью */
+  if (X.noise) {
+    defs.push(`<filter id="grain" filterUnits="userSpaceOnUse" x="${bx}" y="${by}" width="${bw}" height="${bh}" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="${px(.9 * X.nSize)}" numOctaves="3" seed="7" result="n"/>
+<feColorMatrix in="n" type="matrix" values="3 0 0 0 -1  3 0 0 0 -1  3 0 0 0 -1  0 0 0 0 ${X.nAmt / 100}" result="g"/>
+<feBlend in="g" in2="SourceGraphic" mode="${X.nMode}" result="bl"/><feComposite in="bl" in2="SourceAlpha" operator="in"/></filter>`);
+  }
+
+  const lw = 3, shape = q => q.k === 'r' || q.k === 'e';
+  const shadow = q => {                                     // 5. жёсткая тень: копия фигуры со смещением, blur = 0
+    if (!X.hard || q.gh || !shape(q)) return '';
+    const a = q.a < 1 ? ` fill-opacity="${+q.a.toFixed(3)}"` : '';
+    return geo(q, `fill="${X.hCol}"${a}`, X.hOff, X.hOff);
+  };
+  const outline = q => (X.hard && X.hLine && !q.gh && shape(q))   // для спирали обводка рисуется отдельным проходом без швов
+    ? geo(q, `fill="${X.hCol}" stroke="${X.hCol}" stroke-width="${2 * lw}" stroke-linejoin="round"`) : '';
+  const frame = q => `<rect x="${f(q.x)}" y="${f(q.y)}" width="${f(q.w)}" height="${f(q.h)}" fill="none" stroke="${o.frm}" stroke-width="1.5" stroke-dasharray="8 6"/>`;
+  const face = (q, spiral) => {
+    if (q.k === 'f') return frame(q);
+    const plain = q.gh, a = q.a < 1 ? q.a : 1, fill = plain ? q.c : fillOf(q);
+    const flt = (X.clay && !plain) ? ` filter="url(#${clayFilter(q)})"` : '';
+    const st = (X.hard && X.hLine && !plain && !spiral) ? ` stroke="${X.hCol}" stroke-width="${lw}" stroke-linejoin="round"` : '';
+    const soften = content => {
+      if (!X.blur || plain || X.blurAmt <= 0) return content;
+      const id = 'blur-shape-' + uid++, [x, y, w, h] = box(q), pad = X.blurAmt * 4 + 4;
+      defs.push(`<filter id="${id}" filterUnits="userSpaceOnUse" x="${px(x-pad)}" y="${px(y-pad)}" width="${px(w+2*pad)}" height="${px(h+2*pad)}"><feGaussianBlur stdDeviation="${px(X.blurAmt)}"/></filter>`);
+      return `<g filter="url(#${id})">${content}</g>`;
+    };
+    if (X.glass && !plain) {
+      const cid = 'gc' + uid++;
+      defs.push(`<clipPath id="${cid}">${geo(q, '')}</clipPath>`);
+      return soften(`<g${a < 1 ? ` opacity="${+a.toFixed(3)}"` : ''}><g clip-path="url(#${cid})"><use href="#bdb"/></g>` +
+        geo(q, `fill="${fill}" fill-opacity="${X.gA / 100}"${flt}${st}`) +
+        (X.gLine ? `<g clip-path="url(#${cid})">${geo(q, 'fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="2"')}</g>` : '') + '</g>');
+    }
+    return soften(geo(q, `fill="${fill}"${a < 1 ? ` fill-opacity="${+a.toFixed(3)}"` : ''}${flt}${st}`));
+  };
+
+  let body = o.tr ? '' : `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="${o.bg}"/>`;
+  if (X.aurora) body += '<g clip-path="url(#bbc)"><use href="#aur"/></g>';
+  if (o.view === 'spiral') {                                // всё в одном слое: тени → обводка → заливки
+    body += sc.P.map(shadow).join('') + sc.P.map(outline).join('') + sc.P.map(q => face(q, true)).join('');
+  } else {                                                  // слои друг над другом: тень каждого уровня падает на нижний
+    sc.P.forEach(q => { body += shadow(q) + face(q, false); });
+  }
+  if (X.noise) body = `<g filter="url(#grain)">${body}</g>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${bw}" height="${bh}" viewBox="${bx} ${by} ${bw} ${bh}"><defs>${defs.join('')}</defs>${body}</svg>`;
+}
+
+function toPPTX(all) {
+  if (!window.PptxGenJS) return alert('Библиотека PptxGenJS не загрузилась (нужен интернет). Экспортируйте SVG: он вставляется в PowerPoint и конвертируется в фигуры.');
+  const p = new PptxGenJS(); p.layout = 'LAYOUT_WIDE';
+  const hex = c => c.slice(1).toUpperCase();
+  (all ? [1, 2, 3, 4, 5, 6] : [o.stage]).forEach(s => {
+    const sc = build(o, s), b = sc.bb;
+    const k = Math.min(12.3 / b.w, 6.5 / b.h), ox = (13.333 - b.w * k) / 2, oy = (7.5 - b.h * k) / 2;
+    const X = x => ox + (x - b.x) * k, Y = y => oy + (y - b.y) * k;
+    const sl = p.addSlide();
+    if (!o.tr) sl.background = { color: hex(o.bg) };
+    sc.P.forEach(q => {
+      if (q.k === 'r') sl.addShape(p.ShapeType.rect, { x: X(q.x), y: Y(q.y), w: q.w * k, h: q.h * k, fill: { color: hex(q.c) }, line: { type: 'none' } });
+      else if (q.k === 'e') sl.addShape(p.ShapeType.ellipse, { x: X(q.cx - q.r), y: Y(q.cy - q.r), w: 2 * q.r * k, h: 2 * q.r * k, fill: { color: hex(q.c) }, line: { type: 'none' } });
+      else sl.addShape(p.ShapeType.rect, { x: X(q.x), y: Y(q.y), w: q.w * k, h: q.h * k, fill: { color: 'FFFFFF', transparency: 100 }, line: { color: hex(o.frm), width: 1, dashType: 'dash' } });
+    });
+  });
+  p.writeFile({ fileName: `course-${o.view}-${all ? 'all-stages' : 'stage' + o.stage}.pptx` });
+}
+
+/* ===== UI и анимация ===== */
 const $ = id => document.getElementById(id);
+let cur = N, raf = null, last = 0, timer = null;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ===== Константы темы ===== */
-const BG_DEFAULT = '#F2F5EC';
-const BLD_DEFAULT = '#FFFFFF';
-const INK_DEFAULT = '#202020';
-const SOFT_DEFAULT = '#B9BDBF';
-const DOT_DEFAULT = '#F8F4C0';
-const SUPPORT_DEFAULT = '#B9BDBF';
-const GROWTH_DEFAULT = '#7C7085';
-const D = { bg: BG_DEFAULT, bld: BLD_DEFAULT };
-let dotHex = DOT_DEFAULT;
-let supportHex = SUPPORT_DEFAULT;
-let mode = '3d';
-let flatBlend = 0;
-let inkHex = INK_DEFAULT, softHex = SOFT_DEFAULT;
-let autoInk = true;
-let lineThickness = 1.0;
-let lineStyle = 'sketch';
-let drawLevel = 'full';
-const levelColors = [null, null, null, null, null, null];
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(D.bg);
-
-const camera = new THREE.PerspectiveCamera(32, innerWidth/innerHeight, 0.5, 200);
-camera.position.set(12, 9, 15);
-camera.lookAt(0, 2, 0);
-
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-document.body.appendChild(renderer.domElement);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 2, 0);
-controls.enableDamping = true;
-controls.dampingFactor = 0.07;
-controls.maxPolarAngle = Math.PI * 0.48;
-controls.minDistance = 6;
-controls.maxDistance = 45;
-
-const hemi = new THREE.HemisphereLight(0xFFFFFF, 0xB9BDBF, 2.0);
-scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xFFFFFF, 1.8);
-sun.position.set(7, 15, 9);
-sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.left = -9; sun.shadow.camera.right = 9;
-sun.shadow.camera.top = 9;   sun.shadow.camera.bottom = -9;
-sun.shadow.camera.near = 1;  sun.shadow.camera.far = 40;
-sun.shadow.bias = -0.0008;
-sun.shadow.normalBias = 0.035;
-scene.add(sun);
-
-const stdRegs = [];
-const inkMats = [], softMats = [];
-const solids = [];
-const allLines = [];
-const OFFS = { wall: 0, slab: 0.04, col: -0.03, base: -0.01, cap: -0.1 };
-
-function tint(hex, off) {
-  const c = new THREE.Color(hex);
-  const hsl = {};
-  c.getHSL(hsl, THREE.SRGBColorSpace);
-  c.setHSL(hsl.h, hsl.s, Math.min(1, Math.max(0, hsl.l + off)), THREE.SRGBColorSpace);
-  return c;
+function draw() {
+  $('stage').innerHTML = toSVG(build(o, cur), o);
+  $('stLab').textContent = Math.round(cur) + ' / ' + N;
+  $('st').value = cur;
+  document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.v === o.view));
 }
-function stdMat(kind, extra = {}, level = null) {
-  const m = new THREE.MeshStandardMaterial({
-    color: tint(D.bld, OFFS[kind]), roughness: 0.92, metalness: 0,
-    ...extra,
-  });
-  stdRegs.push({ mat: m, kind, level });
-  return m;
+function tick(t) {
+  const dt = Math.min(.05, (t - last) / 1000); last = t;
+  const d = o.stage - cur, s = (1.1 + 1.2 * Math.abs(d)) * dt;
+  if (Math.abs(d) <= s) { cur = o.stage; raf = null; } else { cur += Math.sign(d) * s; raf = requestAnimationFrame(tick); }
+  draw();
 }
-function capMat(extra = {}) {
-  const m = new THREE.MeshBasicMaterial({
-    color: tint(D.bld, OFFS.cap), side: THREE.BackSide,
-    polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2, ...extra,
-  });
-  stdRegs.push({ mat: m, kind: 'cap' });
-  return m;
+function go(n) {
+  o.stage = Math.min(N, Math.max(1, n));
+  if (reduce) { cur = o.stage; draw(); return; }
+  if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
 }
-const bpMat = new THREE.MeshBasicMaterial({
-  color: D.bld, side: THREE.DoubleSide,
-  polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2,
+function stopPlay() { if (timer) { clearInterval(timer); timer = null; $('play').textContent = '▶'; } }
+
+$('views').innerHTML = VIEWS.map(([v, t]) => `<button data-v="${v}">${t}</button>`).join('');
+$('views').onclick = e => { if (e.target.dataset.v) { o.view = e.target.dataset.v; draw(); } };
+$('sliders').innerHTML = SL.map(([k, t, mn, mx, st]) =>
+  `<div class="row"><label><span>${t}</span><b id="v_${k}">${o[k]}</b></label><input type="range" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${o[k]}"></div>`).join('');
+$('sliders').oninput = e => { const k = e.target.dataset.k; o[k] = +e.target.value; $('v_' + k).textContent = o[k]; draw(); };
+$('colors').innerHTML = CL.map(([k, t]) => `<label>${t}<input type="color" data-c="${k}" value="${o[k]}"></label>`).join('');
+$('colors').oninput = e => { o[e.target.dataset.c] = e.target.value; draw(); };
+$('levels').innerHTML = o.lv.map((c, i) => `<label>Уровень ${i + 1}<input type="color" data-l="${i}" value="${c}"></label>`).join('');
+$('levels').oninput = e => { o.lv[e.target.dataset.l] = e.target.value; draw(); };
+$('checks').innerHTML = CK.map(([k, t]) => `<label class="chk"><input type="checkbox" data-b="${k}" ${o[k] ? 'checked' : ''}>${t}</label>`).join('');
+$('checks').onchange = e => { o[e.target.dataset.b] = e.target.checked; draw(); };
+
+/* ползунок: тянете — фигура собирается вручную; отпустили — доезжает до целого уровня */
+$('ticks').innerHTML = [1, 2, 3, 4, 5, 6].map(i => `<button data-n="${i}">${i}</button>`).join('');
+$('ticks').onclick = e => { if (e.target.dataset.n) { stopPlay(); go(+e.target.dataset.n); } };
+$('st').oninput = e => { stopPlay(); cancelAnimationFrame(raf); raf = null; cur = +e.target.value; o.stage = Math.round(cur); draw(); };
+$('st').onchange = () => go(Math.round(cur));
+$('prev').onclick = () => { stopPlay(); go(Math.round(o.stage) - 1); };
+$('next').onclick = () => { stopPlay(); go(Math.round(o.stage) + 1); };
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' && e.target.type !== 'range') return;
+  if (e.key === 'ArrowLeft') { stopPlay(); go(o.stage - 1); } else if (e.key === 'ArrowRight') { stopPlay(); go(o.stage + 1); }
 });
-const flatMat = new THREE.MeshBasicMaterial({
-  color: D.bld, side: THREE.DoubleSide,
-});
-
-function solid(geo, mat, cap, x, y, z, parent, level = null) {
-  const m = new THREE.Mesh(geo, mat);
-  m.position.set(x, y, z);
-  m.castShadow = true; m.receiveShadow = true;
-  parent.add(m);
-  let c = null;
-  if (cap) {
-    c = new THREE.Mesh(geo, cap);
-    c.position.set(x, y, z);
-    parent.add(c);
-  }
-  solids.push({ mesh: m, std: mat, cap: c, level });
-  return m;
-}
-function box(w, h, d, x, y, z, parent, mat, cap, level = null) {
-  const m = solid(new THREE.BoxGeometry(w, h, d), mat, cap, x, y, z, parent, level);
-  m.userData.blk = 1;
-  exportBlocks.push({ mesh: m, parent, x0: x - w/2, x1: x + w/2, y0: y - h/2, y1: y + h/2, z0: z - d/2, z1: z + d/2 });
-  return m;
-}
-
-function sketchLineTo(arr, p1, p2) {
-  if (!arr.cleanData) arr.cleanData = [];
-  const dist = p1.distanceTo(p2);
-  const segs = Math.max(3, Math.min(10, Math.floor(dist * 3)));
-  const jitter = 0.010;
-  const pts = [], ptsClean = [];
-  for (let i = 0; i <= segs; i++) {
-    const t = i / segs;
-    const pt = new THREE.Vector3().lerpVectors(p1, p2, t);
-    const ptClean = pt.clone();
-    if (i > 0 && i < segs) {
-      pt.x += (Math.random() - 0.5) * jitter;
-      pt.y += (Math.random() - 0.5) * jitter;
-      pt.z += (Math.random() - 0.5) * jitter;
-    }
-    pts.push(pt);
-    ptsClean.push(ptClean);
-  }
-  for (let i = 0; i < pts.length - 1; i++) {
-    arr.push(pts[i].x, pts[i].y, pts[i].z, pts[i+1].x, pts[i+1].y, pts[i+1].z);
-    arr.cleanData.push(ptsClean[i].x, ptsClean[i].y, ptsClean[i].z, ptsClean[i+1].x, ptsClean[i+1].y, ptsClean[i+1].z);
-  }
-}
-
-function emitEdge(a, b, levels, targets) {
-  const tmp = [];
-  sketchLineTo(tmp, a, b);
-  const clean = tmp.cleanData || [];
-  levels.forEach(lvl => {
-    const arr = targets[lvl];
-    if (!arr) return;
-    if (!arr.cleanData) arr.cleanData = [];
-    for (let i = 0; i < tmp.length; i++) arr.push(tmp[i]);
-    for (let i = 0; i < clean.length; i++) arr.cleanData.push(clean[i]);
-  });
-}
-
-function boxEdges3(w, h, d, x, y, z, fullArr, medArr, minArr) {
-  const hw = w/2, hh = h/2, hd = d/2;
-  const c = [
-    [x-hw, y-hh, z-hd], [x+hw, y-hh, z-hd], [x+hw, y-hh, z+hd], [x-hw, y-hh, z+hd],
-    [x-hw, y+hh, z-hd], [x+hw, y+hh, z-hd], [x+hw, y+hh, z+hd], [x-hw, y+hh, z+hd],
-  ];
-  const P = idx => new THREE.Vector3(...c[idx]);
-  const targets = { full: fullArr, medium: medArr, min: minArr };
-  [[0,1],[1,2],[2,3],[3,0]].forEach(([a, b]) => emitEdge(P(a), P(b), ['full'], targets));
-  [[4,5],[5,6],[6,7],[7,4]].forEach(([a, b]) => emitEdge(P(a), P(b), ['full', 'medium', 'min'], targets));
-  [[0,4],[1,5],[2,6],[3,7]].forEach(([a, b]) => emitEdge(P(a), P(b), ['full', 'medium'], targets));
-}
-
-function mkLines(arr, opacity, kind, parent = scene) {
-  const geo = new LineSegmentsGeometry();
-  geo.setPositions(arr);
-  geo.computeBoundingSphere();
-  const mat = new LineMaterial({
-    color: kind === 'soft' ? softHex : inkHex,
-    transparent: true, opacity, depthWrite: false,
-    linewidth: lineThickness,
-    resolution: new THREE.Vector2(innerWidth, innerHeight),
-  });
-  (kind === 'soft' ? softMats : inkMats).push(mat);
-  const l = new LineSegments2(geo, mat);
-  l.userData.srcArr = arr;
-  l.userData.cleanArr = arr.cleanData || arr;
-  parent.add(l);
-  allLines.push(l);
-  return l;
-}
-function mkLines3(arrays, opacity, kind, parent = scene) {
-  const l = mkLines(arrays.full, opacity, kind, parent);
-  l.userData.arrs = arrays;
-  return l;
-}
-function getLineArray(l) {
-  if (l.userData.arrs) {
-    const arr = l.userData.arrs[drawLevel];
-    if (arr) return arr;
-  }
-  return l.userData.srcArr;
-}
-function refreshLineGeometry(l) {
-  const arr = getLineArray(l);
-  if (!arr || !arr.length) return;
-  const data = lineStyle === 'strict' ? (arr.cleanData || arr) : arr;
-  if (!data || !data.length) return;
-  const geo = new LineSegmentsGeometry();
-  geo.setPositions(data);
-  geo.computeBoundingSphere();
-  if (l.geometry) l.geometry.dispose();
-  l.geometry = geo;
-}
-function applyLineStyle(style) {
-  lineStyle = style;
-  allLines.forEach(refreshLineGeometry);
-  document.querySelectorAll('.lp-style-btn[data-style]').forEach(b => {
-    b.classList.toggle('active', b.dataset.style === style);
-  });
-}
-function applyDrawLevel(level) {
-  drawLevel = level;
-  allLines.forEach(refreshLineGeometry);
-  document.querySelectorAll('.lp-style-btn[data-draw]').forEach(b => {
-    b.classList.toggle('active', b.dataset.draw === level);
-  });
-}
-document.querySelectorAll('.lp-style-btn[data-style]').forEach(btn => {
-  btn.addEventListener('click', () => { if (btn.dataset.style !== lineStyle) applyLineStyle(btn.dataset.style); });
-});
-document.querySelectorAll('.lp-style-btn[data-draw]').forEach(btn => {
-  btn.addEventListener('click', () => { if (btn.dataset.draw !== drawLevel) applyDrawLevel(btn.dataset.draw); });
-});
-
-/* =========================================================
-   КОНСТАНТЫ И МОДУЛЬНОЕ СОСТОЯНИЕ
-   ========================================================= */
-const STEP = 0.8;
-const hallSize = 1.6;
-let wallWidth = 0.16;
-const slabT = 0.08;
-
-let turnHeights = [], coreY = 0, floorOf = [];
-const wallLines = [];
-const MODELS = {
-  museum:   { turns: 5, name: 'Музей безграничного роста' },
-  supports: { turns: 4, name: '5 опор устойчивости',
-    mods: ['Я (центральный зал)', 'Ценности', 'Способности', 'Действия', 'Окружающая среда'],
-    sups: ['Физическая', 'Эмоциональная', 'Интеллектуальная', 'Энергетическая', 'Духовная'] },
+$('play').onclick = () => {
+  if (timer) return stopPlay();
+  $('play').textContent = '❚❚';
+  if (o.stage >= N) { o.stage = 1; cur = 1; draw(); }
+  setTimeout(() => go(o.stage + 1), 300);
+  timer = setInterval(() => { if (o.stage >= N) return stopPlay(); go(o.stage + 1); }, 1500);
 };
-let modelKey = 'museum', growth = 6;
-const MN = () => MODELS[modelKey].turns + 1;
-const turnColors = [0xD5DAC8, 0xF8F4C0, 0x62B0DA, 0x7C7085, 0xB9BDBF];
 
-const levels = [];
-const state = [];
-const museumGroup = new THREE.Group();
-scene.add(museumGroup);
-
-const LIFT = STEP - slabT;
-const WALL_HEIGHT = STEP;
-const wallGroups = [];
-const stairGroups = [];
-const wallMeshes = [], colMeshes = [], colBlocks = [];
-let lift = 0, liftTarget = 0;
-const flatPlanes = [];
-const FACADE_EXT = 0.1;
-const supportObjs = [];
-const exportBlocks = [];
-let stairsOn = true;
-let wallsOn = false;
-
-// Пересоздаются при генерации
-let dot, dotEdges, dotMat;
-let colMat, supportFlatMat;
-let colL;
-let floorGroup;
-let growthLine;
-let facadeFillers = null;
-
-function updateStairs() {
-  const fac = currentView === 'facade';
-  stairGroups.forEach(g => { g.visible = stairsOn && currentView === 'axon' && !wallsOn; });
-  wallGroups.forEach(g => { g.visible = wallsOn || fac; });
-  liftTarget = (wallsOn || fac) ? LIFT : 0;
-  flatPlanes.forEach(({ mesh }) => { if (mesh.userData.col) mesh.visible = mode === 'flat' && !fac; });
-  supportObjs.forEach(o => { o.visible = !fac && mode !== 'flat'; });
-  wallMeshes.forEach(m => { const e = fac ? FACADE_EXT : 0, d = m.userData.depth; m.scale.y = (d + e) / d; m.position.y = m.userData.baseY - e; });
-  wallLines.forEach(l => { const [yb, d] = l.userData.wx, e = fac ? FACADE_EXT : 0, k = (d + e) / d; l.scale.y = k; l.position.y = yb * (1 - k) - e; });
-}
-
-function makeOffsetPolygon(points, width) {
-  const half = width / 2;
-  const offsetSide = sign => points.map((p, i) => {
-    let dx0, dz0, dx1, dz1;
-    if (i === 0) {
-      dx1 = points[1][0] - p[0]; dz1 = points[1][1] - p[1];
-      const len = Math.hypot(dx1, dz1) || 1;
-      return [p[0] - dz1 / len * half * sign, p[1] + dx1 / len * half * sign];
-    }
-    if (i === points.length - 1) {
-      dx0 = p[0] - points[i - 1][0]; dz0 = p[1] - points[i - 1][1];
-      const len = Math.hypot(dx0, dz0) || 1;
-      return [p[0] - dz0 / len * half * sign, p[1] + dx0 / len * half * sign];
-    }
-    dx0 = p[0] - points[i - 1][0]; dz0 = p[1] - points[i - 1][1];
-    dx1 = points[i + 1][0] - p[0]; dz1 = points[i + 1][1] - p[1];
-    const len0 = Math.hypot(dx0, dz0) || 1;
-    const len1 = Math.hypot(dx1, dz1) || 1;
-    dx0 /= len0; dz0 /= len0; dx1 /= len1; dz1 /= len1;
-    const n0x = -dz0 * sign, n0z = dx0 * sign;
-    const n1x = -dz1 * sign, n1z = dx1 * sign;
-    const denom = 1 + dx0 * dx1 + dz0 * dz1;
-    if (Math.abs(denom) < 1e-5) {
-      return [p[0] + n1x * half, p[1] + n1z * half];
-    }
-    return [p[0] + (n0x + n1x) * half / denom, p[1] + (n0z + n1z) * half / denom];
-  });
-  const a = offsetSide(1);
-  const b = offsetSide(-1).reverse();
-  return [...a, ...b];
-}
-
-function shapeFromWorldPolygon(polygon) {
-  const shape = new THREE.Shape();
-  if (!polygon.length) return shape;
-  shape.moveTo(polygon[0][0], -polygon[0][1]);
-  for (let i = 1; i < polygon.length; i++) shape.lineTo(polygon[i][0], -polygon[i][1]);
-  shape.closePath();
-  return shape;
-}
-
-function extrudedGeometry(shape, depth) {
-  const geo = new THREE.ExtrudeGeometry(shape, { depth, steps: 1, bevelEnabled: false, curveSegments: 1 });
-  geo.rotateX(-Math.PI / 2);
-  return geo;
-}
-
-function regLegs(mesh, pts, yb, yt) {
-  mesh.userData.blk = 1;
-  const h = wallWidth / 2, n = pts.length;
-  for (let i = 0; i + 1 < n; i++) {
-    const [ax, az] = pts[i], [bx, bz] = pts[i + 1];
-    const dx = Math.sign(bx - ax), dz = Math.sign(bz - az);
-    const e0 = i > 0 ? h : 0, e1 = i + 2 < n ? h : 0;
-    const sx = ax - dx * e0, sz = az - dz * e0, ex = bx + dx * e1, ez = bz + dz * e1;
-    exportBlocks.push({ mesh, parent: mesh.parent,
-      x0: Math.min(sx, ex) - (dx ? 0 : h), x1: Math.max(sx, ex) + (dx ? 0 : h),
-      z0: Math.min(sz, ez) - (dz ? 0 : h), z1: Math.max(sz, ez) + (dz ? 0 : h), y0: yb, y1: yt, legDir: [dx, dz] });
-  }
-}
-function attachExtrudedMesh(parent, shape, depth, baseY, material, level, role = 'building') {
-  const mesh = new THREE.Mesh(extrudedGeometry(shape, depth), material);
-  mesh.position.y = baseY;
-  mesh.userData.baseY = baseY; mesh.userData.depth = depth;
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  parent.add(mesh);
-  solids.push({ mesh, std: material, cap: null, level, role });
-  return mesh;
-}
-
-function freshEdgeArrays() { return { full: [], medium: [], min: [] }; }
-function addLineEdge(arr, a, b) {
-  sketchLineTo(arr, new THREE.Vector3(a[0], a[1], a[2]), new THREE.Vector3(b[0], b[1], b[2]));
-}
-function addClosedContourEdges(arrays, contour, yBottom, yTop) {
-  for (let i = 0; i < contour.length; i++) {
-    const a = contour[i], b = contour[(i + 1) % contour.length];
-    addLineEdge(arrays.full, [a[0], yTop, a[1]], [b[0], yTop, b[1]]);
-    addLineEdge(arrays.medium, [a[0], yTop, a[1]], [b[0], yTop, b[1]]);
-    addLineEdge(arrays.min, [a[0], yTop, a[1]], [b[0], yTop, b[1]]);
-    addLineEdge(arrays.full, [a[0], yBottom, a[1]], [b[0], yBottom, b[1]]);
-    addLineEdge(arrays.full, [a[0], yBottom, a[1]], [a[0], yTop, a[1]]);
-    addLineEdge(arrays.medium, [a[0], yBottom, a[1]], [a[0], yTop, a[1]]);
-  }
-}
-function makeRibbonEdgeArrays(polygon, pathPointCount, yBottom, yTop) {
-  const arrays = freshEdgeArrays();
-  const n = polygon.length;
-  const endCapIndex = pathPointCount - 1;
-  const startCapIndex = n - 1;
-  for (let i = 0; i < n; i++) {
-    const j = (i + 1) % n;
-    const isCap = i === startCapIndex || i === endCapIndex;
-    if (!isCap) {
-      addLineEdge(arrays.full, [polygon[i][0], yTop, polygon[i][1]], [polygon[j][0], yTop, polygon[j][1]]);
-      addLineEdge(arrays.medium, [polygon[i][0], yTop, polygon[i][1]], [polygon[j][0], yTop, polygon[j][1]]);
-      addLineEdge(arrays.min, [polygon[i][0], yTop, polygon[i][1]], [polygon[j][0], yTop, polygon[j][1]]);
-      addLineEdge(arrays.full, [polygon[i][0], yBottom, polygon[i][1]], [polygon[j][0], yBottom, polygon[j][1]]);
-    }
-    addLineEdge(arrays.full, [polygon[i][0], yBottom, polygon[i][1]], [polygon[i][0], yTop, polygon[i][1]]);
-    addLineEdge(arrays.medium, [polygon[i][0], yBottom, polygon[i][1]], [polygon[i][0], yTop, polygon[i][1]]);
-  }
-  return arrays;
-}
-function makeCoreWallPolygon(outerHalf, thickness, openingWidth) {
-  const innerHalf = Math.max(0.001, outerHalf - thickness);
-  const openingHalf = Math.min(openingWidth / 2, innerHalf * 0.8);
-  return [
-    [-outerHalf, -outerHalf], [-openingHalf, -outerHalf],
-    [-openingHalf, -innerHalf], [-innerHalf, -innerHalf],
-    [-innerHalf, innerHalf], [innerHalf, innerHalf],
-    [innerHalf, -innerHalf], [openingHalf, -innerHalf],
-    [openingHalf, -outerHalf], [outerHalf, -outerHalf],
-    [outerHalf, outerHalf], [-outerHalf, outerHalf]
-  ];
-}
-function setWallsVisible(visible) { wallsOn = !!visible; updateStairs(); }
-
-/* =========================================================
-   ГЕНЕРАЦИЯ МУЗЕЯ
-   ========================================================= */
-function generateMuseum() {
-  const M = MN(), G = 0.09 * (M - growth);
-  floorOf = Array.from({ length: M }, (_, i) => Math.floor((M - 1 - i) * growth / M));
-  turnHeights = floorOf.map(f => +(0.08 + G + f * STEP).toFixed(3));
-  coreY = turnHeights[0];
-  // --- Модуль 1: центральный зал ---
-  const coreGroup = new THREE.Group();
-  museumGroup.add(coreGroup);
-
-  box(hallSize, slabT, hallSize, 0, coreY - slabT/2, 0, coreGroup, stdMat('slab', {}, 1), capMat(), 1);
-  const coreEdges = freshEdgeArrays();
-  boxEdges3(hallSize, slabT, hallSize, 0, coreY - slabT/2, 0, coreEdges.full, coreEdges.medium, coreEdges.min);
-  mkLines3(coreEdges, 0.85, 'ink', coreGroup);
-
-  const coreWallGroup = new THREE.Group();
-  coreWallGroup.visible = false;
-  coreGroup.add(coreWallGroup);
-  wallGroups.push(coreWallGroup);
-  const coreWallPolygon = makeCoreWallPolygon(hallSize / 2, wallWidth, 0.42);
-  const coreWallShape = shapeFromWorldPolygon(coreWallPolygon);
-  const coreWallMat = stdMat('wall', {}, 1);
-  const coreWallMesh = attachExtrudedMesh(coreWallGroup, coreWallShape, WALL_HEIGHT - slabT, coreY - WALL_HEIGHT, coreWallMat, 1, 'wall');
-  coreWallMesh.userData.blk = 1; if (floorOf[0] > 0) { coreWallMesh.userData.ext = FACADE_EXT; wallMeshes.push(coreWallMesh); }
-  {
-    const H = hallSize / 2, t = wallWidth, o = 0.21, y0 = coreY - WALL_HEIGHT, y1 = coreY - slabT;
-    [[-H, H, H - t, H], [H - t, H, -H, H], [-H, -H + t, -H, H], [-H, -o, -H, -H + t], [o, H, -H, -H + t]]
-      .forEach(([x0, x1, z0, z1]) => exportBlocks.push({ mesh: coreWallMesh, parent: coreWallGroup, x0, x1, y0, y1, z0, z1 }));
-  }
-  const coreWallFlatMat = new THREE.MeshBasicMaterial({ color: tint(D.bld, -0.08), side: THREE.DoubleSide });
-  const coreWallEdgeArrays = freshEdgeArrays();
-  addClosedContourEdges(coreWallEdgeArrays, coreWallPolygon, coreY - WALL_HEIGHT, coreY - slabT);
-  { const wl = mkLines3(coreWallEdgeArrays, 0.85, 'ink', coreWallGroup); if (floorOf[0] > 0) { wl.userData.wx = [coreY - WALL_HEIGHT, WALL_HEIGHT - slabT]; wallLines.push(wl); } }
-
-  // Пять опор
-  colMat = stdMat('col');
-  supportFlatMat = new THREE.MeshBasicMaterial({ color: supportHex, side: THREE.DoubleSide });
-  const colLines = [];
-  [[-0.55,-0.55],[0.55,-0.55],[0.55,0.55],[-0.55,0.55],[0,0]].forEach(([x, z]) => {
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, coreY - slabT, 16), colMat);
-    m.position.set(x, (coreY - slabT)/2, z);
-    m.castShadow = true; m.receiveShadow = true;
-    coreGroup.add(m);
-    solids.push({ mesh: m, std: colMat, cap: null, level: 1, role: 'support' });
-    supportObjs.push(m); m.userData.blk = 1;
-    const cb = { mesh: m, parent: coreGroup, x0: x - 0.05, x1: x + 0.05, y0: 0, y1: coreY - slabT, z0: z - 0.05, z1: z + 0.05 };
-    exportBlocks.push(cb); colBlocks.push(cb); colMeshes.push(m);
-    for (let k = 0; k < 4; k++) {
-      const a = k / 4 * Math.PI * 2;
-      const px = x + 0.05 * Math.cos(a), pz = z + 0.05 * Math.sin(a);
-      sketchLineTo(colLines, new THREE.Vector3(px, 0, pz), new THREE.Vector3(px, coreY - slabT, pz));
-    }
-  });
-  colL = mkLines(colLines, 0.85, 'ink', coreGroup);
-
-  // Центральная точка — всегда 3D-сфера
-  dotMat = new THREE.MeshBasicMaterial({ color: dotHex });
-  dot = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), dotMat);
-  dot.position.set(0, coreY + 0.1, 0);
-  dot.userData.dot = 1;
-  coreGroup.add(dot);
-
-  // Проволочный контур для режима «чертёж»
-  {
-    const ringPts = [];
-    const N = 48;
-    for (let i = 0; i < N; i++) {
-      const a0 = i / N * Math.PI * 2;
-      const a1 = (i + 1) / N * Math.PI * 2;
-      const r = 0.1;
-      ringPts.push(r*Math.cos(a0), r*Math.sin(a0), 0);
-      ringPts.push(r*Math.cos(a1), r*Math.sin(a1), 0);
-      ringPts.push(r*Math.cos(a0), 0, r*Math.sin(a0));
-      ringPts.push(r*Math.cos(a1), 0, r*Math.sin(a1));
-      ringPts.push(0, r*Math.cos(a0), r*Math.sin(a0));
-      ringPts.push(0, r*Math.cos(a1), r*Math.sin(a1));
-    }
-    const ringGeo = new THREE.BufferGeometry();
-    ringGeo.setAttribute('position', new THREE.Float32BufferAttribute(ringPts, 3));
-    dotEdges = new THREE.LineSegments(ringGeo, new THREE.LineBasicMaterial({
-      color: inkHex, transparent: true, opacity: 0.85, depthWrite: false
-    }));
-    dotEdges.position.copy(dot.position);
-    dotEdges.visible = false;
-    dotEdges.userData.dotEdges = 1;
-    coreGroup.add(dotEdges);
-  }
-
-  const coreFlatMat = new THREE.MeshBasicMaterial({ color: tint(D.bld, 0), side: THREE.DoubleSide });
-  levels.push({ wallG: coreGroup, slabG: coreGroup, flatMat: coreFlatMat, wallFlatMat: coreWallFlatMat, slabT: 1 });
-  state.push({ visible: true, t: 1 });
-
-  // --- Модули 2–6: квадратная спираль ---
-  let pathEnd = [0, -hallSize/2];
-
-  for (let turn = 0; turn < M - 1; turn++) {
-    const mg = new THREE.Group();
-    mg.name = 'Модуль ' + (turn + 2);
-    museumGroup.add(mg);
-
-    const y = turnHeights[turn + 1];
-    const outer = hallSize/2 + (turn + 1) * STEP;
-    let next;
-    if (turn === 0) {
-      next = [[0, -outer], [outer, -outer], [outer, outer], [-outer, outer]];
-    } else {
-      const inner = hallSize/2 + turn * STEP;
-      next = [[-inner, -outer], [outer, -outer], [outer, outer], [-outer, outer]];
-    }
-    const points = [pathEnd, ...next];
-    const polygon = makeOffsetPolygon(points, wallWidth);
-    const shape = shapeFromWorldPolygon(polygon);
-
-    const flatM = new THREE.MeshBasicMaterial({ color: turnColors[turn], side: THREE.DoubleSide });
-    const slabM = stdMat('slab', {}, turn + 2);
-    regLegs(attachExtrudedMesh(mg, shape, slabT, y - slabT, slabM, turn + 2, 'building'), points, y - slabT, y);
-    const edgeArrays = makeRibbonEdgeArrays(polygon, points.length, y - slabT, y);
-    mkLines3(edgeArrays, 0.85, 'ink', mg);
-
-    const wallGroup = new THREE.Group();
-    wallGroup.name = 'Стены модуля ' + (turn + 2);
-    wallGroup.visible = wallsOn;
-    mg.add(wallGroup);
-    wallGroups.push(wallGroup);
-    {
-      const wm = attachExtrudedMesh(wallGroup, shape, WALL_HEIGHT - slabT, y - WALL_HEIGHT, stdMat('wall', {}, turn + 2), turn + 2, 'wall');
-      if (floorOf[turn + 1] > 0) { wm.userData.ext = FACADE_EXT; wallMeshes.push(wm); }
-      regLegs(wm, points, y - WALL_HEIGHT, y - slabT);
-      const wl = mkLines3(makeRibbonEdgeArrays(polygon, points.length, y - WALL_HEIGHT, y - slabT), 0.85, 'ink', wallGroup);
-      if (floorOf[turn + 1] > 0) { wl.userData.wx = [y - WALL_HEIGHT, WALL_HEIGHT - slabT]; wallLines.push(wl); }
-    }
-
-    if (turnHeights[turn] - y > 0.05) {
-      const sg = new THREE.Group();
-      sg.name = 'Лесенка ' + (turn + 2);
-      mg.add(sg); stairGroups.push(sg);
-      const [p0, p1] = points;
-      const dx = Math.sign(p1[0] - p0[0]), dz = Math.sign(p1[1] - p0[1]);
-      const yHi = turnHeights[turn], N = 8, tread = 0.1, rise = (yHi - y) / N;
-      const sMat = stdMat('slab', {}, turn + 2), ea = freshEdgeArrays();
-      for (let i = 0; i < N; i++) {
-        const h = yHi - i * rise - y - 0.003;
-        const run = -wallWidth / 2 + (i + 0.5) * tread;
-        const w = dx ? tread : wallWidth, d = dz ? tread : wallWidth;
-        const cx = p0[0] + dx * run, cz = p0[1] + dz * run, cy = y + h / 2;
-        const stm = box(w, h, d, cx, cy, cz, sg, sMat, null, turn + 2);
-        stm.userData.stair = 1; stm.userData.dir = [dx, dz];
-        boxEdges3(w, h, d, cx, cy, cz, ea.full, ea.medium, ea.min);
-      }
-      mkLines3(ea, 0.85, 'ink', sg);
-    }
-
-    const wallFlatM = new THREE.MeshBasicMaterial({ color: tint(new THREE.Color(turnColors[turn]), -0.08), side: THREE.DoubleSide });
-    levels.push({ wallG: mg, slabG: mg, flatMat: flatM, wallFlatMat: wallFlatM, slabT: 1 });
-    state.push({ visible: true, t: 1 });
-    pathEnd = points[points.length - 1];
-  }
-
-  // Пол здания
-  floorGroup = new THREE.Group();
-  floorGroup.visible = false;
-  museumGroup.add(floorGroup);
-  {
-    const half = hallSize / 2 + (M - 1) * STEP + wallWidth / 2, fe = freshEdgeArrays();
-    box(half * 2, slabT, half * 2, 0, -slabT / 2, 0, floorGroup, stdMat('slab'), null, null);
-    boxEdges3(half * 2, slabT, half * 2, 0, -slabT / 2, 0, fe.full, fe.medium, fe.min);
-    mkLines3(fe, 0.85, 'ink', floorGroup);
-  }
-
-  // Пунктир безграничного роста
-  const growthR = hallSize/2 + (M - 1) * STEP + 0.8;
-  const growthY = turnHeights[M - 1] + 0.035;
-  const growthPts = [
-    new THREE.Vector3(-growthR, growthY, -growthR),
-    new THREE.Vector3( growthR, growthY, -growthR),
-    new THREE.Vector3( growthR, growthY,  growthR),
-    new THREE.Vector3(-growthR, growthY,  growthR),
-    new THREE.Vector3(-growthR, growthY, -growthR)
-  ];
-  const growthGeo = new THREE.BufferGeometry().setFromPoints(growthPts);
-  const growthMat = new THREE.LineDashedMaterial({
-    color: GROWTH_DEFAULT, dashSize: 0.4, gapSize: 0.3, linewidth: 2,
-    transparent: true, opacity: 1, depthTest: true, depthWrite: false
-  });
-  growthLine = new THREE.Line(growthGeo, growthMat);
-  growthLine.computeLineDistances();
-  museumGroup.add(growthLine);
-
-  // Фасадный вид: западный зазор закрываем виртуальными блоками,
-  // привязанными к этапам сборки. Южная грань — вровень с южной гранью платформы.
-  facadeFillers = new THREE.Group();
-  facadeFillers.name = 'Facade symmetry fillers';
-  facadeFillers.visible = false;
-  museumGroup.add(facadeFillers);
-  for (let turn = 0; turn < M - 1; turn++) {
-    const y = turnHeights[turn + 1], outer = hallSize / 2 + (turn + 1) * STEP, ww = wallWidth;
-    const h = WALL_HEIGHT + (floorOf[turn + 1] > 0 ? FACADE_EXT : 0), w = ww / 2;
-    const std = stdMat('wall', {}, turn + 2);
-    const f = new THREE.Mesh(new THREE.BoxGeometry(w, h, ww), std);
-    f.position.set(-(outer + ww / 4), y - h / 2, outer);
-    f.castShadow = f.receiveShadow = true;
-    Object.assign(f.userData, { facadeFiller: true, stage: turn + 2, topY: y, height: h, std });
-    const fa = freshEdgeArrays(), p = [-w/2, -h/2, ww/2], q = [-w/2, h/2, ww/2], r = [w/2, h/2, ww/2], t = [w/2, -h/2, ww/2];
-    addLineEdge(fa.full, p, q); addLineEdge(fa.medium, p, q);
-    addLineEdge(fa.full, q, r); addLineEdge(fa.medium, q, r); addLineEdge(fa.min, q, r);
-    addLineEdge(fa.full, p, t);
-    mkLines3(fa, 0.85, 'ink', f);
-    facadeFillers.add(f);
-  }
-
-  // Flat: плоскости соседних уровней могут лежать в одной плоскости (одинаковая
-  // высота перекрытий, ступени vs плита) — задаём приоритет: меньший уровень сверху.
-  levels.forEach((L, i) => {
-    const k = M - i;
-    [L.flatMat, L.wallFlatMat].forEach(mm => {
-      if (!mm) return;
-      mm.polygonOffset = true;
-      mm.polygonOffsetFactor = -k * 0.5;
-      mm.polygonOffsetUnits = -k * 4;
-    });
-  });
-
-  // Начальное состояние видимости этапов — без «мигания» при пересборке
-  state.forEach((s, i) => {
-    const vis = i < currentStage;
-    s.visible = vis;
-    s.t = vis ? 1 : 0;
-  });
-}
-
-/* =========================================================
-   ОЧИСТКА И ПЕРЕСБОРКА
-   ========================================================= */
-function disposeDeep(obj, mats) {
-  if (obj.geometry) obj.geometry.dispose();
-  if (obj.material) {
-    const ms = Array.isArray(obj.material) ? obj.material : [obj.material];
-    ms.forEach(m => mats.add(m));
-  }
-  obj.children.forEach(c => disposeDeep(c, mats));
-}
-
-function clearMuseum() {
-  const mats = new Set();
-  museumGroup.children.slice().forEach(child => {
-    disposeDeep(child, mats);
-    museumGroup.remove(child);
-  });
-  stdRegs.forEach(r => { if (r.mat) mats.add(r.mat); });
-  inkMats.forEach(m => mats.add(m));
-  softMats.forEach(m => mats.add(m));
-  levels.forEach(L => {
-    if (L.flatMat) mats.add(L.flatMat);
-    if (L.wallFlatMat) mats.add(L.wallFlatMat);
-  });
-  if (colMat) mats.add(colMat);
-  if (supportFlatMat) mats.add(supportFlatMat);
-  if (dotMat) mats.add(dotMat);
-  if (dotEdges && dotEdges.material) mats.add(dotEdges.material);
-  if (growthLine && growthLine.material) mats.add(growthLine.material);
-  // Общие модульные материалы не уничтожаем
-  const keep = new Set([bpMat, flatMat]);
-  mats.forEach(m => { if (!keep.has(m)) m.dispose(); });
-
-  levels.length = 0;
-  state.length = 0;
-  wallGroups.length = 0;
-  stairGroups.length = 0;
-  wallMeshes.length = 0;
-  colMeshes.length = 0;
-  colBlocks.length = 0;
-  flatPlanes.length = 0;
-  supportObjs.length = 0;
-  exportBlocks.length = 0;
-  wallLines.length = 0;
-  solids.length = 0;
-  allLines.length = 0;
-  stdRegs.length = 0;
-  inkMats.length = 0;
-  softMats.length = 0;
-
-  facadeFillers = null;
-  dot = dotEdges = dotMat = null;
-  colMat = supportFlatMat = null;
-  colL = null;
-  floorGroup = null;
-  growthLine = null;
-
-  lift = 0; liftTarget = 0;
-}
-
-function rebuild() {
-  clearMuseum();
-  generateMuseum();
-  buildFlatPlanes();
-  applyTheme();
-  setMode(mode);
-  if (floorGroup) floorGroup.visible = $('lpFloor').checked;
-  lift = liftTarget;
-  applyStage(currentStage);
-  applyLineStyle(lineStyle);
-  applyDrawLevel(drawLevel);
-}
-
-/* ===== Тема ===== */
-function hexToRgb(h) {
-  const n = parseInt(h.slice(1), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-function applyTheme() {
-  const [r, g, b] = hexToRgb(D.bg);
-  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-  const dark = lum < 0.45;
-
-  const uiInk  = dark ? '#FFFFFF' : '#202020';
-  const uiSoft = '#B9BDBF';
-
-  if (autoInk) { inkHex = uiInk; softHex = uiSoft; }
-  $('cInk').value = inkHex;
-  $('cSoft').value = softHex;
-
-  const [ir, ig, ib] = hexToRgb(inkHex);
-  const [ur, ug, ub] = hexToRgb(uiInk);
-
-  scene.background.set(D.bg);
-  const root = document.documentElement.style;
-  root.setProperty('--paper', D.bg);
-  root.setProperty('--paper-rgb', r + ',' + g + ',' + b);
-  root.setProperty('--ui-ink', uiInk);
-  root.setProperty('--ui-ink-rgb', ur + ',' + ug + ',' + ub);
-  root.setProperty('--ui-ink-soft', uiSoft);
-  root.setProperty('--ink', inkHex);
-  root.setProperty('--ink-rgb', ir + ',' + ig + ',' + ib);
-  root.setProperty('--ink-soft', softHex);
-
-  inkMats.forEach(m => m.color.set(inkHex));
-  softMats.forEach(m => m.color.set(softHex));
-  if (growthLine) growthLine.material.color.set(GROWTH_DEFAULT);
-  stdRegs.forEach(({ mat, kind, level }) => mat.color.copy(tint((level && levelColors[level - 1]) || D.bld, OFFS[kind])));
-  if (colMat) colMat.color.set(supportHex);
-  if (supportFlatMat) supportFlatMat.color.set(supportHex);
-  if (dotMat) dotMat.color.set(dotHex);
-  if (dotEdges) dotEdges.material.color.set(inkHex);
-  bpMat.color.set(D.bld);
-  flatMat.color.set(D.bld);
-
-  levels.forEach((L, idx) => {
-    if (!L.flatMat) return;
-    const custom = levelColors[idx];
-    const baseColor = idx === 0
-      ? (custom ? new THREE.Color(custom) : tint(D.bld, 0))
-      : (custom ? new THREE.Color(custom) : new THREE.Color(turnColors[idx - 1]));
-    L.flatMat.color.copy(baseColor);
-    if (L.wallFlatMat) {
-      const wallColor = baseColor.clone();
-      const hsl = {};
-      wallColor.getHSL(hsl, THREE.SRGBColorSpace);
-      wallColor.setHSL(hsl.h, hsl.s, Math.max(0, hsl.l - 0.08), THREE.SRGBColorSpace);
-      L.wallFlatMat.color.copy(wallColor);
-    }
-  });
-  syncLevelColors();
-}
-
-function defaultLevelColorHex(level) {
-  if (level <= 1) return BLD_DEFAULT;
-  return '#' + turnColors[level - 2].toString(16).padStart(6, '0').toUpperCase();
-}
-function syncLevelColors() {
-  document.querySelectorAll('.lp-level-color input').forEach(inp => {
-    const lvl = Number(inp.dataset.level);
-    inp.value = levelColors[lvl - 1] || defaultLevelColorHex(lvl);
-  });
-}
-document.querySelectorAll('.lp-level-color input').forEach(inp => {
-  inp.addEventListener('input', e => {
-    const lvl = Number(e.target.dataset.level);
-    levelColors[lvl - 1] = e.target.value;
-    applyTheme();
-  });
-});
-
-/* ===== Режим: 3D / Flat / Чертёж ===== */
-let shadowsOn = true;
-function updateShadowVis() { sun.castShadow = shadowsOn && mode === '3d'; }
-
-function buildFlatPlanes() {
-  exportBlocks.forEach(b => {
-    const rec = solids.find(r => r.mesh === b.mesh);
-    if (!rec) return;
-    b.rec = rec;
-    const ud = b.mesh.userData, w = b.x1 - b.x0, d = b.z1 - b.z0, h = b.y1 - b.y0;
-    const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2;
-    const add = (geo, x, y, z, rotY, riser = false) => {
-      const m = new THREE.Mesh(geo, flatMat);
-      m.position.set(x, y, z); m.rotation.y = rotY; m.visible = false; m.userData.fp = 1;
-      b.parent.add(m); flatPlanes.push({ mesh: m, rec, riser });
-      return m;
-    };
-    const hPlane = y => { const g = new THREE.PlaneGeometry(w, d); g.rotateX(-Math.PI / 2); return add(g, cx, y, cz, 0); };
-    const vPlane = (len, hh, x, y, z, rotY, riser) => { const g = new THREE.PlaneGeometry(len, hh); g.translate(0, hh / 2, 0); return add(g, x, y, z, rotY, riser); };
-    let kind = null;
-    if (rec.role === 'wall') {
-      // Flat: плоскость стены ставим на её НАРУЖНУЮ грань (а не на осевую линию),
-      // иначе при большой толщине плоскости соседних стен перекрещиваются «крестом»
-      // и не стыкуются с краем плиты.
-      kind = 'v'; const hh = h + slabT;
-      let ax, ox = 0, oz = 0;
-      if (b.legDir) {                       // спираль: наружу = (dz, -dx)
-        const [ldx, ldz] = b.legDir, hw = wallWidth / 2;
-        ax = ldx !== 0; ox = ldz * hw; oz = -ldx * hw;
-      } else {                              // стены центрального зала: наружу от центра
-        ax = w >= d;
-        if (ax) oz = (cz > 0 ? 1 : -1) * d / 2; else ox = (cx > 0 ? 1 : -1) * w / 2;
-      }
-      b.wp = { ax, ox, oz };
-      const m = vPlane(ax ? w : d, hh, cx + ox, b.y0, cz + oz, ax ? 0 : Math.PI / 2);
-      if (ud.ext) { m.userData.baseY = b.y0; m.userData.depth = hh; m.userData.ext = ud.ext; wallMeshes.push(m); }
-    } else if (rec.role === 'support') {
-      kind = 'c'; const y = (b.y0 + b.y1) / 2;
-      [add(new THREE.PlaneGeometry(w, h), cx, y, cz, 0), add(new THREE.PlaneGeometry(d, h), cx, y, cz, Math.PI / 2)]
-        .forEach(m => { m.userData.col = 1; colMeshes.push(m); });
-    } else if (ud.stair) {
-      kind = 's'; hPlane(b.y1);
-      const [dx, dz] = ud.dir;
-      if (dz) vPlane(w, h, cx, b.y0, dz > 0 ? b.z1 : b.z0, 0, true);
-      else vPlane(d, h, dx > 0 ? b.x1 : b.x0, b.y0, cz, Math.PI / 2, true);
-    } else if (h <= slabT + 1e-3) { kind = 'h'; hPlane(b.y1); }
-    if (kind) { b.plane = kind; b.dir = ud.dir; ud.hasPlanes = 1; }
-  });
-}
-
-function setMode(m) {
-  mode = m;
-  const is3d = m === '3d';
-  const isFlat = m === 'flat';
-  const isBp = m === 'bp';
-  const showSolid = is3d || isFlat;
-
-  solids.forEach(rec => {
-    const { mesh, std, cap, level } = rec;
-    if (isFlat) {
-      mesh.material = rec.role === 'support' ? supportFlatMat
-        : (rec.role === 'wall' && level != null && levels[level - 1] ? levels[level - 1].wallFlatMat
-        : ((level != null && levels[level - 1]) ? levels[level - 1].flatMat : flatMat));
-    } else {
-      mesh.material = showSolid ? std : bpMat;
-    }
-    mesh.castShadow = is3d;
-    mesh.receiveShadow = is3d;
-    if (cap) cap.visible = showSolid && !isFlat;
-    if (mesh.userData.hasPlanes) mesh.visible = !isFlat;
-  });
-  flatPlanes.forEach(pr => {
-    const { mesh, rec } = pr, L = rec.level != null ? levels[rec.level - 1] : null;
-    mesh.visible = isFlat;
-    mesh.material = rec.role === 'support' ? supportFlatMat
-      : ((pr.riser || rec.role === 'wall') && L ? L.wallFlatMat : (L ? L.flatMat : flatMat));
-  });
-  hemi.visible = showSolid;
-  if (facadeFillers) facadeFillers.children.forEach(f => {
-    const L = levels[f.userData.stage - 1];
-    f.material = isFlat ? L.wallFlatMat : isBp ? bpMat : f.userData.std;
-    f.castShadow = f.receiveShadow = is3d;
-  });
-  if (dot) dot.visible = true;
-  if (dotEdges) dotEdges.visible = isBp;
-  sun.visible = is3d;
-  allLines.forEach(line => { line.visible = isBp; });
-  updateShadowVis();
-
-  document.body.classList.toggle('bp-mode', isBp);
-  document.body.classList.toggle('flat-mode', isFlat);
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
-  $('lpLight').style.display = showSolid ? '' : 'none';
-  updateStairs();
-
-  const v = getView(currentView);
-  controls.enableRotate = v.enableRotate;
-  controls.maxPolarAngle = v.flat ? Math.PI / 2 : Math.PI * 0.48;
-}
-
-/* ===== Этапы ===== */
-let currentStage = 6;
-function applyStage(stage) {
-  currentStage = stage;
-  state.forEach((s, i) => { s.visible = i < stage; });
-  $('stageValue').textContent = String(stage).padStart(2, '0') + ' / ' + String(MN()).padStart(2, '0');
-}
-const range = $('stageRange');
-range.addEventListener('input', () => applyStage(Number(range.value)));
-
-/* ===== Уровни роста ===== */
-const gRange = $('growthRange'); let gTimer = null;
-function applyGrowth(v) { growth = v; $('growthValue').textContent = String(v).padStart(2, '0') + ' / ' + String(MN()).padStart(2, '0'); }
-gRange.addEventListener('input', () => { applyGrowth(Number(gRange.value)); clearTimeout(gTimer); gTimer = setTimeout(rebuild, 40); });
-
-/* ===== Модели ===== */
-function renderLegend() {
-  const m = MODELS[modelKey], el = $('legend');
-  if (!m.mods) { el.style.display = 'none'; return; }
-  const hex = n => '#' + n.toString(16).padStart(6, '0');
-  const row = (c, t) => '<div class="r"><i style="background:' + c + '"></i>' + t + '</div>';
-  el.innerHTML = '<h4>«' + m.name + '»</h4><div class="lg-t">Витки от центра</div>' +
-    m.mods.map((t, i) => row(i ? hex(turnColors[i - 1]) : dotHex, i + ' · ' + t)).join('') +
-    '<div class="lg-t">5 опор</div>' + m.sups.map((t, i) => row(supportHex, (i + 1) + ' · ' + t)).join('');
-  el.style.display = 'block';
-}
-function setModel(k) {
-  modelKey = k; const M = MN(); currentStage = M;
-  range.max = gRange.max = M; range.value = gRange.value = M; applyGrowth(M);
-  document.querySelectorAll('.model-btn').forEach(x => x.classList.toggle('active', x.dataset.model === k));
-  rebuild(); renderLegend();
-}
-document.querySelectorAll('.model-btn').forEach(b => b.addEventListener('click', () => { if (b.dataset.model !== modelKey) setModel(b.dataset.model); }));
-
-/* ===== Виды ===== */
-const VIEW_BASE = {
-  axon:   { pos: new THREE.Vector3(12, 9, 15), target: new THREE.Vector3(0, 2.0, 0), fov: 34, enableRotate: true, flat: false },
-  top:    { pos: new THREE.Vector3(0, 22, 0.01), target: new THREE.Vector3(0, 0, 0), fov: 32, enableRotate: false, flat: false },
-  facade: { pos: new THREE.Vector3(0, 2.3, 18), target: new THREE.Vector3(0, 2.3, 0), fov: 28, enableRotate: false, flat: true },
-};
-function getView(name) { return VIEW_BASE[name]; }
-
-const LIGHT_DEFAULT = { az: 38, el: 53, sunI: 1.8, hemiI: 2.0 };
-const LIGHT_TOP     = { az: 61, el: 32, sunI: 2.1, hemiI: 1.4 };
-const lightTarget = { ...LIGHT_TOP };
-const lightCur = { ...LIGHT_TOP };
-let autoLight = true;
-
-let currentView = 'axon';
-let transitioning = false;
-let targetPos = VIEW_BASE.axon.pos.clone();
-let targetTarget = VIEW_BASE.axon.target.clone();
-let targetFov = VIEW_BASE.axon.fov;
-
-controls.addEventListener('start', () => { if (transitioning) transitioning = false; });
-
-function setView(name, force) {
-  if (name === currentView && !force) return;
-  currentView = name;
-  const v = getView(name);
-  targetPos.copy(v.pos);
-  targetTarget.copy(v.target);
-  targetFov = v.fov;
-  transitioning = true;
-  if (autoLight && mode !== 'bp') { Object.assign(lightTarget, name === 'top' ? LIGHT_TOP : LIGHT_DEFAULT); syncLightUI(); }
-  document.querySelectorAll('.view-btn[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === name));
-  controls.enableRotate = v.enableRotate;
-  controls.maxPolarAngle = v.flat ? Math.PI / 2 : Math.PI * 0.48;
-  updateStairs();
-}
-document.querySelectorAll('.view-btn[data-view]').forEach(btn => {
-  btn.addEventListener('click', () => setView(btn.dataset.view));
-});
-document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => { if (btn.dataset.mode !== mode) setMode(btn.dataset.mode); });
-});
-
-/* ===== Панель настроек ===== */
-const lightBtn = $('lightBtn'), lightPanel = $('lightPanel');
-const ui = {
-  sun:  [$('lpSun'),  $('lpSunV'),  v => v.toFixed(2)],
-  hemi: [$('lpHemi'), $('lpHemiV'), v => v.toFixed(2)],
-  az:   [$('lpAz'),   $('lpAzV'),   v => Math.round(v) + '°'],
-  el:   [$('lpEl'),   $('lpElV'),   v => Math.round(v) + '°'],
-};
-function syncLightUI() {
-  ui.sun[0].value = lightTarget.sunI;
-  ui.hemi[0].value = lightTarget.hemiI;
-  ui.az[0].value = lightTarget.az;
-  ui.el[0].value = lightTarget.el;
-  Object.values(ui).forEach(([inp, out, fmt]) => { out.textContent = fmt(Number(inp.value)); });
-}
-function manualLight(el, apply) {
-  el.addEventListener('input', () => {
-    apply(Number(el.value));
-    autoLight = false; $('lpAuto').checked = false;
-    syncLightUI();
-  });
-}
-manualLight(ui.sun[0],  v => { lightTarget.sunI = v; });
-manualLight(ui.hemi[0], v => { lightTarget.hemiI = v; });
-manualLight(ui.az[0],   v => { lightTarget.az = v; });
-manualLight(ui.el[0],   v => { lightTarget.el = v; });
-$('lpShadows').addEventListener('change', e => { shadowsOn = e.target.checked; updateShadowVis(); });
-function applyViewLight() {
-  Object.assign(lightTarget, currentView === 'top' ? LIGHT_TOP : LIGHT_DEFAULT);
-  syncLightUI();
-}
-$('lpAuto').addEventListener('change', e => { autoLight = e.target.checked; if (autoLight) applyViewLight(); });
-
-const lpLineEl = $('lpLine'), lpLineV = $('lpLineV');
-function setLineThickness(v) {
-  lineThickness = v;
-  lpLineV.textContent = v.toFixed(1);
-  [...inkMats, ...softMats].forEach(m => { m.linewidth = v; });
-}
-lpLineEl.addEventListener('input', () => setLineThickness(Number(lpLineEl.value)));
-
-const lpWallEl = $('lpWall'), lpWallV = $('lpWallV');
-let wallRebuildTimer = null;
-function setWallWidth(v) {
-  wallWidth = v;
-  lpWallV.textContent = v.toFixed(2);
-}
-lpWallEl.addEventListener('input', () => {
-  setWallWidth(Number(lpWallEl.value));
-  clearTimeout(wallRebuildTimer);
-  wallRebuildTimer = setTimeout(rebuild, 120);
-});
-
-$('cBg').addEventListener('input', e => { D.bg = e.target.value; applyTheme(); });
-$('cBld').addEventListener('input', e => { D.bld = e.target.value; applyTheme(); });
-$('cDot').addEventListener('input', e => { dotHex = e.target.value; applyTheme(); });
-$('cSupports').addEventListener('input', e => { supportHex = e.target.value; applyTheme(); });
-$('lpWalls').addEventListener('change', e => setWallsVisible(e.target.checked));
-$('lpFloor').addEventListener('change', e => { if (floorGroup) floorGroup.visible = e.target.checked; });
-$('lpStairs').addEventListener('change', e => { stairsOn = e.target.checked; updateStairs(); });
-
-$('cInk').addEventListener('input', e => { inkHex = e.target.value; autoInk = false; $('lpInkAuto').checked = false; applyTheme(); });
-$('cSoft').addEventListener('input', e => { softHex = e.target.value; autoInk = false; $('lpInkAuto').checked = false; applyTheme(); });
-$('lpInkAuto').addEventListener('change', e => { autoInk = e.target.checked; applyTheme(); });
-
-$('lpReset').addEventListener('click', () => {
-  D.bg = BG_DEFAULT; D.bld = BLD_DEFAULT;
-  dotHex = DOT_DEFAULT; supportHex = SUPPORT_DEFAULT;
-  $('cBg').value = BG_DEFAULT; $('cBld').value = BLD_DEFAULT;
-  $('cDot').value = DOT_DEFAULT; $('cSupports').value = SUPPORT_DEFAULT;
-  $('lpWalls').checked = false; setWallsVisible(false);
-  $('lpStairs').checked = true; stairsOn = true; updateStairs();
-  $('lpFloor').checked = false; if (floorGroup) floorGroup.visible = false;
-  autoInk = true; $('lpInkAuto').checked = true;
-  inkHex = INK_DEFAULT; softHex = SOFT_DEFAULT;
-  levelColors.fill(null);
-  applyTheme();
-  autoLight = true; $('lpAuto').checked = true;
-  $('lpShadows').checked = true; shadowsOn = true; updateShadowVis();
-  applyViewLight();
-  $('lpLine').value = 1; setLineThickness(1);
-  applyLineStyle('sketch'); applyDrawLevel('full');
-
-  if (wallWidth !== 0.16) {
-    wallWidth = 0.16;
-    lpWallEl.value = '0.16';
-    lpWallV.textContent = '0.16';
-    clearTimeout(wallRebuildTimer);
-    rebuild();
-  }
-});
-lightBtn.addEventListener('click', () => {
-  const open = lightPanel.classList.toggle('open');
-  lightBtn.setAttribute('aria-expanded', String(open));
-});
-syncLightUI();
-
-/* ===== Снимок сцены ===== */
-function renderComposite(prMin = 2) {
-  const oldPR = renderer.getPixelRatio();
-  const pr = Math.max(prMin, oldPR);
-  try {
-    renderer.setPixelRatio(pr);
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.render(scene, camera);
-    const w = renderer.domElement.width, h = renderer.domElement.height;
-    const out = document.createElement('canvas');
-    out.width = w; out.height = h;
-    const ctx = out.getContext('2d');
-    if (!ctx) throw new Error('Не удалось создать 2D-контекст.');
-    ctx.drawImage(renderer.domElement, 0, 0);
-    return out;
-  } finally {
-    renderer.setPixelRatio(oldPR);
-    renderer.setSize(innerWidth, innerHeight);
-  }
-}
-function stamp() {
-  const t = new Date(), p = n => String(n).padStart(2, '0');
-  return t.getFullYear() + p(t.getMonth() + 1) + p(t.getDate()) + '-' + p(t.getHours()) + p(t.getMinutes()) + p(t.getSeconds());
-}
-function downloadBlob(blob, name) {
+const svgText = () => '<?xml version="1.0" encoding="UTF-8"?>\n' + toSVG(build(o, o.stage), o);
+$('exSvg').onclick = () => {
   const a = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  a.href = URL.createObjectURL(new Blob([svgText()], { type: 'image/svg+xml' }));
+  a.download = `course-${o.view}-stage${o.stage}.svg`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+$('exCopy').onclick = () => navigator.clipboard.writeText(svgText()).then(() => { $('exCopy').textContent = 'Скопировано ✓'; setTimeout(() => $('exCopy').textContent = 'Копировать SVG', 1400); });
+$('exPptx').onclick = () => toPPTX(false);
+$('exPptxAll').onclick = () => toPPTX(true);
+/* ===== Панель эффектов ===== */
+const FXUI = [
+  ['gradient', 'Градиент заливки', 'Заменяет заливку фигур на пользовательский линейный или радиальный градиент.', [
+    ['s', 'gradMode', [['linear', 'Линейный'], ['radial', 'Радиальный']]],
+    ['k', 'gradC1', 'Начальный цвет'], ['k', 'gradC2', 'Конечный цвет'],
+    ['r', 'gradAng', 'Угол, °', 0, 360, 5]]],
+  ['blur', 'Размытие фигур', 'Мягко размывает сами фигуры, не затрагивая пунктирную рамку и контуры будущих уровней.', [
+    ['r', 'blurAmt', 'Радиус размытия, px', 0, 16, .5]]],
+  ['noise', 'Шум (Grain)', 'Зернистость поверх фона и фигур. На светлых цветах Overlay почти не виден — берите Multiply или Color Burn.', [
+    ['r', 'nAmt', 'Интенсивность, %', 0, 40, 1], ['r', 'nSize', 'Крупность зерна', .3, 2.5, .05],
+    ['s', 'nMode', [['overlay', 'Overlay'], ['color-burn', 'Color Burn'], ['multiply', 'Multiply']]]]],
+  ['glass', 'Глассморфизм', 'Матовое стекло: размытый фон под фигурой, полупрозрачная заливка, белая граница 1px. Эффектнее всего с авророй.', [
+    ['r', 'gA', 'Прозрачность заливки, %', 10, 90, 1], ['r', 'gBlur', 'Background Blur', 0, 80, 1],
+    ['b', 'gLine', 'Белая внутренняя граница']]],
+  ['clay', 'Клэй / мягкий объём', 'Белый блик сверху-слева, тёмная внутренняя тень снизу-справа, мягкая внешняя тень. Нужно скругление.', [
+    ['r', 'cInt', 'Объём (внутренние тени), %', 0, 100, 1], ['r', 'cSz', 'Мягкость, px', 4, 40, 1],
+    ['r', 'cDrop', 'Внешняя тень, %', 0, 100, 1], ['k', 'cCol', 'Цвет теней']]],
+  ['aurora', 'Аврора / Mesh Gradient', 'Яркие круги + Layer Blur на всю группу.', [
+    ['r', 'aBlur', 'Layer Blur', 40, 300, 5], ['a'], ['t', 'shuffle', 'Перемешать пятна']]],
+  ['hard', 'Жёсткие тени (брутализм)', 'Drop Shadow с blur = 0 и одинаковым смещением по X и Y. Тени — настоящие фигуры, не фильтр.', [
+    ['r', 'hOff', 'Смещение X = Y, px', 2, 30, 1], ['k', 'hCol', 'Цвет тени и обводки'], ['b', 'hLine', 'Обводка в цвет тени']]],
+  ['chrome', 'Хром / металл (Y2K)', 'Градиент с чередованием тёмных и светлых полос. Заменяет заливку фигур.', [
+    ['s', 'chMode', [['palette', 'По палитре'], ['silver', 'Серебро'], ['gold', 'Золото']]],
+    ['r', 'chDens', 'Плотность бликов', .5, 5, .1], ['r', 'chAng', 'Угол бликов, °', 0, 360, 5]]]
+];
+const fxPanel = ([id, t, hint, ps]) => `<label class="chk fxh"><input type="checkbox" data-on="${id}" ${o.fx[id] ? 'checked' : ''}>${t}</label>
+<div class="fxp" data-p="${id}" ${o.fx[id] ? '' : 'hidden'}><div class="hint">${hint}</div>` + ps.map(([k, a, b, mn, mx, st]) => {
+    const X = o.fx;
+    if (k === 'r') return `<div class="row"><label><span>${b}</span><b id="fv_${a}">${X[a]}</b></label><input type="range" data-k="${a}" min="${mn}" max="${mx}" step="${st}" value="${X[a]}"></div>`;
+    if (k === 'k') return `<div class="cols"><label>${b}<input type="color" data-k="${a}" value="${X[a]}"></label></div>`;
+    if (k === 'b') return `<label class="chk"><input type="checkbox" data-k="${a}" ${X[a] ? 'checked' : ''}>${b}</label>`;
+    if (k === 's') return `<div class="seg">${b.map(([v, n]) => `<button data-seg="${a}" data-v="${v}" class="${X[a] === v ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+    if (k === 'a') return `<div class="cols">${X.ac.map((c, i) => `<label>Цвет ${i + 1}<input type="color" data-ac="${i}" value="${c}"></label>`).join('')}</div>`;
+    return `<div class="seg"><button data-shuffle="1">${a === 'shuffle' ? b : a}</button></div>`;
+  }).join('') + '</div>';
+function renderFX() {
+  const X = o.fx;
+  $('fx').innerHTML = `<div class="row"><label><span>Скругление углов, px</span><b id="fv_rad">${X.rad}</b></label><input type="range" data-k="rad" min="0" max="80" step="1" value="${X.rad}"></div>` +
+    FXUI.map(fxPanel).join('') + '<div class="seg" style="margin-top:12px"><button id="fxReset">Сбросить эффекты</button></div>';
 }
-function flash() {
-  const fl = $('shotFlash');
-  fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
-}
-function takeShot() {
-  const out = renderComposite();
-  const prefix = mode === '3d' ? '3d-' : mode === 'flat' ? 'flat-' : 'plan-';
-  out.toBlob(blob => { if (blob) downloadBlob(blob, 'museum-' + prefix + stamp() + '.png'); }, 'image/png');
-  flash();
-}
-$('shotBtn').addEventListener('click', takeShot);
+renderFX();
+$('fx').oninput = e => {
+  const t = e.target, X = o.fx;
+  if (t.type === 'checkbox') return;
+  if (t.dataset.k) { X[t.dataset.k] = t.type === 'range' ? +t.value : t.value; if (t.type === 'range') $('fv_' + t.dataset.k).textContent = X[t.dataset.k]; draw(); }
+  else if (t.dataset.ac != null) { X.ac[+t.dataset.ac] = t.value; draw(); }
+};
+$('fx').onchange = e => {
+  const t = e.target, X = o.fx;
+  if (t.dataset.on) {
+    X[t.dataset.on] = t.checked;
+    document.querySelector(`.fxp[data-p="${t.dataset.on}"]`).hidden = !t.checked;
+    if (t.dataset.on === 'clay' && t.checked && !X.rad) { X.rad = 28; renderFX(); }
+    draw();
+  } else if (t.type === 'checkbox' && t.dataset.k) { X[t.dataset.k] = t.checked; draw(); }
+};
+$('fx').onclick = e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.seg) { o.fx[t.dataset.seg] = t.dataset.v; t.parentNode.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === t)); draw(); }
+  else if (t.dataset.shuffle) { o.fx.aSeed++; draw(); }
+  else if (t.id === 'fxReset') { o.fx = FX0(); renderFX(); draw(); }
+};
 
-function tessellate(a, b, c, max, out) {
-  const st = [[a, b, c]];
-  while (st.length) {
-    const [p, q, r] = st.pop();
-    const e = [p.distanceTo(q), q.distanceTo(r), r.distanceTo(p)];
-    const m = Math.max(e[0], e[1], e[2]);
-    if (m <= max || st.length > 50000) { out.push([p, q, r]); continue; }
-    if (m === e[0]) { const h = p.clone().add(q).multiplyScalar(.5); st.push([p, h, r], [h, q, r]); }
-    else if (m === e[1]) { const h = q.clone().add(r).multiplyScalar(.5); st.push([p, q, h], [p, h, r]); }
-    else { const h = r.clone().add(p).multiplyScalar(.5); st.push([p, q, h], [h, q, r]); }
+$('exPng').onclick = () => {
+  const sc = build(o, o.stage), b = sc.bb, W = Math.round(f(b.w) * 2), H = Math.round(f(b.h) * 2);
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    c.getContext('2d').drawImage(img, 0, 0, W, H);
+    c.toBlob(bl => { const a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = `course-${o.view}-stage${o.stage}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(toSVG(sc, o));
+};
+
+/* ===== Настраиваемый GIF: сборка/разборка/качание, длительность, FPS и пауза ===== */
+const GIFCFG = { mode: 'build', easing: 'smooth', duration: 4, fps: 12, hold: 1, resolution: 480, loop: true };
+const GIF_MODES = [['build','Сборка 1 → 6'], ['reverse','Разборка 6 → 1'], ['pingpong','Сборка ↔ разборка']];
+const GIF_EASING = [['smooth','Плавно'], ['linear','Линейно'], ['steps','По этапам']];
+function renderGifControls() {
+  $('gifControls').innerHTML = `
+    <div class="gif-field"><label for="gifMode"><span>Сценарий</span></label><select id="gifMode">${GIF_MODES.map(([v,t])=>`<option value="${v}" ${GIFCFG.mode===v?'selected':''}>${t}</option>`).join('')}</select></div>
+    <div class="gif-field"><label for="gifEasing"><span>Характер движения</span></label><select id="gifEasing">${GIF_EASING.map(([v,t])=>`<option value="${v}" ${GIFCFG.easing===v?'selected':''}>${t}</option>`).join('')}</select></div>
+    <div class="gif-field"><label for="gifDuration"><span>Длительность анимации</span><b id="gifDurationLab">${GIFCFG.duration.toFixed(1)} с</b></label><input type="range" id="gifDuration" min="2" max="12" step="0.5" value="${GIFCFG.duration}"></div>
+    <div class="gif-grid">
+      <div class="gif-field"><label for="gifFps"><span>Частота кадров</span></label><select id="gifFps">${[6,8,10,12,15,20].map(v=>`<option value="${v}" ${GIFCFG.fps===v?'selected':''}>${v} FPS</option>`).join('')}</select></div>
+      <div class="gif-field"><label for="gifResolution"><span>Размер</span></label><select id="gifResolution">${[320,480,640,800].map(v=>`<option value="${v}" ${GIFCFG.resolution===v?'selected':''}>${v}px</option>`).join('')}</select></div>
+    </div>
+    <div class="gif-field"><label for="gifHold"><span>Пауза на финальном кадре</span><b id="gifHoldLab">${GIFCFG.hold.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')} с</b></label><input type="range" id="gifHold" min="0" max="3" step="0.25" value="${GIFCFG.hold}"></div>
+    <label class="chk"><input type="checkbox" id="gifLoop" ${GIFCFG.loop?'checked':''}>Зациклить GIF</label>`;
+}
+renderGifControls();
+$('gifControls').oninput = e => {
+  const t = e.target;
+  if (t.id === 'gifDuration') { GIFCFG.duration = +t.value; $('gifDurationLab').textContent = GIFCFG.duration.toFixed(1) + ' с'; }
+  if (t.id === 'gifHold') { GIFCFG.hold = +t.value; $('gifHoldLab').textContent = GIFCFG.hold.toFixed(2).replace(/0+$/,'').replace(/\.$/,'') + ' с'; }
+};
+$('gifControls').onchange = e => {
+  const t = e.target;
+  if (t.id === 'gifMode') GIFCFG.mode = t.value;
+  else if (t.id === 'gifEasing') GIFCFG.easing = t.value;
+  else if (t.id === 'gifFps') GIFCFG.fps = +t.value;
+  else if (t.id === 'gifResolution') GIFCFG.resolution = +t.value;
+  else if (t.id === 'gifLoop') GIFCFG.loop = t.checked;
+};
+function gifProgress(percent, message) {
+  $('gifProgress').style.width = `${Math.max(0, Math.min(100, percent))}%`;
+  $('gifStatus').textContent = message;
+}
+const yieldUI = () => new Promise(resolve => setTimeout(resolve, 0));
+function gifFrameStage(i, count, cfg) {
+  let t = count <= 1 ? 1 : i / (count - 1);
+  if (cfg.mode === 'reverse') t = 1 - t;
+  else if (cfg.mode === 'pingpong') t = t <= .5 ? t * 2 : (1 - t) * 2;
+  if (cfg.easing === 'smooth') t = ease(t);
+  else if (cfg.easing === 'steps') t = Math.round(t * (N - 1)) / (N - 1);
+  return 1 + t * (N - 1);
+}
+function gifPaletteFromHistogram(hist) {
+  let entries = [];
+  for (let key = 0; key < hist.length; key++) if (hist[key]) {
+    entries.push({ r: (((key >> 10) & 31) << 3) + 4, g: (((key >> 5) & 31) << 3) + 4, b: ((key & 31) << 3) + 4, n: hist[key] });
   }
+  if (!entries.length) entries = [{r:255,g:255,b:255,n:1}];
+  const boxStats = items => {
+    let r0=255,r1=0,g0=255,g1=0,b0=255,b1=0,total=0;
+    for (const c of items) { r0=Math.min(r0,c.r);r1=Math.max(r1,c.r);g0=Math.min(g0,c.g);g1=Math.max(g1,c.g);b0=Math.min(b0,c.b);b1=Math.max(b1,c.b);total+=c.n; }
+    const ranges=[r1-r0,g1-g0,b1-b0];
+    return {ranges,total,channel:ranges.indexOf(Math.max(...ranges)),range:Math.max(...ranges)};
+  };
+  const boxes = [entries];
+  while (boxes.length < 255) {
+    let best=-1, bestScore=-1, chosen=null;
+    for (let i=0;i<boxes.length;i++) {
+      if (boxes[i].length < 2) continue;
+      const st=boxStats(boxes[i]), score=st.range*Math.sqrt(st.total);
+      if (score>bestScore) { best=i;bestScore=score;chosen=st; }
+    }
+    if (best<0 || !chosen || chosen.range===0) break;
+    const items=boxes[best], ch=['r','g','b'][chosen.channel];
+    items.sort((a,b)=>a[ch]-b[ch]);
+    const halfway=chosen.total/2; let cum=0,cut=1;
+    for (;cut<items.length;cut++) { cum+=items[cut-1].n; if(cum>=halfway) break; }
+    cut=Math.max(1,Math.min(items.length-1,cut));
+    boxes.splice(best,1,items.slice(0,cut),items.slice(cut));
+  }
+  const palette=[[0,0,0]];
+  for (const items of boxes) {
+    let r=0,g=0,b=0,n=0;
+    for (const c of items) {r+=c.r*c.n;g+=c.g*c.n;b+=c.b*c.n;n+=c.n;}
+    palette.push([Math.round(r/n),Math.round(g/n),Math.round(b/n)]);
+  }
+  while (palette.length < 256) palette.push(palette[palette.length-1].slice());
+  return palette.slice(0,256);
 }
-
-function exportSVG() {
-  const W = Math.max(1, Math.round(innerWidth)), H = Math.max(1, Math.round(innerHeight));
-  const ns = 'http://www.w3.org/2000/svg';
+function gifLut(palette) {
+  const lut=new Uint8Array(32768);
+  const usable=Math.min(255,palette.length-1);
+  for(let key=0;key<32768;key++) {
+    const r=(((key>>10)&31)<<3)+4,g=(((key>>5)&31)<<3)+4,b=((key&31)<<3)+4;
+    let best=1,dist=Infinity;
+    for(let p=1;p<=usable;p++) {
+      const dr=r-palette[p][0],dg=g-palette[p][1],db=b-palette[p][2];
+      const d=dr*dr*0.30+dg*dg*0.59+db*db*0.11;
+      if(d<dist){dist=d;best=p;}
+    }
+    lut[key]=best;
+  }
+  return lut;
+}
+function gifLzw(indices) {
+  // A conservative 9-bit LZW dictionary is reset before it grows past 9-bit codes.
+  // This is valid GIF LZW and avoids boundary differences between decoders.
+  const out=[]; let cur=0,bits=0;
+  let nextCode=258,dict=new Map();
+  const clear=256,end=257;
+  const writeCode=code=>{cur|=(code<<bits);bits+=9;while(bits>=8){out.push(cur&255);cur>>>=8;bits-=8;}};
+  writeCode(clear);
+  if (!indices.length) {writeCode(end);if(bits)out.push(cur&255);return out;}
+  let prefix=indices[0];
+  for(let i=1;i<indices.length;i++) {
+    const symbol=indices[i],key=(prefix<<8)|symbol,hit=dict.get(key);
+    if(hit!==undefined) prefix=hit;
+    else {
+      writeCode(prefix);
+      if(nextCode<510) dict.set(key,nextCode++);
+      else {writeCode(clear);dict.clear();nextCode=258;}
+      prefix=symbol;
+    }
+  }
+  writeCode(prefix);writeCode(end);if(bits)out.push(cur&255);
+  return out;
+}
+function encodeGifHeader(bytes,w,h,palette,loop) {
+  const put=(...v)=>bytes.push(...v), u16=v=>put(v&255,(v>>8)&255);
+  put(71,73,70,56,57,97);u16(w);u16(h);put(0xF7,0,0);
+  for(let i=0;i<256;i++) put(...palette[i]);
+  if(loop) put(0x21,0xFF,0x0B,78,69,84,83,67,65,80,69,50,46,48,0x03,0x01,0x00,0x00,0x00);
+  return {put,u16};
+}
+function appendGifFrame(bytes,indices,w,h,delay,transparent=true) {
+  const put=(...v)=>bytes.push(...v), u16=v=>put(v&255,(v>>8)&255);
+  put(0x21,0xF9,0x04,transparent?0x09:0x08);u16(Math.max(2,Math.min(65535,delay)));put(0,0);
+  put(0x2C);u16(0);u16(0);u16(w);u16(h);put(0);
+  put(8);
+  const compressed=gifLzw(indices);
+  for(let i=0;i<compressed.length;i+=255) {const chunk=compressed.slice(i,i+255);put(chunk.length,...chunk);}
+  put(0);
+}
+function loadSvgImage(svg) {
+  return new Promise((resolve,reject)=>{
+    const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();
+    img.onload=()=>{URL.revokeObjectURL(url);resolve(img);};
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Не удалось отрисовать SVG-кадр.'));};
+    img.src=url;
+  });
+}
+async function renderGifFrame(ctx, w, h, options, stage) {
+  const svg=toSVG(build(options,stage),options),img=await loadSvgImage(svg);
+  ctx.clearRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
+  return ctx.getImageData(0,0,w,h).data;
+}
+async function makeGif(options, cfg) {
+  const base=build(options,1).bb, rawW=f(base.w), rawH=f(base.h), scale=cfg.resolution/Math.max(rawW,rawH);
+  const w=Math.max(1,Math.round(rawW*scale)),h=Math.max(1,Math.round(rawH*scale));
+  const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  if(!ctx) throw new Error('Браузер не поддерживает Canvas 2D.');
+  const frames=Math.max(2,Math.round(cfg.duration*cfg.fps)),hist=new Uint32Array(32768);
+  for(let i=0;i<frames;i++) {
+    const data=await renderGifFrame(ctx,w,h,options,gifFrameStage(i,frames,cfg));
+    for(let y=0;y<h;y+=3) for(let x=0;x<w;x+=3) {
+      const p=(y*w+x)*4;if(data[p+3]<128)continue;
+      const key=((data[p]>>3)<<10)|((data[p+1]>>3)<<5)|(data[p+2]>>3);hist[key]++;
+    }
+    gifProgress((i+1)/frames*40,`Подготовка палитры: кадр ${i+1} из ${frames}`);
+    await yieldUI();
+  }
+  const palette=gifPaletteFromHistogram(hist),lut=gifLut(palette),bytes=[];
+  encodeGifHeader(bytes,w,h,palette,cfg.loop);
+  const delay=Math.max(2,Math.round(100/cfg.fps));
+  for(let i=0;i<frames;i++) {
+    const data=await renderGifFrame(ctx,w,h,options,gifFrameStage(i,frames,cfg)),indexed=new Uint8Array(w*h);
+    for(let p=0,j=0;p<data.length;p+=4,j++) {
+      if(options.tr && data[p+3]<128) indexed[j]=0;
+      else indexed[j]=lut[((data[p]>>3)<<10)|((data[p+1]>>3)<<5)|(data[p+2]>>3)];
+    }
+    appendGifFrame(bytes,indexed,w,h,delay+(i===frames-1?Math.round(cfg.hold*100):0),true);
+    gifProgress(40+(i+1)/frames*60,`Кодирование GIF: кадр ${i+1} из ${frames}`);
+    await yieldUI();
+  }
+  bytes.push(0x3B);
+  return new Blob([new Uint8Array(bytes)],{type:'image/gif'});
+}
+$('exGif').onclick = async () => {
+  const button=$('exGif');if(button.disabled)return;
+  button.disabled=true;button.textContent='Создание GIF…';
+  const options=JSON.parse(JSON.stringify(o)),cfg={...GIFCFG};
   try {
-    scene.updateMatrixWorld(true); camera.updateMatrixWorld(true);
-    const eye = camera.position.clone();
-    const nearZ = -camera.near;
-    const shown = o => { for (let p = o; p; p = p.parent) if (!p.visible) return false; return true; };
+    gifProgress(0,'Подготовка кадров…');
+    const blob=await makeGif(options,cfg),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=`course-${options.view}-${cfg.mode}.gif`;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);
+    gifProgress(100,`Готово: ${cfg.duration.toFixed(1)} с, ${cfg.fps} FPS, ${cfg.resolution}px.`);
+  } catch(err) {
+    console.error(err);gifProgress(0,`Ошибка экспорта: ${err && err.message ? err.message : 'не удалось создать GIF'}`);
+  } finally {button.disabled=false;button.textContent='Скачать GIF';}
+};
 
-    const proj = v => {
-      const vz = v.clone().applyMatrix4(camera.matrixWorldInverse).z;
-      if (!(vz < nearZ)) return null;
-      const n = v.clone().project(camera);
-      const x = (n.x + 1) * W / 2, y = (1 - n.y) * H / 2;
-      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
-      return [x, y, n.z];
-    };
-    const f2 = n => n.toFixed(2);
-    const lightDir = sun.position.clone().normalize();
-    const styleCache = new Map();
-    const items = [];
-
-    scene.traverse(o => {
-      if (!o.isMesh || mode === 'bp' || !shown(o) || o.userData.blk || o.userData.dot || (mode === 'flat' && o.userData.fp)) return;
-      const mat = o.material;
-      if (!mat || !mat.color || mat.side === THREE.BackSide || mat.wireframe) return;
-      const pos = o.geometry.attributes.position, idx = o.geometry.index;
-      const cnt = idx ? idx.count : pos.count;
-      const V = i => new THREE.Vector3().fromBufferAttribute(pos, idx ? idx.getX(i) : i).applyMatrix4(o.matrixWorld);
-      const lit = mode === '3d' && mat.isMeshStandardMaterial;
-      for (let i = 0; i + 2 < cnt; i += 3) {
-        const tris = [];
-        tessellate(V(i), V(i + 1), V(i + 2), 0.45, tris);
-        for (const [a, b, c] of tris) {
-          const P = [a, b, c].map(proj);
-          if (P.some(q => !q)) continue;
-          const ctr = a.clone().add(b).add(c).divideScalar(3);
-          let kq = 30;
-          if (lit) {
-            const n = b.clone().sub(a).cross(c.clone().sub(a)).normalize();
-            if (n.dot(eye.clone().sub(ctr)) < 0) n.negate();
-            kq = Math.round((0.6 + 0.4 * Math.max(0, n.dot(lightDir))) * 30);
-          }
-          const key = mat.uuid + '|' + kq;
-          let fill = styleCache.get(key);
-          if (!fill) { fill = mat.color.clone().multiplyScalar(kq / 30).getStyle(); styleCache.set(key, fill); }
-          items.push({ d: eye.distanceTo(ctr), k: 'p', key: 'p' + fill, pts: P,
-            attrs: { fill, stroke: fill, 'stroke-width': '0.6', 'stroke-linejoin': 'round' } });
-        }
-      }
-    });
-
-    if (mode !== 'bp') {
-      const bl = [];
-      for (const b of exportBlocks) {
-        if ((b.plane === 'c' && currentView === 'facade')) continue;
-        if (!(b.mesh.visible || (mode === 'flat' && b.plane))) continue;
-        if (!shown(b.parent)) continue;
-        if (!b.mesh.material || !b.mesh.material.color) continue;
-        const A = b.parent.localToWorld(new THREE.Vector3(b.x0, b.y0, b.z0));
-        const B = b.parent.localToWorld(new THREE.Vector3(b.x1, b.y1, b.z1));
-        const mn = [Math.min(A.x, B.x), Math.min(A.y, B.y), Math.min(A.z, B.z)];
-        const mx = [Math.max(A.x, B.x), Math.max(A.y, B.y), Math.max(A.z, B.z)];
-        if (b.mesh.userData.ext && currentView === 'facade') mn[1] -= b.mesh.userData.ext;
-        if (mx[1] - mn[1] < 1e-4) continue;
-        bl.push({ b, mn, mx, c: eye.distanceTo(new THREE.Vector3((mn[0] + mx[0]) / 2, (mn[1] + mx[1]) / 2, (mn[2] + mx[2]) / 2)) });
-      }
-      const n = bl.length, adj = bl.map(() => []), indeg = new Array(n).fill(0), E = 1e-4;
-      const inFront = (B, A) => {
-        for (let a = 0; a < 3; a++) {
-          if (B.mn[a] >= A.mx[a] - E && eye.getComponent(a) >= B.mn[a]) return true;
-          if (B.mx[a] <= A.mn[a] + E && eye.getComponent(a) <= B.mx[a]) return true;
-        }
-        return false;
-      };
-      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (i !== j && inFront(bl[j], bl[i])) { adj[i].push(j); indeg[j]++; }
-      const done = new Array(n).fill(false), order = [];
-      while (order.length < n) {
-        let pick = -1;
-        for (let i = 0; i < n; i++) if (!done[i] && indeg[i] === 0 && (pick < 0 || bl[i].c > bl[pick].c)) pick = i;
-        if (pick < 0) for (let i = 0; i < n; i++) if (!done[i] && (pick < 0 || bl[i].c > bl[pick].c)) pick = i;
-        done[pick] = true; order.push(pick); adj[pick].forEach(j => indeg[j]--);
-      }
-      const faces = [
-        [[1, 0, 0], [[1,0,0],[1,0,1],[1,1,1],[1,1,0]]], [[-1, 0, 0], [[0,0,0],[0,1,0],[0,1,1],[0,0,1]]],
-        [[0, 1, 0], [[0,1,0],[1,1,0],[1,1,1],[0,1,1]]], [[0, -1, 0], [[0,0,0],[0,0,1],[1,0,1],[1,0,0]]],
-        [[0, 0, 1], [[0,0,1],[0,1,1],[1,1,1],[1,0,1]]], [[0, 0, -1], [[0,0,0],[1,0,0],[1,1,0],[0,1,0]]],
-      ];
-      order.forEach((bi, rank) => {
-        const { b, mn, mx } = bl[bi], mat = b.mesh.material, lit = mode === '3d' && mat.isMeshStandardMaterial;
-        if (mode === 'flat' && b.plane) {
-          const cx = (mn[0] + mx[0]) / 2, cz = (mn[2] + mx[2]) / 2, yt = mx[1] + slabT;
-          const hq = y => [[mn[0], y, mn[2]], [mx[0], y, mn[2]], [mx[0], y, mx[2]], [mn[0], y, mx[2]]];
-          const xq = (y0, y1, z) => [[mn[0], y0, z], [mx[0], y0, z], [mx[0], y1, z], [mn[0], y1, z]];
-          const zq = (y0, y1, x) => [[x, y0, mn[2]], [x, y0, mx[2]], [x, y1, mx[2]], [x, y1, mn[2]]];
-          const rl = b.rec && b.rec.level != null ? levels[b.rec.level - 1] : null, rmat = rl ? rl.wallFlatMat : mat;
-          const quads = [];
-          if (b.plane === 'h') quads.push([hq(mx[1]), mat]);
-          else if (b.plane === 'v') { const wp = b.wp || { ax: (mx[0] - mn[0]) >= (mx[2] - mn[2]), ox: 0, oz: 0 }; quads.push([wp.ax ? xq(mn[1], yt, cz + wp.oz) : zq(mn[1], yt, cx + wp.ox), mat]); }
-          else if (b.plane === 'c') quads.push([xq(mn[1], mx[1], cz), mat], [zq(mn[1], mx[1], cx), mat]);
-          else if (b.plane === 's') {
-            quads.push([hq(mx[1]), mat]);
-            const [dx, dz] = b.dir;
-            quads.push([dz ? xq(mn[1], mx[1], dz > 0 ? mx[2] : mn[2]) : zq(mn[1], mx[1], dx > 0 ? mx[0] : mn[0]), rmat]);
-          }
-          for (const [C, m2] of quads) {
-            const P = C.map(c => proj(new THREE.Vector3(...c)));
-            if (P.some(q => !q)) continue;
-            const fill = m2.color.getStyle();
-            items.push({ d: 1e6 - rank, k: 'p', key: 'b' + items.length, pts: P,
-              attrs: { fill, stroke: fill, 'stroke-width': '0.4', 'stroke-linejoin': 'round' } });
-          }
-          return;
-        }
-        for (const [nv, cs] of faces) {
-          const nrm = new THREE.Vector3(...nv);
-          const ctr = new THREE.Vector3(
-            (mn[0] + mx[0]) / 2 + nv[0] * (mx[0] - mn[0]) / 2,
-            (mn[1] + mx[1]) / 2 + nv[1] * (mx[1] - mn[1]) / 2,
-            (mn[2] + mx[2]) / 2 + nv[2] * (mx[2] - mn[2]) / 2
-          );
-          if (nrm.dot(eye.clone().sub(ctr)) <= 0) continue;
-          const P = cs.map(([ix, iy, iz]) => proj(new THREE.Vector3(ix ? mx[0] : mn[0], iy ? mx[1] : mn[1], iz ? mx[2] : mn[2])));
-          if (P.some(q => !q)) continue;
-          const kq = lit ? Math.round((0.6 + 0.4 * Math.max(0, nrm.dot(lightDir))) * 30) : 30;
-          const fill = mat.color.clone().multiplyScalar(kq / 30).getStyle();
-          items.push({ d: 1e6 - rank, k: 'p', key: 'b' + items.length, pts: P,
-            attrs: { fill, stroke: fill, 'stroke-width': '0.4', 'stroke-linejoin': 'round' } });
-        }
-      });
-      if (dot && shown(dot)) {
-        const c = dot.getWorldPosition(new THREE.Vector3()), C = proj(c);
-        if (C) {
-          const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
-          const rProj = proj(c.clone().addScaledVector(right, 0.1));
-          if (rProj) {
-            const R = Math.abs(rProj[0] - C[0]);
-            const pts = Array.from({ length: 32 }, (_, i) => [C[0] + R * Math.cos(i / 32 * 2 * Math.PI), C[1] + R * Math.sin(i / 32 * 2 * Math.PI)]);
-            const fill = dotMat.color.getStyle();
-            items.push({ d: -1, k: 'p', key: 'dot', pts, attrs: { fill, stroke: fill, 'stroke-width': '0.4' } });
-          }
-        }
-      }
-    }
-
-    const pushSeg = (a, b, color, w, op, bias, extra = {}) => {
-      const near = -camera.near;
-      const av = a.clone().applyMatrix4(camera.matrixWorldInverse);
-      const bv = b.clone().applyMatrix4(camera.matrixWorldInverse);
-      const aBehind = av.z >= near, bBehind = bv.z >= near;
-      if (aBehind && bBehind) return;
-      let aa = a, bb = b;
-      if (aBehind) {
-        const t = (near - av.z) / (bv.z - av.z);
-        aa = a.clone().lerp(b, t);
-      } else if (bBehind) {
-        const t = (near - bv.z) / (av.z - bv.z);
-        bb = b.clone().lerp(a, t);
-      }
-      const A = proj(aa), B = proj(bb);
-      if (!A || !B) return;
-      const mid = aa.clone().add(bb).multiplyScalar(.5);
-      items.push({ d: eye.distanceTo(mid) - bias, k: 's', key: 's' + color + w + op, pts: [A, B],
-        attrs: { fill: 'none', stroke: color, 'stroke-width': String(w), 'stroke-opacity': String(op), 'stroke-linecap': 'round', ...extra } });
-    };
-
-    if (mode === 'bp') {
-      const rc = new THREE.Raycaster();
-      const occ = solids.map(r => r.mesh);
-      if (facadeFillers) occ.push(...facadeFillers.children);
-      const occl = occ.filter(shown);
-      const hidden = p => {
-        const dv = p.clone().sub(eye), dist = dv.length();
-        rc.set(eye, dv.divideScalar(dist)); rc.near = 0; rc.far = dist - 0.03;
-        return rc.intersectObjects(occl, false).length > 0;
-      };
-      for (const line of allLines) {
-        if (!line.visible || !shown(line)) continue;
-        const arr = getLineArray(line);
-        if (!arr || !arr.length) continue;
-        const data = lineStyle === 'strict' ? (arr.cleanData || arr) : arr;
-        const color = line.material.color.getStyle(), op = line.material.opacity ?? 1;
-        for (let i = 0; i + 5 < data.length; i += 6) {
-          const A = line.localToWorld(new THREE.Vector3(data[i], data[i + 1], data[i + 2]));
-          const B = line.localToWorld(new THREE.Vector3(data[i + 3], data[i + 4], data[i + 5]));
-          const n = Math.min(40, Math.max(1, Math.ceil(A.distanceTo(B) / 0.12)));
-          let st = -1;
-          for (let k = 0; k <= n; k++) {
-            const vis = k < n && !hidden(A.clone().lerp(B, (k + 0.5) / n));
-            if (vis && st < 0) st = k;
-            if (!vis && st >= 0) { pushSeg(A.clone().lerp(B, st / n), A.clone().lerp(B, k / n), color, lineThickness, op, 0.06); st = -1; }
-          }
-        }
-      }
-      if (dot && shown(dot)) {
-        const c = dot.getWorldPosition(new THREE.Vector3()), C = proj(c);
-        const rp = C && proj(c.clone().addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0), 0.1));
-        if (rp) {
-          const R = Math.abs(rp[0] - C[0]);
-          const pts = Array.from({ length: 33 }, (_, i) => [C[0] + R * Math.cos(i / 32 * 2 * Math.PI), C[1] + R * Math.sin(i / 32 * 2 * Math.PI)]);
-          items.push({ d: eye.distanceTo(c) - 0.06, k: 's', key: 'sdot', pts,
-            attrs: { fill: 'none', stroke: inkHex, 'stroke-width': String(lineThickness), 'stroke-linecap': 'round' } });
-        }
-      }
-    }
-
-    if (growthLine && growthLine.visible && shown(growthLine)) {
-      const gp = growthLine.geometry.getAttribute('position');
-      const color = growthLine.material.color.getStyle(), op = growthLine.material.opacity ?? 1;
-      const dash = growthLine.material.dashSize, gap = growthLine.material.gapSize;
-      for (let i = 0; i + 1 < gp.count; i++) {
-        const a = new THREE.Vector3().fromBufferAttribute(gp, i).applyMatrix4(growthLine.matrixWorld);
-        const b = new THREE.Vector3().fromBufferAttribute(gp, i + 1).applyMatrix4(growthLine.matrixWorld);
-        const len = a.distanceTo(b);
-        for (let t = 0; t < len; t += dash + gap) {
-          const t2 = Math.min(len, t + dash);
-          pushSeg(a.clone().lerp(b, t / len), a.clone().lerp(b, t2 / len), color, 1.7, op, 0.02);
-        }
-      }
-    }
-
-    items.sort((x, y) => y.d - x.d);
-    const svg = document.createElementNS(ns, 'svg');
-    svg.setAttribute('xmlns', ns);
-    svg.setAttribute('width', String(W)); svg.setAttribute('height', String(H));
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('version', '1.1');
-    const bg = document.createElementNS(ns, 'rect');
-    for (const [k, v] of Object.entries({ x: 0, y: 0, width: W, height: H, fill: D.bg })) bg.setAttribute(k, String(v));
-    svg.appendChild(bg);
-    const g = document.createElementNS(ns, 'g');
-    svg.appendChild(g);
-    let cur = null, curKey = null, d = '';
-    const flush = () => { if (cur) { cur.setAttribute('d', d); g.appendChild(cur); } cur = null; };
-    for (const it of items) {
-      if (it.key !== curKey) {
-        flush(); curKey = it.key; d = '';
-        cur = document.createElementNS(ns, 'path');
-        for (const [k, v] of Object.entries(it.attrs)) cur.setAttribute(k, v);
-      }
-      d += 'M' + it.pts.map(q => f2(q[0]) + ' ' + f2(q[1])).join('L') + (it.k === 'p' ? 'Z' : '');
-    }
-    flush();
-    if (!g.childNodes.length) throw new Error('Нет геометрии для экспорта.');
-
-    const source = new XMLSerializer().serializeToString(svg);
-    const parsed = new DOMParser().parseFromString(source, 'image/svg+xml');
-    if (parsed.querySelector('parsererror')) throw new Error('Generated SVG is not valid XML.');
-    const blob = new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n${source}`], { type: 'image/svg+xml;charset=utf-8' });
-    downloadBlob(blob, 'museum-' + mode + '-' + currentView + '-' + stamp() + '.svg');
-    flash();
-  } catch (error) {
-    console.error('SVG export failed:', error);
-    alert('Не удалось создать корректный SVG. Подробности — в консоли браузера.');
-  }
-}
-
-$('svgBtn').addEventListener('click', exportSVG);
-
-/* ===== Анимация ===== */
-function animate() {
-  requestAnimationFrame(animate);
-  const is3d = mode === '3d';
-  const isFlat = mode === 'flat';
-
-  if (transitioning) {
-    camera.position.lerp(targetPos, 0.08);
-    controls.target.lerp(targetTarget, 0.08);
-    camera.fov += (targetFov - camera.fov) * 0.08;
-    camera.updateProjectionMatrix();
-    if (camera.position.distanceTo(targetPos) < 0.02 && controls.target.distanceTo(targetTarget) < 0.02) {
-      camera.position.copy(targetPos);
-      controls.target.copy(targetTarget);
-      camera.fov = targetFov;
-      camera.updateProjectionMatrix();
-      transitioning = false;
-    }
-  }
-
-  const flatGoal = isFlat ? 1 : 0;
-  flatBlend += (flatGoal - flatBlend) * 0.15;
-  if (Math.abs(flatBlend - flatGoal) < 0.005) flatBlend = flatGoal;
-
-  for (const k of ['az', 'el', 'sunI', 'hemiI']) lightCur[k] += (lightTarget[k] - lightCur[k]) * 0.12;
-  const ar = lightCur.az * Math.PI / 180, er = lightCur.el * Math.PI / 180;
-  sun.position.set(18 * Math.cos(er) * Math.sin(ar), 18 * Math.sin(er), 18 * Math.cos(er) * Math.cos(ar));
-  sun.intensity = lightCur.sunI * (1 - flatBlend);
-  hemi.intensity = lightCur.hemiI * (1 + flatBlend * 0.8);
-  if (isFlat) { sun.visible = false; }
-
-  state.forEach((s, i) => {
-    const target = s.visible ? 1 : 0;
-    s.t += (target - s.t) * 0.12;
-    if (Math.abs(s.t - target) < 0.005) s.t = target;
-
-    const L = levels[i];
-    if (!L) return;
-    L.slabT = Math.max(0, Math.min(1, (s.t - 0.5) / 0.5));
-
-    if (L.wallG) {
-      L.wallG.visible = s.t > 0.01;
-      L.wallG.scale.y = Math.max(0.001, s.t);
-    }
-  });
-
-  // Фасадные «заполнители» — видимы только в фасад-виде 3D и только для
-  // реально собранных этапов; растут синхронно с state[i].t.
-  if (facadeFillers) {
-    facadeFillers.visible = currentView === 'facade';
-    if (facadeFillers.visible) {
-      facadeFillers.children.forEach(f => {
-        const s = state[f.userData.stage - 1];
-        const t = s ? s.t : 0;
-        f.visible = t > 0.01;
-        f.scale.y = Math.max(0.001, t);
-        f.position.y = t * (f.userData.topY - f.userData.height / 2);
-      });
-    }
-  }
-
-  const lastS = state[state.length - 1], showGrowth = currentStage === state.length && lastS && lastS.t > 0.9 && currentView === 'top';
-  if (growthLine) {
-    growthLine.visible = showGrowth;
-    if (showGrowth) growthLine.material.opacity = Math.min(1, Math.max(0.2, (lastS.t - 0.9) * 10));
-  }
-
-  lift += (liftTarget - lift) * 0.15;
-  if (Math.abs(lift - liftTarget) < 0.001) lift = liftTarget;
-  museumGroup.position.y = lift;
-  if (floorGroup) floorGroup.position.y = -lift;
-  const colTop = coreY - slabT;
-  colMeshes.forEach(m => { m.scale.y = (colTop + lift) / colTop; m.position.y = (colTop - lift) / 2; });
-  if (colL) { colL.position.y = -lift; colL.scale.y = (colTop + lift) / colTop; }
-  colBlocks.forEach(b => { b.y0 = -lift; });
-
-  controls.update();
-  renderer.render(scene, camera);
-}
-
-/* ===== Инициализация ===== */
-applyStage(6);
-generateMuseum();
-buildFlatPlanes();
-applyTheme();
-setMode('3d');
-updateStairs();
-lift = liftTarget;
-applyLineStyle('sketch');
-applyDrawLevel('full');
-setLineThickness(1);
-setWallWidth(0.16);
-animate();
-
-addEventListener('resize', () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-  [...inkMats, ...softMats].forEach(m => {
-    if (m.resolution && typeof m.resolution.set === 'function') {
-      m.resolution.set(innerWidth, innerHeight);
-    }
-  });
-});
+draw();
 </script>
 </body>
 </html>
